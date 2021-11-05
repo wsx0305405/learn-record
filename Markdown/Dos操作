@@ -1,0 +1,53 @@
+# Dos 
+
+
+
+### 打開CMD
+
+> windows + R  + cmd
+
+> 任意資料夾  按住shift 選擇在此處打開cmd
+
+> 任意資料夾路徑前 加入 cmd  + 空格
+
+> 以系統管理員權限開啟
+
+## CMD指令
+
+> 切換磁碟區    磁碟 A: + enter
+
+> 顯示當前資料夾中有哪些資料 dir + enter
+
+> 清理cmd中過去的資料  cls (clean screen)
+
+> 退出cmd exit
+
+> 查看電腦ip ipconfig
+
+> 打開計算機 calc
+
+> 打開小畫家 mspaint
+
+> 打開記事本 notepad
+
+#### #cd 進行資料夾位置切換
+
+> 切換磁碟 cd /d A:     cd 資料夾名稱  則可切換資料夾
+
+> cd.. 返回上一級
+
+> \ 文件的反斜線   / 參數的反斜線
+
+#### #ping 測試網路是否正常
+
+> ping + www.youtube.com  任意一個網址 
+
+#### #文件操作
+
+> 在路徑中創立資料夾 md 文件名
+
+> 刪除創立的資料夾 rd 文件名
+
+> cd > 文件名  創立此文件 
+
+> 在路徑中刪除文件 del 文件名
