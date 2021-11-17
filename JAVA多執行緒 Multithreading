@@ -1,0 +1,1009 @@
+# JAVA多執行緒 **Multithreading**
+
+多執行緒 一般分為進程(Program) 線程(Thread)
+
+## Program 主執行緒
+
+> main() 方法
+
+## Thread多執行緒 實現方法
+
+#### 繼承Thread類別	
+
+- 繼承 Thread class
+- override run()方法
+- 使用start()方法啟動
+
+```java
+// 繼承Thread類別     使用Start執行
+public class TestThread extends Thread {
+    // override 重寫 run() 方法
+    @Override
+    public void run(){
+        for(int i = 0;i < 20; i++){
+            System.out.println("run方法  " + i);
+        }
+    }
+    public static void main(String[] args) {
+        // main() 主要執行緒
+        // 因為已經繼承了Thread 所以直接建立testThread即可
+        TestThread test1 = new TestThread();
+        //使用start() 開啟多執行緒  讓程式同時執行
+        test1.start();
+        for(int i = 0;i < 20 ; i++){
+            System.out.println("main方法 " + i);
+        }
+    }
+}
+```
+
+
+
+#### 實作Runnable介面
+
+- 實作Runnable介面
+- override run()方法
+- 因為沒有繼承Thread 需要建立一個Thread類別使用start()
+
+```java
+//實作Runnable介面
+public class TestRunnable implements  Runnable{
+
+    //重寫run()方法
+    @Override
+    public void run(){
+        for(int i = 0;i < 200; i++){
+            System.out.println("run方法  " + i);
+        }
+    }
+    public static void main(String[] args) {
+        // 建立runnable介面 實作方法
+        TestRunnable test2 = new TestRunnable();
+        // 建立多執行緒對象(Thread) 通過此對象啟用多執行緒
+
+        // 與Thread的方法不同 並沒有繼承Thread 所以需要重新建立 引用
+        // 執行start方法  直接new一個類別執行方法
+        new Thread(test2).start();
+
+        for (int i = 0; i < 200; i++) {
+            System.out.println("main方法 " + i);
+        }
+    }
+}
+```
+
+
+
+#### Thread Runnable 比較
+
+> 不建議使用Thread的繼承方式實現多執行緒 受限於java只能單繼承的問題
+
+> 使用Runnable實作介面不會受限於只能單繼承的問題,較可以靈活使用
+
+
+
+
+
+## 多執行緒同時執行同一個對象
+
+```
+//實現多執行緒同時執行同一個對象
+//買火車票
+//此種方式使用Thread並不安全  執行之下會產生 ticketNums < 0 的情況
+public class TestThread02 implements Runnable {
+    //票價
+    private int ticketNums = 10;
+
+    @Override
+    public void run(){
+        while(true){
+            if(ticketNums <= 0){
+                break;
+            }
+            //模擬延遲
+            try{
+                Thread.sleep(200);
+            }catch(InterruptedException e){
+                e.printStackTrace();
+            }
+            //返回當前Thread的名字
+            //每拿到一張票 TicketNums--
+            System.out.println(Thread.currentThread().getName() + 
+            "拿到了第" + ticketNums-- + "票");
+        }
+    }
+    public static void main(String[] args) {
+        TestThread02 ticket = new TestThread02();
+        //建立三個Thread 執行方法
+        new Thread(ticket,"AA").start();
+        new Thread(ticket,"BB").start();
+        new Thread(ticket,"CC").start();
+    }
+}
+```
+
+> 這樣的使用並不安全 會有互相搶占資源造成數量與執行的次數不相同的問題
+
+
+
+## 模擬龜兔賽跑
+
+```java
+//Race 龜兔賽跑
+public class Race implements Runnable{
+
+    private static String winner;
+    @Override
+    public void run() {
+        for(int i = 0 ; i <= 100; i++){
+
+            //模擬兔子休息
+            if(Thread.currentThread().getName().equals("rabbit") && i%10 == 0){
+                try{
+                    Thread.sleep(1); // 1ms
+                }catch(InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+            //判斷比賽是否結束
+            boolean flag = gameover(i);
+            //如果比賽結束 停止
+            if(flag){
+                break;
+            }
+            System.out.println(Thread.currentThread().getName() + "-->跑了" + i + "步");
+        }
+    }
+    //判斷是否完成比賽
+    private boolean gameover(int steps){
+        //判斷是否有winner
+        if(winner != null){
+            return true;
+        }else{
+            if(steps >= 100){
+                winner = Thread.currentThread().getName();
+                System.out.println("winner is " + winner);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void main(String[] args) {
+        Race race = new Race();
+        //執行兩個Thread  須建立Thread使用方法
+        new Thread(race,"rabbit").start();
+        new Thread(race,"turtle").start();
+    }
+}
+```
+
+
+
+## Callable 介面
+
+
+
+#### 實作Callable介面
+
+- 使用 implement 加入介面
+- 建立執行服務
+- 提交執行
+- 獲取結果
+- 關閉服務
+
+```
+import java.util.concurrent.*;
+
+//callable
+/*
+1. 可以定義返回值
+2. 可以拋出異常
+*/
+public class TestCallable implements Callable<Boolean> {
+        public TestCallable(){
+
+        }
+        @Override
+        public Boolean call(){
+            System.out.println("override call method");
+            return false;
+        }
+
+        public static void main(String[] args) throws ExecutionException, InterruptedException {
+            TestCallable t1 = new TestCallable();
+            TestCallable t2 = new TestCallable();
+            TestCallable t3 = new TestCallable();
+
+            //建立執行服務  建立數量
+            ExecutorService ser = Executors.newFixedThreadPool(3);
+
+            //提交執行  通過建立的ser 執行方法submit  submit提交後執行
+            Future<Boolean> r1 = ser.submit(t1);
+            Future<Boolean> r2 = ser.submit(t2);
+            Future<Boolean> r3 = ser.submit(t3);
+
+            //獲取結果
+            boolean rs1 = r1.get();
+            boolean rs2 = r2.get();
+            boolean rs3 = r3.get();
+
+            System.out.println("rs1 = " + rs1);
+            System.out.println("rs2 = " + rs2);
+            System.out.println("rs3 = " + rs3);
+
+            //關閉服務
+            ser.shutdownNow();
+        }
+}
+```
+
+
+
+## Thread 靜態代理
+
+#### 靜態代理
+
+- 真實對象和代理對象要實作同一個介面
+- 代理對象要代理真實對象
+
+#### 優點
+
+- 代理對象可以做很多真實對象做不了的事情
+- 真實對象專注做自己的事情
+
+```
+public class Proxy {
+    public static void main(String[] args) {
+
+        You you = new You();
+        /* 原來使用的作法
+        You.HappyMarry();
+        */
+        //代理對象的作法
+        WeddingCompany weddingCompany = new WeddingCompany(you);
+        weddingCompany.HappyMarry();
+    }
+}
+//共同實作介面
+interface Marry{
+
+    void HappyMarry();
+}
+//真實對象  實作介面
+class You implements Marry{
+    @Override
+    public void HappyMarry(){
+        System.out.println("Marry " );
+    }
+}
+
+//代理對象 幫助真實對象完成事情
+class WeddingCompany implements Marry{
+    //代理真實目標 target
+    private Marry target;
+    public WeddingCompany(Marry target){
+        this.target = target;
+    }
+
+    @Override
+    public void HappyMarry(){
+        before();
+        this.target.HappyMarry();//真實對象
+        after();
+    }
+
+    private void after(){
+        System.out.println("after wedding");
+    }
+    private void before(){
+        System.out.println("before wedding");
+    }
+}
+```
+
+輸出結果
+
+```java
+before wedding
+Marry 
+after wedding
+```
+
+
+
+#### 使用Thread
+
+> 將main方法改成
+
+```
+public class Proxy {
+    public static void main(String[] args) {
+
+        You you = new You();
+        //由於Thread類別中已經繼承了Runnable介面
+        new Thread( () -> System.out.println("Thread作法") ).start();
+        
+        new weddingCompany(new You()).HappyMarry();
+    }
+}
+```
+
+
+
+## Lambda 表達式
+
+- 避免匿名內部類別定義過多
+- 使程式碼看起來簡潔
+- 捨棄一些沒有意義的程式碼 只留下核心
+- 性質屬於函數式概念
+
+```java
+a -> System.out.println("i like lambda --> " + a );
+new Thread  ( ()->System.out.println("lambda..") )
+```
+
+
+
+#### Function interface 函數式介面
+
+- 任何介面 只包含唯一一個抽象方法 他就是函數式介面
+
+```
+public interface Runnable{
+	public abstract void run();
+}
+```
+
+- 函數式介面可以通過lambda表達式建立該介面的對象
+
+
+
+#### 簡化方式  類別關係
+
+```java
+public class Lambda {
+
+    // 3.靜態內部類別  需要注意放置的位置
+    static class Like2 implements ILike{
+        @Override
+        public void lambda() {
+            System.out.println("i like lambda2");
+        }
+    }
+
+    public static void main(String[] args) {
+        //實現類別
+        ILike like = new Like();
+        like.lambda();
+
+        //靜態內部類別
+        like = new Like2();
+        like.lambda();
+
+        //4.局部內部類別  類別中的類別
+        class Like3 implements ILike{
+            @Override
+            public void lambda() {
+                System.out.println("i like lambda3");
+            }
+        }
+
+        like = new Like3();
+        like.lambda();
+
+        //5.匿名內部類  沒有類別的名稱 需借助介面或父類
+        // 為了實現抽象類別或介面的抽象方法  一次性使用
+        like = new ILike() {
+            @Override
+            public void lambda() {
+                System.out.println("i like lambda4");
+            }
+        };
+        like.lambda();
+
+        //6. 用lambda簡化 --> 任何介面只包含一個抽象方法  函數式介面簡化
+        like = () -> System.out.println("i like lambda5");
+
+        like.lambda();
+    }
+}
+
+// 1.定義介面
+interface ILike{
+    void lambda();
+}
+
+// 2.實現類別
+class Like implements ILike{
+    @Override
+    public void lambda() {
+        System.out.println("i like lambda");
+    }
+}
+```
+
+輸出結果
+
+```java
+i like lambda
+i like lambda2
+i like lambda3
+i like lambda4
+i like lambda5
+```
+
+
+
+#### 簡化方式2
+
+```java
+public class Lambda2 {
+        public static void main(String[] args) {
+            ILove love = null;
+
+            //Lambda 表示簡化
+            love =  (int a) ->
+                    System.out.println("I love you --> " + a);
+
+            //簡化1 參數類型
+            love =  (a) ->
+                    System.out.println("I love you --> " + a);
+
+            //簡化2 簡化括號
+            love = a ->
+                    System.out.println("I love you --> " + a);
+
+            love.love(520);
+    }
+}
+ 
+interface ILove{
+    void love(int a);
+}
+```
+
+
+
+#### 總結
+
+- lambda表達式只能有一行程式碼的情況才能簡化成一行
+- 前提為函數式介面 (只有一個方法)
+
+
+
+
+
+## 多執行緒 五大狀態
+
+- ### 創建狀態
+
+  - new 
+  - Thread t = new Thread();
+  - 對象一旦創建就進入此狀態
+
+- ### 就緒狀態
+
+  - 使用start()方法 Thread會進入就緒狀態 但不表示可以立刻執行
+
+- ### 運行狀態
+
+  - 進入運行狀態 Thread才真正執行Thread的程式區塊
+
+- ### 阻塞狀態
+
+  - 當使用sleep,wait 同步鎖定時 Thread進入阻塞狀態 
+  - 阻塞狀態解除後 重新進入就緒狀態
+
+- ### 死亡狀態
+
+  - Thread中斷或結束 一旦進入這個狀態 就不能再次啟動
+
+
+
+## Thread停止
+
+```java
+//1. 建議使用正常停止 --> 利用次數 不建議無限循環
+//2. 建議使用標記狀態 --> 設置一個boolean 進行判斷
+//3. 不要使用stop 或 destroy 等不建議使用的方法
+public class ThreadStop implements Runnable{
+    //1.設置一個狀態判斷
+    private boolean flag = true;
+    @Override
+    public void run() {
+        int i = 0;
+        //當flag為true時 持續輸出
+        while (flag){
+            System.out.println("run..Thread" + i++);
+        }
+    }
+    //2.設置一個公開的方法停止Thread
+    public void stop(){
+        this.flag = false;
+    }
+    //main區塊
+    public static void main(String[] args) {
+        //建立一個繼承Runabble介面的類別
+        ThreadStop testStop = new ThreadStop();
+        //建立一個Thread進行start()的方法執行   執行run方法內的程式
+        new Thread(testStop).start();
+
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("main " + i);
+            if(i == 900){
+                //呼叫stop方法標記 停止分支的執行
+                testStop.stop();
+                System.out.println("Thread 停止了 ");
+            }
+        }
+    }
+}
+```
+
+
+
+## 強制執行 Join
+
+```java
+public class Join implements Runnable{
+    @Override
+    public void run() {
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("強制插隊執行分支Thread " + i);
+        }
+    }
+    public static void main(String[] args) throws InterruptedException {
+        Join testjoin = new Join();
+        Thread thread = new Thread(testjoin);
+        thread.start();
+
+        //主要Thread
+        for (int i = 0; i < 500; i++) {
+            if(i == 200){
+                thread.join();
+            }
+            System.out.println("主要Thread " + i);
+        }
+    }
+}
+```
+
+
+
+## 觀測狀態
+
+```java
+public class TestState {
+    public static void main(String[] args) throws InterruptedException {
+        //lambda表達式
+        Thread thread = new Thread(()->{
+            // 定義方法
+            for (int i = 0; i < 5; i++) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println("/////");
+        });
+
+        //觀察狀態 創立Thread.State 取得狀態
+        Thread.State state = thread.getState();
+        System.out.println(state); // NEW
+
+        //觀察啟動後
+        thread.start(); // 啟動
+        state = thread.getState();
+        System.out.println(state); // Run
+
+        //只要不中止 就持續輸出
+        while(state != Thread.State.TERMINATED){
+            Thread.sleep(100);
+            state = thread.getState(); // 更新狀態 判斷跳出迴圈
+            System.out.println(state); // 輸出狀態
+        }
+    }
+}
+```
+
+
+
+## Thread的優先級
+
+- 優先級越高的Thread會比優先級較低的Thread的執行順序較高
+- setPriority(int a )  設置優先級
+- getPriority() 取得當前執行Thread的優先級
+
+
+
+## Daemon 執行緒
+
+- 執行緒中分為用戶執行緒和守護執行緒
+- 虛擬機必須確保用戶執行緒執行完畢
+- 虛擬機不需等待守護執行緒執行完畢
+- 如監控記憶體 垃圾回收等等
+
+```java
+public class TestDaemon {
+    public static void main(String[] args) {
+        God god = new God();
+        Youu you = new Youu();
+
+        Thread thread = new Thread(god);
+        //設置守護執行緒
+        //預設是false 表示用戶Thread 正常的Thread都是用戶Thread
+        thread.setDaemon(true);
+        
+        //守護執行緒執行
+        thread.start();
+        //用戶執行緒執行
+        new Thread(you).start();
+    }
+}
+// 守護執行緒 可以不執行完
+class God implements Runnable{
+    @Override
+    public void run() {
+        while(true){
+            System.out.println("God bless");
+        }
+    }
+}
+// 用戶執行緒  一定會執行完
+class Youu implements Runnable{
+    @Override
+    public void run() {
+        for (int i = 0; i < 36500; i++) {
+            System.out.println("alive ");
+        }
+        System.out.println("goodbye world");
+    }
+}
+```
+
+
+
+## 執行緒同步 synchronized
+
+- 需要隊列
+- 需要鎖
+- 使用synchronized關鍵字
+  - 控制對對象的訪問 每個對象對應一把鎖 
+  - 每個synchronized方法都必須獲得使用該方法的對象的鎖才能執行
+  - 方法一旦執行 就獨占該鎖 直到方法返回才釋放鎖 後面被阻塞的執行緒才能獲得這個鎖
+  - 缺點 : 若將一個大的方法申明為synchronized會影響效率
+- 分為同步方法 同步塊
+
+#### 同步塊
+
+- synchronized(obj){}
+- obj稱為同步監視器
+  - obj可以是任何對象 但是建議使用共享資源作為同步監視器
+  - 同步方法中無須指定同步監視器 因為同步方法的同步監視器就是this 就是對象本身或者是class
+- 同步監視器執行過程
+  1. 第一個Thread訪問 鎖定同步監視器 執行其中程式
+  2. 第二個Thread訪問 發現同步監視器已被鎖定 無法訪問
+  3. 第一個Thread訪問完畢 解鎖同步監視器
+  4. 第二個Thread訪問 發現同步監視器沒有鎖 鎖定並進行訪問
+
+#### 同步方法
+
+```java
+同步方法 : public synchronized void method(int args){}
+```
+
+```java
+//方法中加入 synchronized 確保不會有小於0的情況發生
+//同步方法
+public class UnSafeBuyTicket {
+    public static void main(String[] args) {
+        BuyTicket station = new BuyTicket();
+        //建立三個Thread 同時執行run方法 買票
+        new Thread(station,"AAA").start();
+        new Thread(station,"BBB").start();
+        new Thread(station,"CCC").start();
+    }
+}
+class BuyTicket implements Runnable{
+    private int ticketNums = 10;
+    boolean flag = true;
+
+    @Override
+    public void run() {
+        //賣票
+        while(flag){
+        //此處延遲使其他的Thread有機會爭取資源 而不會讓同一個Thread拿走全部資源
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            buy();
+        }
+    }
+    
+    //同步方法 鎖的是this
+    private synchronized void buy(){
+        //判斷是否有票
+        if(ticketNums <= 0){
+            flag = false;
+            return;
+        }
+        //此處的延遲 延遲取票的時間  買票的順序已經決定 不由這邊的延遲決定買票的人
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //買票
+        System.out.println(Thread.currentThread().getName() + "拿到" + ticketNums--);
+    }
+}
+```
+
+
+
+## Thread不安全的例子
+
+不同執行緒間進行的資料爭奪的碰撞
+
+```java
+//不安全的買票  會有小於0的情況產生
+public class UnSafeBuyTicket {
+    public static void main(String[] args) {
+        BuyTicket station = new BuyTicket();
+        //建立三個Thread 同時執行run方法 買票
+        new Thread(station,"AAA").start();
+        new Thread(station,"BBB").start();
+        new Thread(station,"CCC").start();
+    }
+}
+class BuyTicket implements Runnable{
+    private int ticketNums = 10;
+    boolean flag = true;
+
+    @Override
+    public void run() {
+        //賣票
+        while(flag){
+            buy();
+        }
+    }
+    private void buy(){
+        //判斷是否有票
+        if(ticketNums <= 0){
+            flag = false;
+            return;
+        }
+        //延遲
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //買票
+        System.out.println(Thread.currentThread().getName() + "拿到" + ticketNums--);
+    }
+}
+```
+
+------
+
+```java
+//不安全的取錢
+public class UnSafeBank {
+    public static void main(String[] args) {
+        //建立帳戶account為100
+        Account account = new Account(100,"共同");
+        Drawing you = new Drawing(account,50,"AAA");
+        Drawing they = new Drawing(account,100,"BBB");
+
+        you.start();
+        they.start();
+    }
+}
+//共用帳戶
+class Account{
+    int money;
+    String name;
+
+    public Account(int money, String name) {
+        this.money = money;
+        this.name = name;
+    }
+}
+
+//取款
+class Drawing extends Thread{
+    Account account;
+    int drawingMoney;
+    int deposit;
+    public Drawing(Account account,int drawingMoney,String name){
+        super(name);
+        this.account = account;
+        this.drawingMoney = drawingMoney;
+    }
+    //取款
+    @Override
+    public void run() {
+        //判斷餘額
+        if(account.money - drawingMoney < 0){
+            System.out.println(Thread.currentThread().getName() + "的餘額不足");
+            return;
+        }
+        //當前餘額 扣除
+        account.money = account.money - drawingMoney;
+        //現在有的錢
+        deposit = deposit + drawingMoney;
+
+        System.out.println(account.name + " 的餘額為 " + account.money);
+        //Thread.currentThread().getName() == this.getName()
+        System.out.println(this.getName() + " 身上有的錢為 " + deposit);
+    }
+}
+```
+
+
+
+## 死鎖問題
+
+- 多個執行緒互相抱著對方需要的資源 形成僵持
+
+#### 產生死鎖的條件
+
+- 互斥條件 : 一個資源每次只能被一個執行緒使用
+  - 兩個執行緒以上互相爭奪同一個資源則有機會產生死鎖
+  - 一旦資源分配給某個執行緒 其他執行緒就不能再訪問
+- 請求與保持條件 : 一個執行緒因請求資源造成阻塞時 對已獲得的資源保持不放
+  - 一個執行緒想獲得A B資源 但是B資源在另一個執行緒身上 雙方互相僵持
+- 不剝奪條件 : 執行緒已獲得的資源  在未使用完之前 不能強行剝奪
+  - 一個執行緒獲得的資源不能強行被剝奪 也就是不會被其他執行緒搶奪資源
+- 循環等待條件 : 若多個執行緒之間形成一種頭尾相接的循環等待資源關係
+  - 每一個執行緒都會占有另一個執行緒需要的資源 形成一個等待迴路 無法突破
+
+
+
+## Lock 鎖
+
+- 使用上需要手動開啟 關閉
+- Synchronized算是隱式鎖 與 Lock不太相同
+- Lock只有程式碼區塊鎖 Synchoronized有程式碼區塊及方法鎖
+- Lock鎖能使JVM花費較少的時間調度執行緒 性能較好 並能有更好的擴充性(更多的子類別)
+- 優先使用順序 : Lock > 同步程式碼缺塊 > 同步方法
+
+```java
+import java.util.concurrent.locks.ReentrantLock;
+
+public class TestLock {
+    public static void main(String[] args) {
+        TestLock2 testlock = new TestLock2();
+
+        new Thread(testlock).start();
+        new Thread(testlock).start();
+        new Thread(testlock).start();
+    }
+}
+class TestLock2 implements Runnable{
+    int ticketNums = 10;
+    //定義Lock
+    ReentrantLock lock = new ReentrantLock();
+
+    @Override
+    public void run() {
+        while(true){
+            try{
+                //加鎖
+                lock.lock();
+                if(ticketNums > 0){
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(ticketNums--);
+                }else{
+                    break;
+                }
+            }finally {
+                //解鎖
+                lock.unlock();
+            }
+        }
+    }
+}
+```
+
+#### 格式
+
+```java
+class A{
+	private final ReentrantLock lock = new ReenTrantLock();
+	public void m(){
+		lock.lock();
+		try{
+			//保證執行緒安全的程式碼
+		}finally{
+			lock.unlock();
+			//如果同步程式有例外發生 要將unlock()寫入此區塊
+		}
+	}
+}
+```
+
+
+
+## 執行緒池
+
+- 經常建立及銷毀使用量特別大的資源 對效能的影響很大
+- 提前創建多個執行緒放入池中 使用時直接獲取 使用完放回池中 避免頻繁的創建銷毀實現重複利用
+- 好處
+  - 提高響應速度 (減少創建執行緒的時間)
+  - 降低資源消耗 (重複利用執行緒池中的執行緒 不需要每次都創建)
+  - 便於管理
+    - corePoolSize : 核心池的大小
+    - maximumPoolSize : 最大的執行緒數量
+    - keepAliveTime : 執行緒沒有任務時最多保持多長時間後會終止
+
+
+
+## 總結
+
+- 各種執行緒執行方式
+
+```java
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+
+public class ThreadNew {
+    public static void main(String[] args) {
+        new MyThread().start();
+
+        new Thread(new MyThread2()).start();
+
+        FutureTask<Integer> futureTask = new FutureTask<Integer>(new MyThread3());
+        new Thread(futureTask).start();
+
+        try {
+            //返回值 Callable
+            Integer integer = futureTask.get();
+            System.out.println(integer);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+    }
+}
+
+//1.繼承Thread類別
+class MyThread extends Thread{
+
+    @Override
+    public void run() {
+        System.out.println("MyThread1");
+    }
+}
+
+//2.實作Runnable介面
+class MyThread2 implements Runnable{
+
+    @Override
+    public void run() {
+        System.out.println("MyThread2");
+    }
+}
+
+//3.實現Callable介面
+class MyThread3 implements Callable<Integer>{
+
+    @Override
+    public Integer call() throws Exception {
+        System.out.println("MyThread3");
+        return 100;
+    }
+}
+```
