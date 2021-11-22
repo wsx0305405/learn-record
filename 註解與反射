@@ -1,0 +1,1077 @@
+# 註解與反射
+
+## 什麼是註解
+
+- 不是程式本身 但可以對程式做出解釋
+- 可以被其他程式讀取
+- @注釋名的形式 還可以添加參數
+- 註解可以在很多地方使用如 package class method field 等等
+
+
+
+## 內置註解
+
+- @Override : 定義在java.lang.Override中 表示一個方法打算重寫父類別的方法
+- @Deprecated : 定義在java.lang.Deprecated中 表示不鼓勵使用這樣的元素,因為有危險或是有更好的選擇
+- @SuppressWarnings : 定義在java.lang.SuppressWarnings中 用來抑制編譯時的警告訊息,使用時必須添加參數
+  - @SuppressWarnings("all")
+  - @SuppressWarnings("unchecked")
+  - @SuppressWarnings("value = {"unchecked","deprecation"})
+
+
+
+## 元註解
+
+- 負責解釋其他註解的註解
+- java定義了四個標準的meta-annotation
+  - @Target : 用於描述註解的使用範圍 (描述可以用在什麼地方)
+    - 可以放在類別 方法 屬性上
+  - @Retention : 表示需要什麼級別保存該註釋訊息 用於描述註解的生命週期 (SOURCE < CLASS < RUNTIME)
+  - @Document : 說明該註解該被包含在javadoc中
+  - @Inherited : 說明子類別可以繼承父類別的該註解
+- 其中特別重要的是 @Target  @Retention
+
+```java
+import java.lang.annotation.*;
+
+public class test01 {
+    public void test(){
+
+    }
+}
+//定義一個註解
+//Target 表示註解可以用在哪些地方
+@Target(value = {ElementType.METHOD,ElementType.TYPE})
+
+//Retention 表示註解在什麼地方還有效
+//runtime > class > sources
+@Retention(value = RetentionPolicy.RUNTIME)
+
+//Documented 表示是否將註解生成在JAVAdoc中
+@Documented
+
+//Inherited 子類別可以繼承父類別的註解
+@Inherited
+@interface MyAnnotation{
+
+}
+```
+
+
+
+## 自定義註解 @interface 
+
+- 自定義註解 自動繼承了java.lang.annotation.Annotation介面
+- 用來聲明一個註解 格式 @ interface 註解名(定義內容)
+- 其中每一個方法實際上是聲明一個配置參數
+- 方法的名稱就是參數的名稱
+- 返回值類型就是參數的類型 (返回值只能是基本類型 Class String enum)
+- 可以使用default聲明參數的默認值
+- 如果只有一個參數成員 一般參數名為value
+- 註解元素必須要有值 定義註解元素時 經常使用空字串 , 0作為默認值
+
+```java
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+//自定義註解
+public class test02 {
+    //註解可以顯示賦予值 如果沒有默認值 則要賦予值
+    @MyAnnotation2
+    public void test(){ }
+
+    @MyAnnotation3("ss")
+    public void test2(){ }
+}
+
+//加上元註解
+@Target({ElementType.TYPE,ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+//自定義
+@interface MyAnnotation2{
+    //註解的參數 : 參數類型 + 參數名 ();
+    //參數賦予默認值
+    String name() default "";
+    int age() default 0;
+    // -1 表示不存在
+    int id() default -1;
+}
+
+//加上元註解
+@Target({ElementType.TYPE,ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+//自定義
+@interface MyAnnotation3{
+    //只有一個參數 建議使用value命名
+    String value();
+}
+```
+
+
+
+## 靜態&動態語言
+
+#### 動態語言
+
+- 可以在系統運行的過程中改變自身的結構
+
+#### 靜態語言
+
+- 系統運行的過程中結構不可改變
+
+
+
+## 反射機制 Reflection
+
+- java通過反射機制 可以獲得類似動態語言的特性 
+- Reflection是使java被視為動態語言的關鍵 反射機制允許程式在執行時借助Reflection API 取得任何類別的內部資訊 並能直接操作任意對象的內部屬性及方法
+
+```java
+Class C = Class.forName("java.leng.String")
+```
+
+1. 加載完類別後 在記憶體中就產生了一個class類型的對象 (一個類只有一個class對象)
+2. 這個對象包含了完整類別的結構資訊 可以通過這個對象看到類別的結構
+3. 這個對象像一面鏡子 透過這個鏡子可以看到類別的結構 稱之為**反射**
+
+- 正常方式
+  - 導入需要的包裝類別名稱 --> new實例化  --> 取得實例化對象
+- 反射方式
+  - 實例化對象 --> getClass()方法 --> 得到完整的包裝類別名稱
+
+
+
+#### 反射機制提供的功能
+
+- 執行過程中  判斷任意一個對象所屬的類別
+- 執行過程中  建構任意一個類別的對象
+- 執行過程中  判斷任意一個類別所具有的成員變數和方法
+- 執行過程中  獲取泛型訊息
+- 執行過程中  調用任意對象的成員變量和方法
+- 執行過程中  處理註解
+- 生成動態代理
+
+
+
+#### 反射相關的API
+
+- java.lang.Class : 代表一個類別
+- java.lang.reflect.Method : 代表類別的方法
+- java.lang.reflect.Field : 代表類別的成員變數
+- java.lang.reflect.Constructor : 代表類別的建構子
+
+
+
+#### java反射的優缺點
+
+- 優點
+  - 可以實現動態創建對象和編譯 提高靈活度
+- 缺點
+  - 對性能有影響 使用反射基本上是一種解釋操作 告訴JVM我們希望做什麼 這類的操作通常會慢於直接執行相同的操作
+
+
+
+## Class
+
+對象(Object)照鏡子後可以得到的訊息
+
+- 某個類別的屬性,方法,建構子
+- 某個類別實作了那些介面
+
+對於每個類別來說 JRE都為其保留一個不變的Class類型的對象
+
+一個Class對象包含了特定的某個結構(class interface enum annotation primitive type void )有關的訊息
+
+- Class本身也是一個類別
+- Class對象只能由系統建立對象
+- 一個加載的類別在JVM中只會有一個Class的實例
+- 一個Class對象對應的是一個加載到JVM中的一個.class文件
+- 每個類別的實例都會記得自己是由哪個Class實例所產生
+- 通常Class可以完整的得到一個類別中所有被加載的結構
+- Class類別是Reflection的根源 對於任何想動態加載 運行的類別 唯有先或許相應的Class對象
+
+
+
+#### 獲取Class的實例
+
+- 若已知具體的類別 通過類別的Class屬性獲取 此方法最安全可靠 性能最高
+
+```java
+Class clazz = Person.class;
+```
+
+- 已知某個類的實例 使用該實例的getClass()方法獲取Class對象
+
+```java
+Class clazz = person.getClass();
+```
+
+- 已知一個類別的全類名 且該類在類路徑下 
+- 可通過Class類別的靜態方法forName()獲取
+- 可能拋出ClassNotFoundException
+
+```java
+Class clazz = Class.forName("demo01.Student");
+```
+
+
+
+```java
+//測試Class類別的創建方式
+public class test03 {
+    public static void main(String[] args) throws ClassNotFoundException {
+        Person person = new Student();
+        System.out.println(" " + person.name);
+        //方式一 通過對象(Object)獲得
+        Class c1 = person.getClass();
+        System.out.println(c1.hashCode());
+        //方式二 forname獲得
+        Class c2 = Class.forName("Student"); // forName(放入src以下資料夾~Class路徑)
+        System.out.println(c2.hashCode());
+        //方式三 通過類別名.class獲得
+        Class c3 = Student.class;
+        System.out.println(c3.hashCode());
+        //方式四 基本內置類別的包裝類 都有一個Type屬性
+        Class c4 = Integer.TYPE;
+        System.out.println(c4);
+        //獲得父類類型
+        Class c5 = c1.getSuperclass();
+        System.out.println(c5);
+    }
+}
+class Person{
+    public String name;
+    public Person() {
+    }
+    public Person(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" + " name " + name + "}";
+    }
+}
+
+class Student extends Person{
+    public Student(){
+        this.name = "學生";
+    }
+}
+
+class Teacher extends Person{
+    public Teacher(){
+        this.name = "老師";
+    }
+}
+```
+
+
+
+#### 哪些類型可以有Class對象
+
+- class : 外部類 成員(成員內部類 靜態內部類) 局部內部類 匿名內部類
+- interface : 介面
+- [] : 陣列
+- enum : 枚舉
+- annotation : 註解
+- primitive type : 基本數據類型
+- void 
+
+```java
+import java.lang.annotation.ElementType;
+//各種類型的Class
+public class test04 {
+    public static void main(String[] args) {
+        Class c1 = Object.class; //類別
+        Class c2 = Comparable.class; // 介面
+        Class c3 = String[].class; // 一維陣列
+        Class c4 = int[][].class;  // 二維陣列
+        Class c5 = Override.class; // 註解
+        Class c6 = ElementType.class; // 枚舉
+        Class c7 = Integer.class; // 基本數據類型
+        Class c8 = void.class; // void
+        Class c9 = Class.class; //Class
+
+        System.out.println("c1 = " + c1);
+        System.out.println("c2 = " + c2);
+        System.out.println("c3 = " + c3);
+        System.out.println("c4 = " + c4);
+        System.out.println("c5 = " + c5);
+        System.out.println("c6 = " + c6);
+        System.out.println("c7 = " + c7);
+        System.out.println("c8 = " + c8);
+        System.out.println("c9 = " + c9);
+
+        //只要元素類型跟維度一樣 就是同一個Class
+        int[] a = new int[10];
+        int[] b = new int[100];
+        System.out.println(a.getClass().hashCode());
+        System.out.println(b.getClass().hashCode());
+    }
+}
+```
+
+輸出結果
+
+```java
+c1 = class java.lang.Object
+c2 = interface java.lang.Comparable
+c3 = class [Ljava.lang.String;
+c4 = class [[I
+c5 = interface java.lang.Override
+c6 = class java.lang.annotation.ElementType
+c7 = class java.lang.Integer
+c8 = void
+c9 = class java.lang.Class
+1096979270
+1096979270
+
+```
+
+
+
+#### JAVA記憶體
+
+- heap
+  - 存放new的對象和陣列
+  - 可以被所有的執行緒共享 不會存放別的對象引用
+- Stack
+  - 存放基本變數類型
+  - 引用對象的變量
+- 方法區
+  - 可以被所有執行緒共享
+  - 包含了所有的Class和static變量
+
+
+
+
+#### 類別的載入過程
+
+當程式主動使用某個類別時 如果該類別尚未被載入到記憶體中 系統會通過三個步驟對該類別初始化
+
+- 類別的載入(Load)
+  - 將類別的Class文件讀入記憶體 並創建一個java.lang.Class對象 此過程由類別載入器完成
+    - 將Class文件字元馬內容載入到記憶體中 並將這些靜態數據轉換成方法區的運行時數據結構 然後生成一個代表這個類別的java.lang.Class對象
+- 類別的連接(Link)
+  - 將類別的二進制數據合併到JVM中
+    - 驗證 : 確保載入的類別訊息符合JVM規範 沒有安全方面的問題
+    - 準備 : 為類別變量(static) 分配記憶體並配置類別變量默認初始值的階段 這些記憶體都將在方法區中進行分配
+      - 此時static中的行為都為初始化 無關程式中賦予的值
+    - 解析 : 虛擬機常量池內的符號引用(常量名) 替換為直接引用(地址) 的過程
+- 類別的初始化(Initialize)
+  - JVM負責對類別進行初始化
+    - 執行類別建構子<clinit>()方法的過程 類別建構子<clinit>()方法是由編譯期自動收集類別中所有類別變量的賦值動作和靜態程式碼區塊中的語句合併產生
+    - 當初始化一個類別時 如果發現其父類別還沒有進行初始化 則需要先進行其父類別的初始化
+    - 虛擬機會保證一個類別的方法在多執行緒環境中被正確加鎖和同步
+
+
+
+1. 載入到記憶體 會產生一個類別對應Class對象
+2. 連接 ,  連接結束後 m = 0
+3. 初始化
+
+```java
+public class test05 {
+    public static void main(String[] args) {
+        A a = new A();
+        System.out.println(A.m);
+    }
+}
+
+class A{
+    //靜態區塊先執行 賦予 m = 300
+    static{
+        System.out.println("A類別靜態程式區塊初始化");
+        m = 300;
+    }
+    //靜態變數後執行 覆蓋m = 300 改為 m = 100
+    //次序交換的話 m 為最後賦值的結果
+    static int m = 100;
+
+    public A(){
+        System.out.println("A類別無參數建構子初始化");
+    }
+}
+```
+
+輸出結果
+
+```java
+A類別靜態程式區塊初始化
+A類別無參數建構子初始化
+100
+```
+
+
+
+## 類別的初始化
+
+- 類別主動引用 (一定會發生類別初始化)
+  - 當虛擬機啟動 先初始化main方法所在的類別
+  - new一個類別的對象
+  - 調用類別的靜態成員(除了final常量) 和 靜態方法
+  - 使用java.lang.reflect包的方法對類別進行反射調用
+  - 當初始化一個類別 如果其父類別尚未被初始化 則會先初始化他的父類別
+- 類別的被動引用(不會發生類別的初始化)
+  - 當訪問一個靜態域時 只有真正聲明這個域的類別才會被初始化
+    - ex. 當通過子類別引用父類別的靜態變量 不會導致子類別初始化
+  - 通過陣列定義類的引用 不會觸發此類別的初始化
+  - 引用常量(final)不會觸發此類別的初始化(常量在連接階段就存入調用類別的常量池了)
+
+
+
+#### 類別主動引用初始化
+
+```java
+//測試類別什麼時候會被初始化
+public class test06 {
+    static{
+        System.out.println("main類別被載入");
+    }
+    public static void main(String[] args) {
+        //1.主動引用
+        Son son = new Son();
+    }
+}
+class Father{
+    static int b = 2;
+    static{
+        System.out.println("父類別被載入");
+    }
+}
+class Son extends Father{
+    static{
+        System.out.println("子類別被載入");
+    }
+    static int m = 100;
+    static final int M = 1;
+}
+```
+
+輸出結果
+
+```java
+main類別被載入
+父類別被載入
+子類別被載入
+```
+
+
+
+#### 反射也會產生類別主動引用
+
+```java
+//測試類別什麼時候會被初始化
+public class test06 {
+    static{
+        System.out.println("main類別被載入");
+    }
+
+    public static void main(String[] args) throws ClassNotFoundException {
+        System.out.println("-------------------");
+        //反射也會產生主動引用
+        Class.forName("Son");
+    }
+}
+class Father{
+    static int b = 2;
+    static{
+        System.out.println("父類別被載入");
+    }
+}
+class Son extends Father{
+    static{
+        System.out.println("子類別被載入");
+    }
+    static int m = 100;
+    static final int M = 1;
+}
+```
+
+輸出結果
+
+```java
+main類別被載入
+-------------------
+父類別被載入
+子類別被載入
+```
+
+
+
+不會產生類別引用的方法
+
+```java
+//測試類別什麼時候會被初始化
+public class test06 {
+    static{
+        System.out.println("main類別被載入");
+    }
+
+    public static void main(String[] args) throws ClassNotFoundException {
+        System.out.println("-------------------");
+        //不會產生類別引用的方法
+        //子類別呼叫父類別的靜態變數
+        System.out.println(Son.b);
+    }
+}
+class Father{
+    static int b = 2;
+    static{
+        System.out.println("父類別被載入");
+    }
+}
+class Son extends Father{
+    static{
+        System.out.println("子類別被載入");
+    }
+    static int m = 100;
+    static final int M = 1;
+}
+```
+
+輸出結果
+
+```java
+main類別被載入
+-------------------
+父類別被載入
+2
+```
+
+
+
+#### 其他初始化可能性
+
+- 這種做法並不會進行類別及其父類別的初始化
+
+```java
+//利用類別建立陣列
+Son[] array = new Son[5];
+
+```
+
+- 這種做法並不會進行類別及其父類別的初始化
+- 因為宣告final常數 為一個靜態常數 所以不會執行初始化
+
+```
+//利用類別去呼叫在其類別中的 static final int M = 1
+System.out.println(Son.M);
+```
+
+
+
+## 類別載入器
+
+- 類別載入器作用 : 將class文件的位元組內容載入到記憶體中 並將靜態數據轉換成方法區的運行時數據結構 然後在heap中生成一個代表這個類別的java.lang.Class對象作為方法區中類別數據的訪問入口
+- 類別暫存 : 標準的JavaSE類別載入器可以按要求找尋類別 一旦某個類別被載入到類別載入器中 他將維持暫存一段時間 但是JVM垃圾回收機制可以回收這些Class對象
+
+
+
+```java
+public class test07 {
+    public static void main(String[] args) throws ClassNotFoundException {
+
+        //獲取系統類別的載入器
+        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+        System.out.println(systemClassLoader);
+
+        //獲取系統類別載入器的父類載入器 --> 擴展類載入器
+        ClassLoader parent = systemClassLoader.getParent();
+        System.out.println(parent);
+
+        //獲取擴展類別載入器的父類載入器 --> 根載入器(c/c++)
+        //java讀取不到 返回null
+        ClassLoader parent1 = parent.getParent();
+        System.out.println(parent1);
+
+        //測試目前的類別是哪個載入器載入的
+        ClassLoader classLoader = Class.forName("test07").getClassLoader();
+        System.out.println(classLoader);
+
+        //測試JDK內部的類別是被誰載入的
+        classLoader = Class.forName("java.lang.Object").getClassLoader();
+        System.out.println(classLoader);
+
+        //如何獲得系統類別載入器可以載入的路徑
+        System.getProperty("java.class.path");
+    }
+}
+```
+
+輸出結果
+
+```java
+jdk.internal.loader.ClassLoaders$AppClassLoader@66d3c617
+jdk.internal.loader.ClassLoaders$PlatformClassLoader@119d7047
+null
+jdk.internal.loader.ClassLoaders$AppClassLoader@66d3c617
+null
+
+```
+
+
+
+## 獲取類別執行時的完整結構
+
+- 通過反射獲取執行時類別的完整結構 Field Method Constructor Supeclass interface Annotation
+
+
+
+由最初建立利用類別建立的c1進行所有資訊的反射
+
+```java
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+//獲得類別的訊息
+public class test08 {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException, NoSuchMethodException {
+        Class c1 = Class.forName("User");
+
+        //透過新建立的User對象
+        User user = new User();
+        //建立c1使用方法c1.getName() 反射回包名+類別名
+        c1 = user.getClass();
+
+        //獲得類別的名字
+        System.out.println(c1.getName()); // 獲得包名 + 類別名
+        System.out.println(c1.getSimpleName());  // 獲得類別名
+
+        System.out.println("獲得類別的屬性--------------------");
+        //獲得類別的屬性
+        Field[] fields = c1.getFields(); // 只能找到public的屬性
+
+        fields = c1.getDeclaredFields(); // 可以找到全部的屬性
+
+        for(Field field : fields){
+            System.out.println(field);
+        }
+
+        System.out.println("獲得指定的屬性--------------------");
+        //獲得指定的屬性
+        Field name = c1.getDeclaredField("name");
+        System.out.println(name);
+
+        System.out.println("獲得類別的方法--------------------");
+        //獲得類別的方法
+        Method[] methods = c1.getMethods(); //獲得所有方法 本類別加上父類別
+        for(Method method : methods){
+            System.out.println("正常的 " + method);
+        }
+
+        methods = c1.getDeclaredMethods(); // 獲得本類別的所有方法
+        for(Method method : methods){
+            System.out.println("getDeclaredMethods : " + method);
+        }
+
+        System.out.println("獲得指定方法--------------------");
+        //獲得指定方法
+        //重載
+        Method getName = c1.getMethod("getName",null);
+        Method setName = c1.getMethod("setName",String.class);
+        System.out.println(getName);
+        System.out.println(setName);
+
+        System.out.println("獲得所有的建構子--------------------");
+        //獲得所有的建構子
+        Constructor[] constructors = c1.getConstructors();
+        for (Constructor constructor : constructors) {
+            System.out.println(constructor);
+        }
+
+        constructors = c1.getDeclaredConstructors();
+        for (Constructor constructor : constructors) {
+            System.out.println(constructor);
+        }
+
+        //獲得指定的建構子
+        Constructor declaredConstructor =  c1.getDeclaredConstructors(String.class,int.class,int.class);
+        System.out.println("指定 " + declaredConstructor);
+
+    }
+}
+```
+
+
+
+## 小結
+
+- 實際操作中 取得類別訊息的操作 不會經常發生
+- 熟悉java.lang.reflect的作用 反射機制
+- 如何取得屬性方法建構子的名稱 修飾符等
+
+
+
+## 有了Class對象 能做什麼
+
+- 創建類別的對象 調用Class對象的getDeclaredConstructor().newInstance()方法
+  - 類別必須要有無參數的建構子
+  - 類別的建構子訪問權限必須足夠
+- 如果沒有無參數的建構子
+  - 通過Class類別的getDeclaredConstructor(Class...parameterTypes)取得類別中指定形式參數的建構子
+  - 向建構子的參數傳遞一個對應的陣列進去 包含了建構子中所需的各種參數
+  - 通過Constructor實例化對象
+
+
+
+#### 調用指定方法
+
+- 通過反射 調用類別中的方法 通過Method類別完成
+  - 通過Class類別的getMethod(String name,Class..parameterTypes)方法取得一個Method對象 並設置此方法操作時所需要的參數類型
+  - 使用Object invoke(Object obj,Object[] args)進行調用 並向方法中傳遞要設置的obj對象的參數訊息
+
+
+
+#### Object(invoke)
+
+- Object invoke(Object obj,Object..args)
+
+- Object對應原方法的返回值 若原方法無返回值 則返回null
+- 若原方法為靜態方法 此時形式參數Object可為null
+- 若原方法參數列表為空 則Object[] args為null
+- 若原方法聲明為private 則需要在調用此invoke()方法前 顯示調用方法對向的setAccessible(true)方法 即可訪問private方法
+
+#### setAccessible
+
+- Method和Field Constructor對象都有setAccessible()方法
+- setAccessible作用是啟動和禁用訪問安全檢查的開關
+- 參數值為true 表示反射的對象在使用時應該取消訪問檢查
+  - 提高反射的效率 如果程式碼中必須用反射 而需要頻繁的使用時 設置為true
+  - 使得原本無法訪問的private成員也可以訪問
+- 參數值為false則表示反射的對象應該實施訪問檢查
+
+
+
+#### 基本流程
+
+- 通過forname獲取Class類別
+- 通過newInstance聲明要取得的內部類別訊息
+- 聲明Method調用c1.getDeclaredMethod
+- 用聲明的Method調用invoke傳遞參數
+
+
+
+```java
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+//通過反射 動態建立對象
+public class test09 {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+        //取得一個資料夾中的類別
+        //建立c1引用 獲得Class對象的位址
+        Class c1 = Class.forName("User");
+
+        //建立一個對象  強制轉型成User
+        User user = (User)c1.getDeclaredConstructor().newInstance();
+        //這個行為調用了類別的無參數建構子
+        System.out.println(user);
+
+        //通過建構子建立對象  取得對應參數的建構子
+        Constructor constructor =  c1.getDeclaredConstructor(String.class,int.class,int.class);
+        //創建對象  對應參數的建構子 String int int
+        User user2 = (User)constructor.newInstance("structure",01,10);
+        System.out.println(user2);
+
+        //通過反射調用普通方法
+        User user3 = (User)c1.getDeclaredConstructor().newInstance();
+        //通過反射獲取一個方法
+        Method setNames = c1.getDeclaredMethods("setName",String.class);
+        //invoke : 啟動的意思
+        //(對象,"方法的值")
+        setNames.invoke(user3,"ss");
+        System.out.println(user3.getName());
+
+        //通過反射操作屬性
+        System.out.println("-----------------");
+        User user4 = (User)c1.getDeclaredConstructor().newInstance();
+        //獲取指定的屬性
+        Field name = c1.getDeclaredField("name");
+
+        //設置private的屬性不能直接調用
+        //關閉安全檢測 屬性或是方法的setAccerssible(true)
+        name.setAccessible(true);
+
+        name.set(user4,"反射操作屬性");
+        System.out.println(user4.getName());
+    }
+}
+```
+
+
+
+## 反射 非反射 性能比較
+
+```java
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+//分析性能
+public class test10 {
+
+    //普通方式
+    public static void test01(){
+        User user = new User();
+
+        long startTime = System.currentTimeMillis();
+
+        for (int i = 0; i < 10000000; i++) {
+            user.getName();
+        }
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("普通方式執行時間" + (endTime - startTime) + "ms");
+    }
+
+    //反射方式
+    public static void test02() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        User user = new User();
+        //獲得類別
+        Class c1 = user.getClass();
+        //獲得方法 指定名字(c1)
+        Method getName =  c1.getDeclaredMethod("getName",null);
+
+        long startTime = System.currentTimeMillis();
+
+        for (int i = 0; i < 10000000; i++) {
+            //invoke呼叫使用方法 user 傳入參數為空 null
+            getName.invoke(user,null);
+        }
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("反射方式執行時間" + (endTime - startTime) + "ms");
+    }
+
+    //反射方式調用 關閉檢測
+    public static void test03() throws NoSuchMethodException {
+        User user = new User();
+        Class c1 = user.getClass();
+
+        Method getName = c1.getDeclaredMethod("getName",null);
+        getName.setAccessible(true);
+
+        long startTime = System.currentTimeMillis();
+
+        for (int i = 0; i < 10000000; i++) {
+            user.getName();
+        }
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("反射方式關閉檢測執行時間" + (endTime - startTime) + "ms");
+    }
+
+    public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        test01();
+        test02();
+        test03();
+
+    }
+}
+```
+
+比較結果
+
+```java
+普通方式執行時間5ms
+反射方式執行時間46ms
+反射方式關閉檢測執行時間4ms
+
+```
+
+
+
+## 反射操作泛型
+
+- java採用泛型擦除的機制引入泛型 java中的泛型僅僅是讓編譯器javac使用的 確保數據的安全性和免去強制類型轉換的問題 
+- 但是一旦編譯完成 所有和泛型有關的類型會全部擦除
+- 為了通過反射操作這些類型 java新增了以下幾種類型來代表不能被歸一到Class類別中的類型 但是又和原始類型齊名的類型
+- ParameterizedType
+  - 表示一種參數化類型 比如Collection<String>
+  - 參數化類型帶有 <>
+- GenericArrayType
+  - 表示一種元素類型是參數話模型或者類型變量的陣列類型
+- TypeVarible
+  - 是各種類型變量的公共父介面
+- WildcardType
+  - 代表一種通配符類型表達式
+
+
+
+```java
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+
+//通過反射取得泛型
+public class test11 {
+
+    public void test01(Map<String,User> map, List<User> list){
+        System.out.println("test01");
+    }
+
+    public Map<String,User> test02(){
+        System.out.println("test02");
+        return null;
+    }
+
+    public static void main(String[] args) throws NoSuchMethodException {
+        //通過test11創建class對象
+        //返回了test01的方法
+        Method method = test11.class.getMethod("test01",Map.class,List.class);
+        //通過這個方法獲得泛型參數類型
+        Type[] genericParameterTypes = method.getGenericParameterTypes();
+
+        for (Type genericParameterType : genericParameterTypes) {
+            System.out.println("#" + genericParameterType);
+            //如果目前泛型的參數類型屬於參數化類型
+            if(genericParameterType instanceof ParameterizedType){
+                // 獲得他的真實類型 getActual...
+                Type[] actualTypeArguments = ((ParameterizedType) genericParameterType).getActualTypeArguments();
+                // 輸出真實的泛型參數結果
+                for (Type actualTypeArgument : actualTypeArguments) {
+                    System.out.println(actualTypeArgument);
+                }
+            }
+        }
+        System.out.println("-------------------------");
+        method = test11.class.getMethod("test02",null);
+        //獲得返回值的泛型類型
+        Type genericReturnType = method.getGenericReturnType();
+        if(genericReturnType instanceof ParameterizedType){
+            // 獲得他的真實類型 getActual...
+            Type[] actualTypeArguments = ((ParameterizedType) genericReturnType).getActualTypeArguments();
+            // 輸出真實的泛型參數結果
+            for (Type actualTypeArgument : actualTypeArguments) {
+                System.out.println(actualTypeArgument);
+            }
+        }
+
+    }
+}
+```
+
+輸出結果
+
+```java
+#java.util.Map<java.lang.String, User>
+class java.lang.String
+class User
+#java.util.List<User>
+class User
+-------------------------
+class java.lang.String
+class User
+
+```
+
+
+
+## 獲取註解訊息
+
+- ORM (Object relationship Mapping) 對象關係映射
+  - 類別和表格結構對應
+  - 屬性和字串對應
+  - 對象跟記錄對應
+
+```java
+import java.lang.annotation.*;
+
+//反射操作註解
+public class test12 {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+        Class c1 = Class.forName("student2");
+        //通過反射 獲得註解
+        Annotation[] annotations = c1.getAnnotations();
+        for (Annotation annotation : annotations) {
+            System.out.println(annotation);
+        }
+
+        //獲得註解的value值
+        //@@@獲取指定的註解 Table註解
+        Table table = (Table)c1.getAnnotation(Table.class);
+        //通過.value()獲得註解value的值
+        String value = table.value();
+        System.out.println(value);
+
+        //獲得類指定的註解
+        //獲得Field中name的屬性
+        java.lang.reflect.Field f = c1.getDeclaredField("id");
+        // 傳入指定類別(Table.class) 得到指定類別的註解訊息(getAnnotation)
+        Table annotation = f.getAnnotation(Table.class);
+        System.out.println("annotation = " + annotation);
+
+    }
+
+}
+
+@Table("student")
+class student2{
+
+    @Field(columeName = "student_id",type = "int",length = 10)
+    private int id;
+    @Field(columeName = "student_age",type = "int",length = 10)
+    private int age;
+    @Field(columeName = "student_name",type = "varchar",length = 3)
+    private String name;
+
+    public student2() {
+    }
+
+    public student2(int id, int age, String name) {
+        this.id = id;
+        this.age = age;
+        this.name = name;
+    }
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+//類名的註解 作用的區域
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+//註解 interface 名字  { 參數 }
+@interface Table{
+    String value();
+}
+//只在屬性上生效
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+//屬性的註解
+@interface  Field{
+    String columeName();
+    String type();
+    int length();
+}
+```
+
+
+
