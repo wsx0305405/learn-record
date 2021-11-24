@@ -1,0 +1,557 @@
+# HTML5
+
+## 基本架構
+
+```html
+<!DOCTYPE html>
+
+<html lang="en">  
+<head>
+    <!--網頁頭部-->
+    <title>Title</title>
+</head>
+<body>
+	<!--網頁主體-->
+</body>
+
+</html>
+```
+
+
+
+## 網頁基本訊息
+
+- DOCTYPE
+
+  - 告訴瀏覽器要使用什麼規範
+
+- title標籤
+
+  - 作為瀏覽器瀏覽時顯示的名字
+
+- meta標籤
+
+  - 描述性標籤 用來描述網站的一些訊息
+
+  - 一般用來做搜尋引擎最佳化(SEO)
+
+    
+
+## 網頁基本標籤
+
+- 標題標籤
+  -  1 ~ 6 級由大至小表現
+
+```html
+<!--標題標籤-->
+<h1> 一級標籤 </h1>
+<h2> 二級標籤 </h2>
+<h3> 三級標籤 </h3>
+<h4> 四級標籤 </h4>
+<h5> 五級標籤 </h5>
+<h6> 六級標籤 </h6>
+```
+
+- 段落標籤
+  - 用於分行使用
+
+```html
+<!--段落標籤-->
+<p> 111 </p>
+<p> 222 </p>
+<p> 333 </p>
+```
+
+- 換行標籤
+  - / 可加可不加
+  - 作用是單純的換行
+
+```html
+123 <br/>
+456
+789
+```
+
+- 水平線標籤
+  - / 可加可不加
+
+```html
+<!--水平線標籤-->
+<hr/>
+```
+
+- 字體樣式標籤
+
+```html
+<!--粗體 斜體-->
+<h1> 字體樣式標籤</h1>
+
+<strong> 粗體 strong </strong>
+<br/>
+<em> 斜體 em </em>
+```
+
+- 註釋和特殊符號
+
+```html
+<!--特殊符號  &開頭  ;結尾 -->
+
+<!--空格 &nbsp -->
+空    格    <br/>
+空&nbsp;&nbsp;&nbsp;格
+
+<br/>
+<!-- 大於 -->
+&gt;
+<br/>
+<!-- 小於 -->
+&lt;
+<br/>
+<!-- 版權符號 -->
+&copy;
+```
+
+
+
+## 圖像標籤
+
+- src 圖片位址 必填
+
+```html
+<!-- img
+src : 圖片地址
+    相對位址 絕對位址
+    ../  上一級目錄
+alt : 圖片名字 以及無法顯示時 顯示的文字
+
+title : 當鼠標指向圖片顯示的文字
+
+-->
+<img src="../../resources/img/1.jpg" alt="圖片無法顯示時 顯示的文字" 
+ title = "鼠標指向圖片顯示的文字"  width = "500" height = "500">
+```
+
+
+
+## 連結標籤
+
+```html
+<!--
+href : 必填  表示連結目標
+target : 表示打開的視窗
+    _blank 在新視窗打開
+    _self 在現在的網頁中打開
+-->
+
+<!-- 打開相同資料夾中 另一個html檔案 加入img標籤 使圖片變成超連結-->
+<a href="html03.html" target="_blank">
+    <img src="../../resources/img/1.jpg" alt="圖片無法顯示時 顯示的文字"
+         title = "圖片超連結" >
+</a>
+
+<!-- 打開已經存在的網站 超連結為後面的文字 -->
+<a href="https://www.google.com.tw/?hl=zh_TW">  點擊連結 google </a>
+```
+
+
+
+## 錨點標籤
+
+- 設置一個要移動的位置 使用 name = "target"
+- 後面呼叫 href = "target" 目標位置
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<!-- 設置標記地點為 "top" -->
+<a id = "top"> 標記地點 </a>
+
+<!-- 錨點連結
+1. 需要一個錨點標記
+2. 移動至錨點標記的地點
+#
+-->
+    
+<!-- 移動至#top 設置為top的地點 -->
+<a href="#top"> 移至top </a>
+```
+
+#### 移動至另一個網址的錨點
+
+- html03中設置 錨點跳躍位址
+
+```html
+<a href="html04.html#down"> 移動至html04#down </a>
+```
+
+- heml04中設置 錨點目標位置
+
+```html
+<a id="down"> down標記</a>
+```
+
+
+
+## 行內元素 塊元素
+
+- 塊元素
+  - 此種標籤會獨自佔據一行
+  - 無論內容有多少 該元素獨佔一行
+  - p  h1 ~ h6
+- 行內元素
+  - 此種標籤改變行內的表現情況 但無關生成新的一行
+  - 內容撐開寬度 左右都是行內元素 可以排在一行
+  - a string em
+
+
+
+## 列表
+
+- 一種資源跟訊息展現的形式 使需要的訊息可以結構化和條理化 並以列表的形式表現出來 方便瀏覽者可以快速的得到需要的資料
+- 列表的分類
+  - 無序列表
+  - 有序列表
+  - 自定義列表
+
+```html
+<body>
+<!-- 有序列表 order list -->
+<p> 有序列表 order list </p>
+<ol>
+    <li>java</li>
+    <li>python</li>
+    <li>c++</li>
+</ol>
+
+<!-- 無序列表 unorder list
+應用範圍 : 導覽 側邊攔位
+-->
+<p> 無序列表 unorder list </p>
+<ul>
+    <li>java</li>
+    <li>python</li>
+    <li>c++</li>
+</ul>
+
+<!-- 自定義列表
+dl : 標籤
+dt : 列表名稱
+dd : 列表內容
+
+一般用於官方網站底部
+-->
+<dl>
+    <dt>language</dt>
+
+    <dd>java</dd>
+    <dd>python</dd>
+    <dd>c++</dd>
+</dl>
+
+</body>
+```
+
+
+
+## 表格標籤
+
+- table標籤
+- 跨列標籤 colspan
+- 跨行標籤 rowspan
+
+```html
+<body>
+<!-- 表格
+行 tr row
+列 td column
+-->
+<table border="1px">
+    <tr>
+        <!-- colspan 跨列    -->
+        <td colspan="4">1-1</td>
+    </tr>
+    <tr>
+        <!-- rowspan 跨行    -->
+        <td rowspan="2">2-1</td>
+        <td>2-2</td>
+        <td>2-3</td>
+        <td>2-4</td>
+    </tr>
+    <tr>
+        <td>3-1</td>
+        <td>3-2</td>
+        <td>3-3</td>
+    </tr>
+</table>
+</body>
+```
+
+
+
+## 媒體元素
+
+- video
+- audio
+
+```html
+<!-- 使用video標籤
+加入controls取得播放格式
+
+-->
+<video src="../../resources/video/1.mp4" controls></video>
+
+<audio src="../../resources/audio/1.mp3" controls ></audio>
+```
+
+
+
+## 頁面結構分析
+
+- header
+  - 標題頭部區域的內容
+- footer
+  - 標記腳部區域的內容
+- section
+  - Web頁面中的一塊獨立區域
+- article
+  - 獨立的文章內容
+- aside
+  - 相關內容或應用
+- nav
+  - 導覽類輔助內容
+
+```html
+<body>
+
+<header>
+    <h2> 網頁頭部 </h2>
+</header>
+
+<section>
+    <h2> 網頁主體 </h2>
+</section>
+
+<footer>
+    <h2> 網頁腳部 </h2>
+</footer>
+
+</body>
+```
+
+
+
+## iframe內聯框架
+
+- 在網站中引用其他網站
+- src 必填 連接網址
+- path : 引用頁面地址
+- name : 框架識別名
+
+```html
+<iframe src = "path" name = "mainFrame"> </iframe>
+```
+
+```html
+<body>
+
+<iframe src="https://www.google.com.tw/?hl=zh_TW" name = "google"
+        frameborder="0" width="1000px" height="1000px"></iframe>
+
+</body>
+
+```
+
+```html
+<body>
+<!-- 或是通過 <a> 直接進行內聯框架網站的訪問 -->
+<iframe src="" name = "google"
+        frameborder="0" width="1000px" height="1000px"></iframe>
+<a href="" target="google"> 點擊移動 </a>
+</body>
+```
+
+
+
+## 表單語法
+
+- 使用form標籤
+- 資料傳遞方式 (method )分為get post
+  - get : 不允許在message-body中傳遞資料 從瀏覽器的網址列中可以看到我們從表單傳送的資料 會有安全性的問題
+  - post :  會將表單資料放在message-body中傳遞 傳送檔案時會使用multi-part編碼 將檔案與其他的標單欄位一併放在message-body中進行傳送 
+
+- type : 指定元素的類型 說明input的資料傳入類型  
+  - text : 文字輸入框
+  - password : 密碼輸入框 輸入的文字會隱藏
+  - checkbox : 多選框 用於兩個以上選項的選擇題 選擇數量不限的複選題
+  - radio : 單選框 用於兩個以上選項的單選題
+  - submit : 用於最後資料選擇完後傳送資料的按鈕
+  - reset : 重置資料的選擇回歸初始化的按鈕 
+  - file : 允許附加檔案
+  - image : 提供圖片檔點選
+  - button : 提供一個按鈕點選
+  - 未設定傳入值 默認為text
+- name : 指定表單元素的名字
+- value : 表示元素的初始值 type為radio時必須指定一個值
+- size : 指定標單元素的起始寬度
+- checked : type為radio或checkbox時 指定按鈕是否被選中
+- maxlength : type為 text 或 password時 輸入的最大上限
+
+#### 表單統整
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> 表單 </title>
+</head>
+
+<body>
+
+<h1> 註冊 </h1>
+<!-- 表單 form
+action : 傳送到的位址 可以是網站 也可以是請求處理地址
+method : post , get 傳送資料方式
+    get 方式 : 可以在url看到所傳送的訊息  不安全  效率高
+    post 方式 : 比較安全 傳送大文件
+-->
+<!-- 使用form tag  將資料傳送到 htm101.html 通過get方式-->
+<form action="html01.html" method="get">
+
+<!-- 輸入框 input type = "text"
+value = "start" = 預設的輸入值
+maxlength ="12" 最大輸入上限
+size表單的大小
+-->
+<p> 名字 : <input type="text" name="username"></p>
+<!-- 輸入框 input type = "password" 會以隱藏方式顯示 -->
+<p> 密碼 : <input type="password" name="pwd"></p>
+
+<!-- 單選框
+     radio : 單選框 單純建立兩個radio是各自獨立的
+     value : 屬性框的名字
+     name : 需要設置name的名稱相同視為同一組 才能使選項僅有一個
+     checked : 預設選定
+-->
+    <p> 性別:
+    <input type="radio" value="boy" name = "gender" checked> 男
+        <input type="radio" value="girl" name = "gender" > 女
+    </p>
+<!-- 多選框 checkbox
+    name 要設置為同一組
+    checked 預設選定
+-->
+<p>
+    <input type="checkbox" value="sleep" name="hobby" checked>sleep
+    <input type="checkbox" value="code" name="hobby">code
+    <input type="checkbox" value="chat" name="hobby">chat
+    <input type="checkbox" value="game" name="hobby">game
+</p>
+    
+<!-- 按鈕
+    value 按鈕預設表現為空  在按鈕上面加入的文字
+    input type="button" 普通按鈕
+    input type="image"  圖像按鈕
+    input type="submit" 提交按鈕
+    input type="reset"  重置按鈕
+-->
+<p>
+    按鈕: <input type="button" name = "btn1" value="點擊">
+    <input type="image" src ="../../resources/img/2.png" height="500" width="665.8">
+
+</p>
+
+<!--  下拉框  列表框
+    value賦予名字 最後選擇後顯示的結果
+    selected預設選定的選項
+ -->
+<p> select letter :
+<!--  賦予一個可以顯示選項的軸   -->
+    <select name="choose" id="">
+        <!-- 可以選擇的選項  不寫option的話則什麼也不會顯示        -->
+        <option value="OPTION A"> AA </option>
+        <option value="OPTION B"> BB </option>
+        <option value="OPTION C" selected> CC </option>
+        <option value="OPTION D"> DD </option>
+    </select>
+</p>    
+
+<!-- 文本域 
+    提供一個區塊輸入文字
+-->
+<p>反饋內容:
+    <textarea name="textarea" id="" cols="30" rows="10"> 預設的內容 </textarea>
+</p>
+
+<!-- 文件域
+    input type="file"  name="files"
+    name 屬性
+-->
+<p>
+    <input type="file" name="files">
+    <input type="button" value="上傳文件" name="upload">
+</p>
+
+<!-- 郵件驗證 -->
+<p> 郵件:
+    <input type="email" name="email">
+</p>
+<!-- URL   -->
+    <p>URL:
+        <input type="url" name="url">
+    </p>
+<!-- 數字   -->
+    <p>商品數量:
+        <input type="number" name="numbers" max="100" min="0" step="10" >
+    </p>
+<!-- 滑動 -->
+    <p> 滑動音量
+        <input type="range" name="volume" min="0" max="100" step="2">
+    </p>
+<!-- 搜尋框 -->
+    <p>搜尋:
+        <input type="search" name="search">
+    </p>
+
+<p>
+<!-- 提交 -->
+    <input type="submit">
+<!-- 重置 -->
+    <input type="reset">
+</p>
+
+<!-- 增強鼠標可用性
+允許點擊文字轉移至輸入框
+-->
+    <label for="mark"> 點擊mark </label>
+    <input type="text" id="mark">
+    
+</form>
+
+</body>
+
+</html>
+```
+
+
+
+#### 表單的應用
+
+- readonly 只能讀不能修改
+- disabled 禁止使用
+- hidden 隱藏輸入框
+- value : 禁止修改 隱藏等等 配合預設value給定的值使用
+
+
+
+## 表單初級驗證
+
+- placeholder : 用於文字框的提示訊息
+- required : 必填項目 文字框不能空白 
+- pattern : 需使用正規表示式 驗證格式是否正確
