@@ -1,0 +1,661 @@
+# CSS
+
+css是什麼
+
+css怎麼用
+
+css選擇器
+
+美化網頁
+
+盒子模型
+
+浮動
+
+定位
+
+網頁動畫
+
+
+
+## 什麼是CSS
+
+- Cascading Style Sheet 階層式樣式表
+- CSS : 表現 美化網頁
+
+
+
+## 發展史
+
+- CSS1.0
+- CSS2.0
+  - DIV(塊) + CSS , HTML與CSS結構分離 網頁變得簡單 SEO
+- CSS2.1
+  - 浮動 定位
+- CSS3.0
+  - 圓角 陰影 動畫 瀏覽器兼容性
+
+
+
+## CSS基礎
+
+#### 尚未結構分離
+
+- 寫在html中的CSS 
+
+```html
+<head>
+    <meta charset="UTF-8">
+    <title> Title </title>
+<!--  規範  style 可以撰寫CSS的程式碼
+           每一個聲明 最好使用分號結尾
+      語法:
+        選擇器{
+            聲明1;
+            聲明2;
+        }
+-->
+    <style>
+        /*選擇器  選定了h1這個標籤  改變這個標籤的屬性*/
+        h1{
+            color: blue;
+        }
+    </style>
+</head>
+```
+
+
+
+#### 結構分離
+
+- html中使用link引入CSS
+
+```html
+<head>
+
+    <meta charset="UTF-8">
+    <title> Title </title>
+
+<!-- 引入 CSS -->
+    <link rel="stylesheet" href="CSS/style.css">
+
+</head>
+```
+
+- CSS
+
+```css
+/*選擇器  選定了h1這個標籤  改變這個標籤的屬性*/
+h1{
+    color: blue;
+}
+```
+
+
+
+#### CSS優勢
+
+- 內容和表現分離
+- 網頁結構表現統一 可以實現複用
+- 樣式十分的豐富
+- 建議使用獨立於html的CSS
+- 利用SEO 容易被搜尋引擎搜索
+
+
+
+## 導入CSS的方式
+
+- 優先級  行內樣式 > 外部樣式 ==  內部樣式 
+- 外部樣式和內部樣式取決於head中的宣告順序  後面的會覆蓋前面的
+- 行內樣式
+- 外部樣式
+- 內部樣式
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Title </title>
+
+<!--   內部樣式   -->
+    <style>
+        h1{
+            color: green;
+        }
+
+    </style>
+<!-- 外部樣式 -->
+    <link rel="stylesheet" href="CSS/style.css">
+</head>
+<body>
+
+<!-- 行內樣式 在標籤元素中 寫入style屬性  寫入樣式即可-->
+<h1 style="color: red"> 標題 </h1>
+
+</body>
+</html>
+```
+
+
+
+#### 外部樣式兩種寫法 link  @import
+
+- 鏈結式 : 
+
+  - link屬於html的tag 只能放入html中使用
+  - 一個區塊依序載入
+  - 一般使用link
+
+  ```html
+  <!-- 外部樣式 -->
+  <link rel="stylesheet" href="CSS/style.css">
+  ```
+
+- 導入式
+
+  - @import  CSS2.1 特有
+  - 使用時必須放在style標籤中
+  - 一個網頁一次性載入  如果網頁太大導致載入失敗可能只會看到原始的HTML
+  - 較不建議使用@import
+
+```html
+<style>
+    @import url("CSS/style.css");
+</style>
+```
+
+
+
+## 選擇器
+
+- 選擇某一個或是某一類的元素
+
+#### 標籤選擇器 h1{ }
+
+- 選擇某一個類的標籤
+
+```html
+<style>
+<!--  標籤選擇器 會選擇所有相同的標籤  -->
+        h1{
+            color: #2a1a92;
+            background: #3c8a31;
+            border-radius: 20px;
+        }
+        p{
+            font-size: 40px;
+        }
+    </style>
+```
+
+#### 類選擇器 .class
+
+- 選擇標記過的class類別
+
+- 使共同的標籤有相同 或是 不同的class
+
+```html
+<style>
+  /*
+  類選擇器  .class的名稱{}
+  優點  可以有一個或多個使用同一種class的標籤
+  只會對這些class類型進行改動*/
+     .AA{
+         color : blue;
+     }
+     .BB{
+        color : crimson;
+     }
+</style>
+
+<body>
+
+<h1 class="AA"> tag </h1>
+<h1 class="BB"> tag2 </h1>
+
+</body>
+```
+
+#### id 選擇器 #AA
+
+- 一個ID只能對應一個元素使用
+- 不能有兩個元素有相同的ID
+
+```html
+<head>
+    <style>
+        /*id選擇器 : 同一個id不能被多次使用
+          id只能唯一使用
+          #id名稱{}
+        */
+        #AAA{
+            color: lawngreen;
+        }
+	</style>
+</head>
+<body>
+        <h1 id="AAA"> tag </h1>
+</body>
+```
+
+
+
+#### 多選擇器優先級
+
+- 根據精確度決定優先級
+- 精確度 id (唯一)  > class > tag
+
+```html
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+      /*同時定義多個標籤 越精確的標籤才會生效
+        精確度 id(唯一) > class > tag   */
+      /*id選擇器 : 同一個id不能被多次使用
+        id只能唯一使用
+        格式 #id名稱{}   */
+      #AAA{
+          color: lawngreen;
+      }
+      /*class選擇器*/
+      .DDD{
+          color: crimson;
+      }
+      /* 標籤選擇器  */
+      h1{
+          color: aqua;
+      }
+    </style>
+
+</head>
+<body>
+        <h1 id="AAA"> tag </h1>
+        <h1 id="BBB"> tag2 </h1>
+        <h1 id="CCC"> tag3 </h1>
+        <h1 class="DDD"> tag4 </h1>
+        <h1 class="DDD"> tag5 </h1>
+</body>
+```
+
+
+
+## 層次選擇器
+
+```html
+<body>
+<p> p1 </p>
+<p> p2 </p>
+<p> p3 </p>
+<ul>
+    <li>
+        <p> p4 </p>
+    </li>
+    <li>
+        <p> p5 </p>
+    </li>
+    <li>
+        <p> p6 </p>
+    </li>
+</ul>
+
+</body>
+```
+
+
+
+#### 後代選擇器 body p{ }
+
+- body p{ }
+
+- 在某個元素後面
+- 選擇了上方p1~p6的所有標籤
+
+```html
+<style>
+        /*後代選擇器*/
+        /*body後面的p*/
+        body p{
+            background: crimson;
+        }
+    </style>
+```
+
+
+
+#### 子選擇器 body>p{ } 
+
+- body>p{ }
+
+- 往後一代的區域
+- 選擇了上方p1 ~ p3 第一代的標籤
+
+```html
+<style>
+    body>p{
+	/*子選擇器*/
+    background: aqua;
+}
+</style>
+```
+
+
+
+#### 相鄰選擇器  class + tag
+
+- .class + tag
+
+- 選擇到的對象的下面一個進行作用
+- 選擇active類別相鄰的p
+- 作用的對象是p2 p8
+
+```html
+<head>
+    <style>
+	/*相鄰選擇器
+     active下面一個的p標籤 向下只有一個
+    */
+    .active + p{
+        background: cyan;
+    }
+	</style>
+</head>
+<body>
+<p> p0 </p>
+<p class="active"> p1 </p>
+<p> p2 </p>
+<p> p3 </p>
+<ul>
+    <li>
+        <p> p4 </p>
+    </li>
+    <li>
+        <p> p5 </p>
+    </li>
+    <li>
+        <p> p6 </p>
+    </li>
+</ul>
+
+<p class="active"> p7 </p>
+<p> p8 </p>
+
+</body>
+```
+
+
+
+#### 通用選擇器 .class~tag
+
+- .class~tag
+
+- 目前選中的元素向下所有的相同級元素
+- 選中的對象為 p2 p3 p7
+
+```html
+<style>
+    /*通用選擇器
+    目前選中的元素向下所有的相同級元素
+*/
+.active~p{
+    background: gold;
+}
+</style>
+
+<body>
+<p> p0 </p>
+<p class="active"> p1 </p>
+<p> p2 </p>
+<p> p3 </p>
+<ul>
+    <li>
+        <p> p4 </p>
+    </li>
+    <li>
+        <p> p5 </p>
+    </li>
+    <li>
+        <p> p6 </p>
+    </li>
+</ul>
+<p> p7 </p>    
+</body>
+```
+
+
+
+## 結構偽類選擇器
+
+- 偽類 : 條件
+
+```html
+<style>
+    /*ul第一個子元素*/
+    ul li:first-child{
+        background: crimson;
+    }
+    /*ul最後一個元素*/
+    ul li:last-child{
+        background: blue;
+    }
+    
+    /*選擇p1 : 定位到父元素 選擇當前第一個元素
+      選擇當前p元素的父級元素 選中父級元素的第一個  並且是當前元素(p)才能生效
+    */
+    /*根據p定位到父元素body
+    nth-child() 則是從body依序往下檢查第N個元素
+    如果跟定位的元素(p)相同 則執行動作 */
+    p:nth-child(1){
+        background: aqua;
+    }
+    
+    /*選擇當前父元素中 第N個p類型的元素*/
+    p:nth-of-type(2){
+        background: green;
+    }
+</style>
+```
+
+
+
+## 屬性選擇器 a[]{}
+
+- id + class 結合
+- *= 包含 只要包含其中一種屬性即可
+- =  相等 需要與宣告時的屬性完全一致
+- ^= 以這個為開頭
+- &= 以這個為結尾
+
+```html
+<style>
+/*存在id屬性的元素  a[]{}       */
+/* a[id]{} 選擇a標籤中 擁有id屬性的成員  */
+p[id]{
+    background: aqua;
+}
+/* a[id = AA] 選擇a標籤中 擁有id屬性 且屬性為AA的成員  */
+p[id = AA]{
+    background: crimson;
+}
+/* a[class=links] 選擇a標籤中 含有class屬性 且屬性為links的成員 */
+/* *= 包含 只要包含其中一種屬性即可  */
+/*  = 相等 需要與宣告時的屬性完全一致 *!*/
+/* ^= 以這個為開頭 */
+/* &= 以這個為結尾 */
+a[class=links]{
+    background: gold;
+}
+</style>
+```
+
+
+
+## 美化網頁元素
+
+- 有效傳遞網頁的訊息
+- 凸顯網頁的主題
+- 提高用戶體驗
+- span標籤 : 將重點的強調的字 使用span標籤輔助實現
+
+```html
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        /* id選擇器 */
+        #title{
+            font-size: 50px;
+        }
+
+    </style>
+
+</head>
+<body>
+
+c++ <span id="title"> java </span>
+
+</body>
+```
+
+
+
+#### 字體樣式
+
+```html
+<!--  font-family 字體
+      font-size 字體大小
+      font-weight 字體粗細
+      color 字體顏色
+  -->
+<style>
+        body{
+            font-family: "Bodoni MT" ;
+        }
+        h1{
+            font-size: 20px;
+        }
+
+    </style>
+```
+
+
+
+#### 文本樣式
+
+- 顏色
+  - color  rgb  rgba
+- 文本對齊方式
+  - text-align = center
+- 首行縮進
+  - text-indent : 2em;
+- 行高
+  - line-height : 單行文字上下居中  line-height = height
+- 裝飾
+  - text-decoration
+
+```html
+<style>
+/*下劃線*/
+.l1{
+    text-decoration: underline;
+}
+/*中劃線*/
+.l2{
+    text-decoration: line-through;
+}
+/*上劃線*/
+.l3{
+    text-decoration: overline;
+}
+/*超連結去掉下劃線*/
+a{
+    text-display: none;
+}
+</style>
+```
+
+
+
+#### 陰影
+
+```html
+<style>	
+/*text-shadow : 陰影顏色 水平偏移 垂直偏移 陰影半徑*/
+#price{
+    text-shadow: crimson 10px -10px 2px;
+}
+</style>
+```
+
+
+
+#### 超連結偽類
+
+```html
+<style>	
+    /*預設的顏色*/
+    a{
+        text-decoration: none;
+        color: crimson;
+        font-size: 50px;
+    }
+    /*滑鼠指向時的顏色*/
+    a:hover{
+        color: chartreuse;
+    }
+    /*滑鼠點擊時的顏色*/
+    a:active{
+        color: blue;
+    }
+    /*點擊後呈現的情況*/
+    a:visited{
+        color: black;
+    }
+</style>
+```
+
+
+
+## 背景
+
+```html
+<style>
+        div{
+            width: 1000px;
+            height: 700px;
+            /*粗細 樣式 顏色*/
+            border: 1px solid red;
+            /*設置背景*/
+            background-image: url("../../img/3.png");
+        }
+        .div1{
+            background-repeat: repeat-x;
+        }
+        .div2{
+            background-repeat: repeat-y;
+        }
+        .div3{
+            background-repeat: no-repeat;
+        }
+    </style>
+
+
+
+<body>
+<div class="div1"> </div>
+<div class="div2"> </div>
+<div class="div3"> </div>
+</body>
+```
+
+
+
+## 盒子模型
+
+- margin : 外邊框
+- padding : 內邊框
+- border : 邊框
+
