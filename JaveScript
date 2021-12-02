@@ -1,0 +1,1884 @@
+# JavaScript
+
+
+
+## 引入JavaScript
+
+- 內部標籤
+
+```html
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+<!-- script標籤寫JavaScript   -->
+<!--    內部寫法			  -->
+        <script>
+        alert('hello world');
+        </script>            
+
+<!--不用顯示定義type 默認為javascript-->
+    <script type="text/javascript"></script>
+
+</head>
+```
+
+- 外部引入
+
+```html
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+<!--    外部引入寫法    -->
+<!--    script必須成對使用 不能自閉合-->
+    <script src="JS/JS01.js"></script>
+    
+<!--不用顯示定義type 默認為javascript-->
+    <script type="text/javascript"></script>
+
+</head>
+```
+
+
+
+## 基本語法
+
+
+
+```html
+<script>
+    // 定義變數  變數類型   變數名  = 變數值
+    let score = 65;
+    // 條件控制
+    if(score > 60 && score < 70){
+        alert("60~70")
+    }else if(score > 70 && score < 80){
+        alert("70~80")
+    }else{
+        alert("other")
+    }
+    // console.log(score) 在瀏覽器中顯示變量 System.out.println()
+
+</script>
+```
+
+
+
+## 數據類型
+
+#### 變量
+
+- 不能以數字開頭
+
+```javascript
+var aa
+```
+
+
+
+- JS不區分小數和整數 
+
+```javascript
+123 		// 整數
+123.1 		// 浮點數
+1.123e4 	// 科學計數
+-123 		// 負數
+NaN 		// not a number
+Infinity 	//表示無限大
+```
+
+#### 字串
+
+```javascript
+'abc'
+"abc"
+```
+
+#### 布林值
+
+```javascript
+console.log(1==1) = true
+console.log(1>2)  = false
+```
+
+#### 邏輯運算
+
+```javascript
+&& 左右兩個都為true  return true
+
+|| 左右其中一個為true  return true
+
+!  true false 反轉
+```
+
+#### 比較運算
+
+- JS中 盡量不要使用等於 ==
+- 建議使用絕對等於 ===
+- NaN === NaN 與所有的數值都不相等 包括自己
+- 只能使用 isNaN (NaN) 判斷是否為NaN
+
+```javascript
+=  賦值
+== 等於  (類型不一樣 值一樣 也會返回true)
+1 == "1"  (變數及字串類型不同 也會返回true)
+=== 絕對等於 (必須要類型一樣 值一樣 才會返回true)
+```
+
+#### 浮點數問題
+
+- 盡量避免使用浮點數進行運算 存在精確度問題
+
+```javascript
+console.log(1/3 === (1-2/3)) // false
+```
+
+- 判斷方式
+
+```javascript
+console.log(1/3 === (1-2/3) < 0.00000001)
+```
+
+#### null undefined
+
+- null 空
+- undefined 未定義
+
+#### 陣列
+
+- JAVA中強制陣列的每一個元素需要是相同的類型
+- JS則不強制這個行為
+
+```javascript
+//盡量使用[]的方式建立
+var arr = [1,2,3,4,"aaa",true,null]
+new Array(1,2,3,4,5,6,null,false)
+```
+
+- 如果使用console.log(arr[0])時超過了建立範圍 會顯示
+
+```javascript
+undefined
+```
+
+#### 對象
+
+- 對象是大括號
+- 每個屬性中間要加入逗號 最後一個則不需要加入
+
+```javascript
+// Person person = new Person(); java
+var person = {
+    name: "aaa",
+    age: 3,
+    tags: ['js','java','...']
+}
+```
+
+- 取對象的值
+
+```javascript
+person.name
+> aaa
+Person.age
+> 3
+```
+
+
+
+## 嚴格檢查模式 Strict
+
+- 'use strict'  : 加入啟用嚴格檢查模式
+- var : 全域變數  宣告完成後可能會與其他同名的變數產生衝突
+- let : 區域變數 一般盡量使用let 避免與其他區域的變數產生衝突
+
+```javascript
+<!--
+        前提 : IDEA 需要設定支持ES6語法
+        'use strict'; 嚴格檢查模式 預防JS的隨意性導致的問題
+        必須寫在第一行
+        區域變數建議都使用let定義
+-->
+    <script>
+        'use strict';
+        //全域變數 不建議直接宣告全域變數
+        var a = 0;
+        //區域變數 一般使用區域變數
+        let b = 0;
+
+    </script>
+```
+
+
+
+## 字串
+
+- 正常的字串使用 " " 或是 ' ' 
+- 注意轉譯符號 \
+
+```html
+<script>
+    console.log('a\'');
+</script>
+	out --> a'
+
+\'
+\n
+\t
+```
+
+
+
+#### 多行字串
+
+- 使用 ``
+- 允許換行輸出字串
+
+```html
+<script>
+	var m = `abc
+            def
+            ghi
+            jkl`
+    console.log(m);
+</script>
+```
+
+
+
+#### 模板字串
+
+- 使用 `` 包含內容
+- 使用 ${ name } 呼叫同名稱的變量 串接內容
+- 在印出S時 會同時顯示此變量的內容
+
+```html
+<script>
+let name = "ss";
+let s = `ABC, ${name}`
+</script>
+```
+
+
+
+#### 字串長度
+
+```
+str.length
+```
+
+
+
+#### 字串的可變性
+
+```html
+let student = 'student';
+console.log(student.length); // 7
+console.log(student[0]);  // s
+//無法使用指定位置改變字串內容
+student[0] = 1;
+```
+
+
+
+#### 大小寫轉換
+
+- 屬於方法 不是改變屬性
+- 執行的結果與字串本身無關 單純執行並不會改變字串本身
+
+```html
+let student = 'student';
+student.toUpperCase();
+console.log(student); // student
+student.toLowerCase();
+console.log(student); // student
+console.log(student.toUpperCase()); // STUDENT
+console.log(student.toLowerCase()); // student
+```
+
+
+
+#### indexOf
+
+```
+let student = 'student';
+student.index(t) // 1
+```
+
+
+
+#### substring
+
+```
+[)
+student.substring(1) // 從第一個位置擷取至最後一個位置
+student.substring(1,3) // 從第一個位置擷取 3 - 1 個位置
+```
+
+
+
+## 陣列
+
+- Array可以包含任意的資料類型
+
+```javascript
+var arr=[1,2,3,4,5,6]
+```
+
+- 可以改變內部的值
+
+```javascript
+arr[0] = 10
+10
+console.log(arr)
+[10, 2, 3, 4, 5, 6]
+```
+
+
+
+#### 長度
+
+- arr.length本身是可以被賦值改變的
+
+```
+arr.length
+```
+
+- 長度為6的情況 賦予大於長度的值
+- 出現empty
+
+```javascript
+arr.length = 10
+//10
+console.log(arr)
+//VM781:1 (10) [0, 2, 3, 4, 5, 6, empty × 4]
+```
+
+- 長度為6的情況 賦予小於長度的數字
+- 會造成資料的損失
+
+```javascript
+arr.length = 4
+//4
+console.log(arr)
+// (4) [1, 2, 3, 4]
+undefined
+```
+
+
+
+#### slice()
+
+- 擷取Array的一部份 返回一個新的Array 類似String中的substring
+
+```javascript
+let arr = [1,2,3,4,5,6]
+arr.slice(2)
+// (4) [3, 4, 5, 6]
+arr.slice(2,5)
+// (3) [3, 4, 5]
+```
+
+
+
+#### push pop
+
+- push 往後面丟入資料
+- pop() 從最後面移除一個資料
+
+```javascript
+let arr = [1,2,3,4,5,6]
+arr.push('a','b')  // 往最後面丟入元素
+8   			   // 長度為8
+console.log(arr)   
+//VM350:1 (8) [1, 2, 3, 4, 5, 6, 'a', 'b']  
+undefined
+arr.pop()    //往最後面拋出一個元素
+//'b' 		
+console.log(arr)
+//VM495:1 (7) [1, 2, 3, 4, 5, 6, 'a']
+```
+
+
+
+#### unshift() shift()
+
+- 往array的頭部丟入資料
+- unshift() 放入資料
+- shift() 移除一個資料
+
+```javascript
+arr.unshift('s','d')
+8
+console.log(arr)
+// VM663:1 (8) ['s', 'd', 1, 2, 3, 4, 5, 6]
+undefined
+arr.shift()
+'s'
+console.log(arr)
+// VM727:1 (7) ['d', 1, 2, 3, 4, 5, 6]
+undefined
+```
+
+
+
+#### 排序sort()
+
+- 改變原本資料的屬性
+
+```javascript
+let aaa = ['B','A','C']
+undefined
+aaa.sort()
+//(3) ['A', 'B', 'C']
+console.log(aaa)
+VM849:1 (3) ['A', 'B', 'C']
+undefined
+```
+
+
+
+#### 反轉 reverse()
+
+- 將array反轉
+- 改變原本資料的屬性
+
+```javascript
+let aaa = ['A', 'B', 'C']
+aaa.reverse()
+(3) ['C', 'B', 'A']
+console.log(aaa)
+VM899:1 (3) ['C', 'B', 'A']
+```
+
+
+
+#### concat()
+
+- 將array接上另一組array
+- 屬於方法 不改變原本資料的屬性
+
+```javascript
+console.log(aaa)
+VM899:1 (3) ['C', 'B', 'A']
+undefined
+aaa.concat([4,5,6])
+(6) ['C', 'B', 'A', 4, 5, 6]
+console.log(aaa)
+VM946:1 (3) ['C', 'B', 'A']
+```
+
+
+
+#### 連接符號 join
+
+- 在每個array元素間加入的連接符號
+- 不改變原本資料的屬性
+
+```javascript
+console.log(aaa)
+VM946:1 (3) ['C', 'B', 'A']
+undefined
+aaa.join('--')
+'C--B--A'
+console.log(aaa)
+VM1006:1 (3) ['C', 'B', 'A']
+```
+
+
+
+#### 多維陣列
+
+```javascript
+arr = [[1,2],[3,4],[5,6]]
+(3) [Array(2), Array(2), Array(2)]
+0: (2) [1, 2]
+1: (2) [3, 4]
+2: (2) [5, 6]
+length: 3
+[[Prototype]]: Array(0)
+```
+
+
+
+## 對象類型
+
+- JS中對象 使用 {....} 表示一個對象 描述屬性 aaa : 'bb' 
+- 多個屬性之間使用 , 間隔  最後的屬性則不需加入 ,
+
+```javascript
+var 對象名 = {
+	屬姓名 : 屬性值,
+	屬姓名 : 屬性值,
+	屬姓名 : 屬性值
+}
+
+<script>
+        'use strict'
+        var person = {
+            name : 'aa',
+            age : 'bb',
+            score : '0'
+        }
+    </script>
+```
+
+
+
+#### 對象賦值
+
+```javascript
+person.name   // 原本是 aa
+'aa'
+person.name = "CC"  // 賦值
+'CC'
+person.name   // 改成了 CC
+'CC'
+```
+
+
+
+#### 呼叫不存在的對象屬性
+
+- 使用一個不存在的對象屬性 只會出現undefined
+
+```javascript
+person.aaa
+undefined
+```
+
+
+
+#### 動態的刪減屬性
+
+```javascript
+person  // 呼叫對象名
+{name: 'CC', age: 'bb', score: '0'}
+delete person.name  //移除name
+true
+person
+{age: 'bb', score: '0'} //移除name的結果
+```
+
+
+
+#### 動態的添加屬性
+
+```javascript
+person
+{age: 'bb', score: '0'}
+person.ee = 'eee' // 添加屬性 ee 
+'eee'
+person
+{age: 'bb', score: '0', ee: 'eee'}  //添加後的結果
+```
+
+
+
+#### 判斷屬性值是否在對象中
+
+```javascript
+'age' in person
+true
+//繼承
+'toString' in person
+true
+```
+
+
+
+#### 判斷屬性是否是這個對象自己擁有的
+
+```javascript
+person.hasOwnProperty('toString')
+false
+person.hasOwnProperty('age')
+true
+```
+
+
+
+## 流程控制
+
+#### if(判斷)
+
+```javascript
+var age = 3;
+if(age > 3){
+    alert( "age > 3" );
+}else if(a > 0){
+	alert( "age > 0" );
+}else{
+    alert( "age < 0 ");
+}
+```
+
+
+
+#### while循環
+
+```javascript
+var age = 3;
+while(100 > age){
+    age = age + 1;
+    console.log(age);
+}
+
+do{
+    age = age + 1;
+    console.log(age);
+}while(100 > age)
+```
+
+
+
+#### for循環
+
+```javascript
+for(let i = 0;i < 100; i++){
+    console.log(i);
+}
+```
+
+
+
+#### 陣列循環
+
+##### forEach 印出 array的值
+
+```javascript
+let aa = [4,5,6,7,8,9,10,11,12,13];
+//函數
+aa.forEach(function (value){
+    console.log(value)
+})
+```
+
+##### for of 印出 array的值
+
+```javascript
+let aa = [4,5,6,7,8,9,10,11,12,13];
+
+        for(var nums of aa){
+            console.log(nums);
+        }
+```
+
+##### for in 印出 index
+
+```javascript
+let aa = [4,5,6,7,8,9,10,11,12,13];
+
+for(var nums in aa){
+    console.log(nums);
+    //加入 console.log(aa[nums]) 轉變成值
+}
+```
+
+
+
+## Map Set 
+
+#### Map
+
+```javascript
+var map = new Map([['AAA',100],['BBB',90],['CCC',80]]);
+let name = map.get('AAA'); //通過key獲得value
+100
+map.set('DDD',60);         //新增或修改key value到map中
+map.delete('DDD');		   //刪除
+```
+
+
+
+#### Set
+
+- Set類型會自動去除陣列中重複的元素
+
+```javascript
+var set = new Set([1,1,1,2,2,3,3,3,4]);
+set
+Set(4) {1, 2, 3, 4}
+```
+
+- 加入 刪除元素
+
+```javascript
+set
+	Set(4) {1, 2, 3, 4}
+set.add(5);
+	Set(5) {1, 2, 3, 4, 5}
+set.delete(2); 
+	true
+set
+	Set(4) {1, 3, 4, 5}
+set.add(2);
+	Set(5) {1, 3, 4, 5, 2}
+```
+
+- 判斷是否有特定的元素
+
+```javascript
+set.has(3)
+true
+```
+
+
+
+## iterator
+
+#### 遍歷陣列 for-of
+
+```javascript
+var arr = [3,4,5]
+for(let x of arr){
+    console.log(x);
+}
+//////
+3
+4
+5
+```
+
+
+
+#### 遍歷陣列 for-in
+
+- 後續在新建立name 只有for-in會輸出 不建議使用
+
+```javascript
+var arr = [3,4,5]
+arr.name = '123';  //bug
+for(let x in arr){
+    console.log(x);
+}
+///
+0
+1
+2
+name
+```
+
+
+
+#### 遍歷Map for-of
+
+```javascript
+var map = new Map([['AAA',100],['BBB',90],['CCC',80]]);
+for(let x of map){
+    console.log(x);
+}
+```
+
+
+
+#### 遍歷Set for-of
+
+```javascript
+var set = new Set([2,3,4,5,6]);
+for(let x of set){
+    console.log(x);
+}
+```
+
+
+
+## 函數
+
+#### 絕對值函數
+
+```javascript
+function abs(x){
+    if(x >= 0){
+        return x;
+    }else{
+        return -x;
+    }
+}
+```
+
+執行結果
+
+```
+abs(-5)
+5
+abs(5)
+5
+abs()
+NaN
+```
+
+- 一旦執行到return 代表函數結束 返回結果
+- 如果沒有執行return 函數執行完也會返回結果  結果為undefined
+
+
+
+#### 函數定義
+
+- function(x) 為匿名函數
+- 將結果賦值給abs 通過abs調用函數
+
+```javascript
+var abs = function(x){
+	if(x >= 0){
+        return x;
+    }else{
+        return -x;
+    }
+}
+```
+
+
+
+#### 調用函數
+
+```javascript
+abs(5)
+5
+abs(-5)
+5
+```
+
+
+
+#### 參數問題
+
+- JS中可以傳遞任意數量的參數 也可以不傳遞參數
+
+```javascript
+abs(-10)
+10
+abs(-5,-10,-15)
+5
+```
+
+- 判斷輸入格式是否是數字
+
+```javascript
+<script>
+    function abs(x){
+        //手動拋出異常
+        if(typeof x !== "number"){
+            throw 'not a number';
+        }
+        if(x >= 0){
+            return x;
+        }else{
+            return -x;
+        }
+    }
+</script>
+```
+
+
+
+#### 傳入參數多於實際參數
+
+- 扣除實際使用的參數  使用arguments的作法
+
+- arguments包含所有的參數
+- arguments.length 計算傳入的參數數量
+
+```javascript
+var abs = function (a,b){
+    for(var i = 2;i < arguments.length;i++){
+        //..
+    }
+}
+```
+
+- 使用rest的作法
+- rest參數只能寫在最後面
+- 直接獲取已經定義的參數外的所有參數
+
+```javascript
+function aaa(a,b,...rest){
+    console.log("a --> " + a);
+    console.log("b --> " + b);
+    console.log(rest);
+}
+```
+
+
+
+## 變數的作用域 let const
+
+
+
+#### var的作用域
+
+- 在函數內宣告的變數函數外不可使用
+
+```javascript
+function aa(){
+    var x = 1;
+    x = x + 1;
+}
+x = x + 2; // Uncaught ReferenceError: x is not defined
+```
+
+- 兩個函數使用相同的變數名稱不衝突
+
+```javascript
+function aa(){
+    var x = 1;
+    x = x + 1;
+}
+function bb(){
+    var x = 1;
+    x = x + 1;
+}
+```
+
+- 內部函數可以訪問外部函數的成員 反之則不行
+
+```javascript
+function aa(){
+    var x = 1;
+    function bb(){
+        var y = x + 1;
+    }
+    var z = y + 1; // Uncaught ReferenceError: y is not defined
+}
+```
+
+- JS的函數搜尋變量由內向外搜尋 假設外部存在同名的變數 則內部函數會覆蓋外部的變數
+
+```javascript
+function aa(){
+    var x = 1;
+    console.log('outer' + x)
+    function bb(){
+        var x = 2;
+        console.log('inner' + x);
+    }
+    bb();
+}
+aa();
+```
+
+- 提升變數的作用域  先使用後宣告 但是不會套用之後才賦予的值
+- 在JS建立時就存在的特性  所有變數定義建議放在函數的頭部 便於維護
+
+```javascript
+function aa(){
+    var x = 'x' + y;
+    console.log(x);		// xundefined 
+    var y = 'y';
+    console.log('x = ' + x); // xundefined
+    console.log('y = ' + y); // y
+}
+aa();
+```
+
+
+
+#### window
+
+- 全域對象 window
+
+```javascript
+var x = 'xxx';
+alert(x);
+alert(window.x); // 默認所有的全域變數 都會自動綁定在window對象
+```
+
+- alert() 函數也是window變數
+
+```javascript
+var x = 'xxx';
+window.alert(x);
+window.alert(window.x);
+```
+
+```javascript
+var x = 'xxx';
+window.alert(x);
+var old_alert = window.alert;
+old_alert();
+
+//取代alert的函數
+window.alert = function (){
+
+};
+//此時的alert無效
+window.alert(123);
+//恢復
+window.alert = old_alert;  // old本身已放入 window.alert
+window.alert(456);
+```
+
+- Javascript實際上只有一個全域作用域 任何變數 函數也可以視為變數 假設沒有在函數作用範圍找到 就會向外找 如果在全域作用域都沒有找到 就會出錯
+
+
+
+#### 全域變數規範
+
+- 由於所有的全域變數都會綁定到window上 如果不同的js文件使用了相同的全域變數 會產生衝突 --> 減少衝突
+- 把所有全域變數的程式碼放入自己定義的唯一全域變數中,降低全域變數的衝突問題
+
+```javascript
+//唯一全域變數
+var global = {};
+//定義全域變數
+global.AA = "aaa";
+global.BB = function (a,b){
+    return a + b;
+}
+```
+
+
+
+#### let 局部作用域
+
+- 過去只有var會發生的問題
+
+```javascript
+function aaa(){
+    for (var i = 0; i < 100; i++) {
+        console.log(i);
+    }
+    console.log(i);  // 錯誤   宣告var 此處的i還可以使用
+}
+```
+
+- 使用let的情況
+- 建議使用let定義區域變數類型的變數
+
+```javascript
+function aaa(){
+    for (let i = 0; i < 100; i++) {
+        console.log(i);
+    }
+    console.log(i); // Uncaught ReferenceError: i is not defined
+}
+```
+
+
+
+#### 常數 const (常量)
+
+- 唯獨 不可修改
+
+```javascript
+const PI = 3.14;  //宣告為const 唯獨 不可修改
+console.log(PI);
+PI = 123; // Uncaught TypeError: Assignment to constant variable
+```
+
+
+
+## 方法
+
+- 方法就是把函數放在對象的裡面 對象只有兩個東西 : 屬性和方法
+
+```javascript
+var AAA = {
+    name: AA,
+    birth : 2000,
+    //方法
+    age : function (){
+        var now = new Date();
+        return now - this.birth;
+    }
+}
+//屬性
+AAA.name
+AAA.birth
+//方法 必須加上()
+AAA.age()
+```
+
+
+
+#### this
+
+- 將上面的程式拆開
+- this表示呼叫該函數的對象
+
+```javascript
+function getage() {
+    var now = new Date().getFullYear();
+    return now - this.birth;
+}
+var AAA = {
+    name: 'AA',
+    birth : 2000,
+    //方法
+    age : getage
+}
+```
+
+
+
+#### apply
+
+- 在JS中可以控制this的指向
+
+```javascript
+function getage() {
+    var now = new Date().getFullYear();
+    return now - this.birth;
+}
+var AAA = {
+    name: 'AA',
+    birth : 2000,
+    //方法
+    age : getage
+}
+getage.apply(AAA,[]);  // 選擇對象 指定this選擇此對象 傳入參數為空
+```
+
+
+
+## 內部對象
+
+#### 標準對象
+
+- 判斷對象類型 typeof xxx
+
+```javascript
+typeof 123
+'number'
+typeof '123'
+'string'
+typeof true
+'boolean'
+typeof NaN
+'number'
+typeof []
+'object'
+typeof {}
+'object'
+typeof Math.abs
+'function'
+typeof undefined
+'undefined'
+```
+
+
+
+#### Data
+
+- 基本使用
+
+```javascript
+var now = new Date();
+now.getFullYear();  // 年
+now.getMonth();     // 月
+now.getDate();      // 日
+now.getDay();       // 星期
+now.getHours();     // 時
+now.getMinutes();   // 分
+now.getSeconds();   // 秒
+
+now.getTime(); //全世界統一由1970 1.1 0:00:00 開始計數的毫秒
+console.log(new Date(1638247096508)); // 轉為時間
+```
+
+
+
+#### JSON
+
+- 早期 所有數據的傳輸使用XML文件
+- JSON是一種輕量級的數據交換格式
+- 簡潔和清晰的**層次結構**使得JSON成為理想的數據交換語言
+- 易於使人閱讀跟編寫 也易於機器解析和生成 有效提升網路傳輸效率
+- JS中的一切皆為對象 任何JS支持的類型都可以用JSON表示
+  - 對象都用 { }
+  - 陣列都用 [ ]
+  - 所有的鍵值對都用 key : value
+
+
+
+##### JSON字串 和 JS對象轉換
+
+- JSON字串 '  " "   '  單引號及雙引號會互相使用 裡面出現 外面就不會出現
+- 需要再使用另一個引號包覆對象 形成字串 
+
+```javascript
+var user = {
+    name : "AAA",
+    age : 3,
+    gender : 'male'
+}
+//對象轉換為JSON字串 
+var jsonuser = JSON.stringify(user)
+//'{"name":"AAA","age":3,"gender":"male"}'
+
+//JSON 字串轉換為對象
+var obj = JSON.parse('{"name":"AAA","age":3,"gender":"male"}')
+//{name: 'AAA', age: 3, gender: 'male'}
+```
+
+
+
+##### JSON 字串  JS對象差別
+
+- 一般來說JSON字串的每一個元素都會使用雙引號 則最外面使用單引號形成字串
+
+```javascript
+var obj = {a: 'AAA',b: 'BBB'};
+var json = '{"a": "AAA","b": "BBB"}'
+```
+
+
+
+## 物件導向
+
+- 類別 : 模板
+- 對象 : 具體的實例
+
+#### 原型
+
+- 一個對象可以選定另一個對象作為原型 繼承所有的元素
+- 每一個對象一定都繼承最初的原型 Object
+
+```javascript
+var student = {
+    name : 'AAA',
+    age : 3,
+    //run方法
+    run : function (){
+        console.log(this.name + " run ");
+    }
+};
+var BBB = {
+    name : 'bbb'
+};
+// 原型對象   BBB以student作為原型 包含student的所有元素
+// 如果同名的元素則會被BBB自身的元素覆蓋
+BBB.__proto__ = student;
+```
+
+
+
+#### class繼承
+
+- 定義一個類別 屬性 方法
+
+```javascript
+class Student{
+    
+    constructor(name) {
+        this.name = name;
+    }
+    //方法
+    hello(){
+        alert(this.name + 'hello');
+    }
+};
+var AAA = new Student('aaa');
+```
+
+- 繼承
+  - 與proto的方法類似  呈現方式與JAVA相似
+
+```javascript
+class people{
+    constructor(name) {
+        this.name = name;
+    }
+    //方法
+    hello(){
+        alert('hello');
+    }
+}
+class student extends people{
+    //呼叫建構子 建立一個新的grade name則是呼叫父類別建構
+    constructor(name,grade) {
+        super(name);
+        this.grade = grade;
+    }
+    //方法
+    myGrade(){
+        alert('student');
+    }
+}
+var AAA = new student('aaa');
+```
+
+
+
+## BOM對象
+
+- JavaScript和瀏覽器關係
+  - 為了能夠讓他在瀏覽器中運行
+- BOM : 瀏覽器對象模型
+
+
+
+#### window 
+
+- 代表瀏覽器的視窗
+
+```javascript
+window.alert(2)
+undefined
+window.innerHeight
+262
+window.innerWidth
+1440
+window.outerHeight
+860
+window.outerWidth
+1440
+```
+
+#### Navigator 
+
+- 封裝瀏覽器的訊息
+- 但是一般不建議使用 因為會被人為修改
+
+#### screen
+
+- 代表螢幕的尺寸
+
+```javascript
+screen.width
+1440
+screen.height
+900
+```
+
+#### location
+
+- 目前網頁的URL訊息
+
+```javascript
+host: "localhost:63342"
+hostname: "localhost"
+href: "http://localhost:63342/JavaScript/Script13/html.html?_ijt=cg73voemb47ac0nsg4ifc7qcgf&_ij_reload=RELOAD_ON_SAVE"
+protocol: "http:"
+reload: ƒ reload() //重新載入網頁
+location.assign('https://www.google.com.tw/?hl=zh_TW') // 設置新的地址
+```
+
+#### document
+
+- 代表目前的網頁 HTML DOM文檔樹
+
+```javascript
+document.title
+'Google'
+document.title='AAA'  //改變網頁主題
+'AAA'
+```
+
+- 獲取具體的文檔樹節點
+  - 則能動態的刪除 增加節點
+
+```javascript
+<body>
+    <dl id="app">
+        <dt> java </dt>
+        <dd> javaSE </dd>
+        <dd> javaEE </dd>
+    </dl>
+    <script>
+        var dl = document.getElementById('app')
+    </script>
+
+</body>
+```
+
+- 獲取cookie
+
+```javascript
+document.cookie
+```
+
+#### history
+
+- 代表瀏覽器的歷史記錄
+- 不建議使用
+
+```javascript
+history.forward() // 下一頁
+history.back()    // 上一頁
+```
+
+
+
+## DOM對象
+
+#### 核心
+
+- 瀏覽器網頁就是DOM的樹型結構
+- 要操作一個DOM節點 就必須先獲得這個DOM節點
+  - 更新DOM節點
+  - 遍歷DOM節點 : 得到DOM節點
+  - 刪除 : 刪除一個DOM節點
+  - 添加 : 添加一個新的節點 
+
+
+
+#### 獲得DOM節點
+
+```javascript
+//對應CSS選擇器
+var h1 = document.getElementsByTagName('h1');
+var p1 = document.getElementById('p1');
+var p2 = document.getElementsByClassName('p2');
+var father = document.getElementById('father');
+//獲取父節點下的所有子節點  加入index獲得特定的節點
+var children = father.children;
+// father.firstChild;
+// father.lastChild;
+```
+
+
+
+#### 更新節點
+
+```html
+<div id = 'id1'>
+	
+</div>
+<script>
+	var id1 = document.getElementById('id1');
+</script>
+```
+
+
+
+#### 操作文本
+
+- 基於id獨立的特性 也可以在已存在的網頁中尋找要修改的值的id
+- 創立一個變數接收 document.getElementById('id');  抓取需要的值
+- 再使用方法進行各種操作
+
+```javascript
+//賦予id1 Byid : id這個資料
+var id1 = document.getElementById('id');
+//改變id1的值
+id1.innerText = 'abc';
+
+//修改屬性內部的值  單純為文字text
+id1.innerText = 456
+456
+//修改屬性  為HTML的方式  可以使用HTML的特性
+id1.innerHTML = '<strong> sss </strong>'
+'<strong> sss </strong>'
+```
+
+
+
+#### 操作CSS
+
+```javascript
+id1.style.color = 'red'
+'red'
+id1.style.padding = '2em'
+'2em'
+id1.style.fontSize = '50px'
+'50px'
+```
+
+
+
+#### 刪除節點
+
+- 先獲取父節點 再通過父節點刪除自己
+- 以index刪除需要注意過程中的index變動問題
+
+```html
+<div id="father">
+    <h1> h1 </h1>
+    <p id="p1"> p1 </p>
+    <p class="p2"> p2 </p>
+</div>
+
+    <script>
+        var self = document.getElementById('p1');
+        //利用p1找到父節點
+        var father = self.parentElement;
+        father.removeChild(self);
+	</script>
+
+//刪除屬性是動態刪除 index是隨時在變化的
+        father.removeChild(father.children[0]);
+        father.removeChild(father.children[1]);
+        father.removeChild(father.children[2]);
+```
+
+
+
+#### 插入節點
+
+- 我們獲得了某個DOM節點 假設這個DOM節點是空的 可以通過innerHTML增加一個元素
+- 如果DOM節點已經存在元素 就不能使用innerHTML增加元素 會有覆蓋的問題發生
+
+```javascript
+<p id="js"> javascript </p>
+<div id="list">
+    <p id="se"> javaSE </p>
+    <p id="ee"> javaEE </p>
+    <p id="me"> javaME </p>
+</div>
+<script>
+    //根據ID獲得資料 -->  var 父節點 = ID以下的資料(子節點)
+    var js = document.getElementById('js');
+    var list = document.getElementById('list');
+    //追加到後面
+    list.appendChild(js);
+```
+
+- 追加之後的結果
+- 改變 id = js 的位置  如果不是改變而是單純加入的話 id就不是唯一了
+
+```javascript
+<div id="list">
+    <p id="se"> javaSE </p>
+    <p id="ee"> javaEE </p>
+    <p id="me"> javaME </p>
+	//新增 改變位置
+	<p id="js"> javascript</p>
+</div>
+<script>
+    //根據ID獲得資料 -->  var 父節點 = ID以下的資料(子節點)
+    var js = document.getElementById('js');
+    var list = document.getElementById('list');
+    //追加到後面
+    list.appendChild(js);
+```
+
+##### 插入一個新的標籤
+
+```javascript
+<script>
+    //根據ID獲得資料 -->  var 父節點 = ID以下的資料(子節點)
+    var js = document.getElementById('js'); //已經存在的節點
+    var list = document.getElementById('list');
+    // 建立新節點  newP = 建立的新元素p標籤 設置p標籤的id及內容
+	//建立p標籤
+    var newP = document.createElement('p');
+    // 節點設置id
+    newP.id = 'newP';
+    // 設置newP的內容
+    newP.innerText = 'newP content';
+    // 為list的子節點 加入一個newP 根據上面定義的newP
+    list.appendChild(newP);
+
+</script>
+```
+
+```javascript
+<script>
+// 建立一個標籤節點 script...
+var myScript = document.createElement('script');
+// 設置屬性  設置 type屬性 = text...
+myScript.setAttribute('type','text/javascript');
+//list之下 子節點加入myScript
+list.appendChild(myScript);
+
+// ByTagName返回的是一個陣列 要加入index使用
+var body = document.getElementsByTagName('body');
+// 設置背景顏色
+body[0].setAttribute('style','background-color: red');
+
+// 建立style標籤
+var myStyle = document.createElement('style');
+myStyle.setAttribute('type','text/css');
+myStyle.innerHTML = ('body{background-color: green}');
+//在head之下的子節點  加入myStyle (建立標籤 標籤type 內容為green)
+document.getElementsByTagName('head')[0].appendChild(myStyle)
+
+</script>
+```
+
+##### insertBefore(newNode,targetNode)
+
+- 插入節點 將新節點放置目標節點的前面
+
+```javascript
+<script>
+var ee = document.getElementById('ee');
+var js = document.getElementById('js');
+var list = document.getElementById('list');
+// 插入節點 (放入的節點,參考節點)    list要包含參考節點
+list.insertBefore(js,ee);
+</script>
+```
+
+
+
+#### 操作表單(驗證)
+
+- 文本框 text
+- 下拉框 < select >
+- 單選框 radio
+- 多選框 checkbox
+- 隱藏域 hidden
+- 密碼框 password
+
+表單的目的 : 傳送訊息
+
+```javascript
+<body>
+<form action="post">
+    <p>
+        <span> 名稱 : </span> <input type="text" id="username">
+    </p>
+</form>
+
+var input_text = document.getElementById('username');
+// 得到輸入框輸入的資料 (未送出)
+input_text.value
+// 修改輸入框的資料
+input_text.value = 'abc';
+</body>
+```
+
+```html
+<body>
+
+<form action="post">
+    <p>
+        <span> 性別 : </span>
+        <input type="radio" name="gender" value="male" id="male"> 男
+        <input type="radio" name="gender" value="female" id="female"> 女
+    </p>
+</form>
+<script>
+
+    var input_text = document.getElementById('username');
+    // 得到輸入框輸入的資料 (未送出)
+    //input_text.value
+    // 修改輸入框的資料
+    input_text.value = 'abc';
+
+    // 根據ID尋找所需要的值 由var建立
+    var boy_radio = document.getElementById('male');
+    var girl_radio = document.getElementById('female');
+    // 根據var建立的值使用方法  確認是否被選中 返回true false
+    // boy_radio.checked
+
+    // 賦予值
+    girl_radio.checked = true;
+</script>
+</body>
+```
+
+
+
+## 表單提交及驗證
+
+- 輸入帳號密碼後  讓輸入的值顯示在瀏覽器上
+- 因為可以直接在瀏覽器上得知輸入的東西 所以並不安全
+
+```html
+<body>
+<!--action 傳送的位址   傳送方式post隱藏 -->
+<form action="#" method="post">
+    <p>
+        <span> 名稱 : </span> <input type="text" id="username" name="username">
+    </p>
+    <p>
+        <span> 密碼 : </span> <input type="password" id="password" name="password">
+    </p>
+    
+<!--    綁定事件   onclick 被點擊時 觸發aaa() -->
+    <button type="submit" onclick="aaa()"> 點擊 </button>
+</form>
+    
+<script>
+    function aaa(){
+        //利用ID獲取資訊 接收username password
+        var uname = document.getElementById('username');
+        var pwd = document.getElementById('password');
+        //印出輸入的username  password
+        console.log(uname.value);
+        console.log(pwd.value);
+        return true;
+    }
+</script>
+</body>
+```
+
+
+
+#### 網頁安全性
+
+- 傳送資料後 隱藏console的資料
+- 對傳送的資料使用函式進行資料的接收以及實行加密
+- 對傳送的密碼進行md5的加密
+
+```html
+<body>
+<!--action 傳送的位址   傳送方式post隱藏
+    表單綁定提交事件
+    onsubmit 綁定一個提交檢測的函數 : true false
+    將結果返回給表單  使用onsubmit接收
+    檢查函式寫在form判斷一整個傳送資料時的情況
+    如果寫在input則只有按鈕時才會判斷 
+-->
+<form action="#" method="post" onsubmit="return aaa()">
+    <p>
+        <span> 名稱 : </span> <input type="text" id="username" name="username">
+    </p>
+    <p>
+        <span> 密碼 : </span> <input type="password" id="password" name="password">
+    </p>
+<!--    將輸入的內容中 console的欄位隱藏 -->
+    <input type="hidden" id="md5-password" name="md5-password">
+
+<!--    綁定事件   onclick 被點擊時 觸發aaa() -->
+    <button type="submit"> 點擊 </button>
+</form>
+<script>
+    function aaa(){
+        //利用ID獲取資訊
+        let uname = document.getElementById('username');
+        let pwd = document.getElementById('password');
+        let md5pwd = document.getElementById('md5-password');
+        // MD5算法
+        pwd.value = md5(pwd.value);
+        md5pwd.value = md5(pwd.value);
+        //判斷傳入內容 true表示通過  false表示阻止提交
+        return true
+
+    }
+</script>
+</body>
+```
+
+
+
+## JQuery
+
+- JQuery庫 : 存放大量的javascript函數
+- 使用方式是引入IDEA使用
+
+- 公式 :  $(selector).action()
+- $ 代表著JQuery
+
+```html
+<!--    公式 : $(selector).action()   -->
+
+<a href="" id="test-jquery"> 點擊 </a>
+<script>
+    // 選擇器就是CSS選擇器
+    $('#test-jquery').click(function (){
+        alert('hello jquery');
+    })
+</script>
+```
+
+
+
+#### 選擇器
+
+```javascript
+// JS的選擇器 較難記憶
+// 標籤
+document.getElementsByTagName();
+// id
+document.getElementById();
+// 類
+document.getElementsByClassName();
+
+// JQuery  css中的選擇器都能使用
+$('p').click() //標籤選擇器
+$('id1').click() //id選擇器
+$('.class1').click() //類選擇器
+```
+
+
+
+#### 事件
+
+- 獲取鼠標的座標
+
+```html
+<head>   
+	<style>
+        #divMove{
+            width: 500px;
+            height: 500px;
+            border: 1px solid crimson;
+        }
+    </style>
+</head>
+<body>
+<!--    要求 : 獲取鼠標的座標    -->
+    mouse : <span id="mouseMove"></span>
+    <div id="divMove">
+        MOUSE
+    </div>
+<script>
+    // 網頁元素載入完畢後 響應事件
+    $(function (){
+        //獲取id  $(選擇器).事件
+        $('#divMove').mousemove(function (e){
+            //獲取 span 標籤
+            $('#mouseMove').text('x:' + e.pageX + 'y:' + e.pageY);
+        });
+    });
+
+</script>
+```
+
+
+
+#### 操作DOM
+
+- 節點文本操作
+
+```html
+<body>
+<ul id="test-ul">
+    <li class="js"> JavaScript </li>
+    <li name="python"> Python </li>
+</ul>
+<script>
+    // document.getElementById()
+    // 獲得值
+    $('#test-ul li[name=python]').text();
+    // 設置值
+    $('#test-ul li[name=python]').text('set');
+    // 獲得值  以HTML的形式
+    $('#test-ul').html();
+    // 設置值
+    $('#test-ul').html('<strong> 123 <strong>');
+</script>
+</body>
+```
+
+
+
+#### CSS操作
+
+- 選定標籤 id 類 進行CSS操作
+
+```html
+<script>
+$('#test-ul li[name=python]').css('color','red')
+$('body').css('background','blue')
+</script>
+```
+
+- 元素的顯示與隱藏
+  - display : none;
+
+```javascript
+$('#test-ul li[name=python]').show();  //顯示
+$('#test-ul li[name=python]').hide();  //隱藏
+```
+
+- 其他測試
+
+```html
+$(window).width()
+1440
+$(window).height()
+262
+$(document).width()
+1440
+$(document).height()
+262
+$('#test-ul li[class=js]').toggle();
+S.fn.init [li.js, prevObject: S.fn.init(1)]
+```
+
