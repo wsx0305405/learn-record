@@ -1,0 +1,694 @@
+# JVM
+
+
+
+## JVM 記憶體的 Stack 和 Heap
+
+- Stack 繁中為 **堆疊** 、簡中為 **棧**，Heap 繁中為 **堆積** 、簡中為 **堆**
+- Stack Heap 指的是 JVM記憶體管理
+- Java檔經過編譯後產生Class檔(Bytecode) 只能運行在JVM上
+- JVM運算時 如同一般電腦 需要記憶體儲存運算所需的資料及指令
+- JVM記憶體中的Stack和Heap作為JVM儲存資料或指令的區域 
+
+
+
+## JAVA中資料型態
+
+#### Primitive Type 基本型態
+
+- int short long byte float double boolean char
+- 長度及生命週期都為可知 
+- 運算速度快 但長度與內容受限
+
+
+
+#### Class Type / Reference Type 類別型態 / 參考型態
+
+- 如Integer String Long以及自行定義的Class
+- 通常要使用new去創建  ex User user = new User();
+- 此類行為執行時的動態創建 長度及生命週期不可得知
+- 使用靈活但運算較花時間
+
+
+
+#### Stack 堆疊 棧
+
+- 一種後進先出(FILO)的容器 具有存取速度快 管理簡單的特點
+- JAVA中變數和函式的生命週期都為後進先出 越晚產生的資料會越先被回收或銷毀
+- 因此 Stack非常適合作為可預測性的資料 ex 區域變數 函式參數 函式返回地址等的儲存容器
+- 因為Stack中的資料生命週期都是規律的 由系統自行去產生及回收空間即可 
+
+
+
+#### Heap 堆積 堆
+
+- 屬於儲存共享資料時使用的資料型態
+- Class Type在創建實例(instance)時(new User() ) 會將資料放置於Heap中 系統會在Heap內找一塊區域放置此實例的屬性資料
+- 因為Heap存放的是共=想資料 所以不論該實例是由哪一個Thread所創建  同process底下的其他Thread也可以進行存取
+- 因為實例的生命週期不可預知 系統較難以自行回收空間 但是依據Java的Garbage Collection機制 會自動清理Heap內已經沒有被參考的資料
+
+
+
+#### 小結
+
+- Stack和Heap是JVM記憶體儲存資料或指令的區域
+- Java的資料類型分為兩種 : Primitive Type 和 Class Type
+- Stack存取速度快 但必須要知道資料長度及生命週期 用來儲存區域變數 函式參數 函式返回位址等資料
+- Heap是Class Type創建實例時存放資料的地方 Heap創建完成後會回傳所在的記憶體位址
+- 變數可能是Primitive Type或 Class / Reference Type
+- 若是Primitive Type 則在Stack內的變數值為實際值
+- 若是Class / Reference Type 實例資料會儲存在Heap中 Stack內的變數值為實例在Heap中的記憶體位址
+- User user = new User(); 的行為簡單來說
+  - 創建並儲存User 實例 (name = " ") 於 Heap中
+  - 儲存完成後 回傳資料所在的記憶體位址
+  - 在Stack中新增變量user
+  - 將回傳的記憶體位址指定給user參考
+
+
+
+- JVM的常用調用參數有哪些
+- 記憶體快照如何抓取 
+- 如何分析Dump文件
+
+## JVM的位置
+
+- JVM運行在作業系統(windows)上
+- 在作業系統中安裝的作業環境
+
+## JVM的體系結構
+
+- 由.java文件檔開始 通過javac編譯成 Class File  --> 類別載入器(Class Loader) 
+- 類別載入器 載入至JVM中 JVM互相回傳資料給類別載入器
+- JVM內部 運行時數據區(Runtime Data Area)
+- 本地方法棧 對應 本地方法的接口(java native interface) 又對應於 本地方法資料庫
+- stack區 和 program counter 不會有垃圾存在
+- JVM幾乎所有的調用都是調用方法區和Heap
+
+
+
+#### 類別加載器
+
+- 載入Class檔案~  new Student();
+- 具體的實例 -->  引用在 Stack 裡面
+  - 所建立的引用 儲存的東西只是指向實例物件的地址 所以stack中不會有垃圾存在
+- 具體創建的Student  放在 Heap 裡面
+
+![擷取_2021_12_05_12_08_05_602](https://i.imgur.com/GcSFdgr.png)
+
+- 類別加載器分類
+  - 虛擬機自身帶有的加載器
+  - 啟動類 (根) 加載器  Boot
+  - 擴展類加載器 EXC
+  - 應用程式 (系統類) 加載器 APP
+
+
+
+#### 本地方法接口 JNI (java native interface)
+
+- 調用本地方法庫 為了擴展java的使用
+- 融合不同的語言為java所用
+- 使用native關鍵字 會進入本地方法棧(Native Method Stack)
+  - 會調用本地方法接口 (Java native interface)
+
+
+
+
+
+## JVM結構
+
+![20170513134212845](https://i.imgur.com/k5LZTVA.png)
+
+
+
+#### Class Loader 類別載入器
+
+- 將Class文件載入到記憶體
+- 把描述類別的數據從Class文件載入到記憶體 並對數據進行校驗 轉換解析 初始化 最後形成可以被虛擬機直接使用的java類型
+
+
+
+#### Run Data Area 運行時數據區
+
+- JVM管理的記憶體 主要討論的部分
+- 運行數據區為整個JVM的重點 所有寫入的程式都會被載入於此 之後才開始運行
+
+
+
+#### Execution engine 執行引擎
+
+- JVM核心的組成部分之一 執行引擎用於執行指令 
+- 不同的JVM內部 執行引擎執行java程式碼時有可能 解釋執行 和 編譯執行 也有可能兩者兼備
+- 任何JVM specification實現的核心都是Execution engine 
+
+
+
+#### Native interface 
+
+- 與native libraries交互 一起作為其他編譯語言的介面 
+- 當使用native方法時 就會進入一個全新且不受JVM限制的世界
+- 也較容易出現JVM無法控制的native heap OutOfMemory
+
+
+
+## Run Data Area 運行時數據區
+
+#### Projram , Counter , Register
+
+- 程式計數器 
+- 各個執行緒私有 指向下一條要執行的指令
+
+#### Java Stack
+
+- 虛擬機的 Stack
+- 各個執行緒私有 生命週期與執行緒相同
+- 描述java方法執行的記憶體模型
+  - 每個方法被執行時都會建立一個Stack Frame用於儲存局部變量表 操作Stack 動態鏈接 方法出口
+
+#### Native Method Stack
+
+- 為虛擬機使用到的Native方法服務
+
+#### Heap
+
+- 所有的執行緒共享一個Heap
+- 由於現在大多採用分代收集算法 所以Heap中可以細分為 新生代 老年代
+  - 新生代
+    - Eden
+    - From Survivor
+    - To Survivor
+  - 老年代
+- 所有對象的實例及陣列都要在Heap上分配 為垃圾收集管理的主要區域
+
+
+
+#### Method Area
+
+- 方法區 別名叫 非堆 (Non-Heap) 為所有執行緒共享的記憶體區域
+- 目的是與Java的Heap區分開來 儲存類別的訊息 變數 靜態變數 即時編譯器編譯後的程式碼
+- 存放的訊息包括
+  - 類別的基本訊息
+    - 每個類別的全限定名
+    - 每個類別的直接超類的全限定名 (可約束類型轉換)
+    - 該類別是類別還是介面
+    - 該類型的訪問修飾符
+    - 直接超介面的全限定名的有序列表
+  - 以裝載類別的詳細訊息
+    - 執行時常量池 : 在方法區中 每個類型都對應一個常數池 存放該類別所用到的所有常量 常量池中儲存了如文字字元 final變量 類別名 方法名常量 以陣列形式通過索引被訪問 是外部調用與類別聯繫及類型對象化的橋樑 (儲存的可能是某個字串 經過常量池解析 變成指向某個類別的引用)
+    - 字段訊息 : 字段訊息存放類別中聲明的每一個字段的訊息 包括字段的名字 類型 修飾符 字串名稱指的是類別或介面的實例變量或類別變量 字段描述符是一個指示字段的類型的字串 如private A a = null , 則a為字段名 A為描述符 private為修飾符
+    - 方法訊息 : 類別中聲明的每一個方法的訊息 包括方法名 返回值類型 參數類型 修飾符 異常 方法的字元碼 (在編譯的時候 就已經將方法的局部變數 操作數 Stack大小等 確定並存放在字元碼中 在裝載十隨著類別一起裝入方法區)
+    - 靜態變數 : 就是類別變量 類別的所有實例都共享  方法區有個靜態區 靜態區專門存放靜態變數和靜態塊
+    - 到類別Classloader引用 : 到該類別的類別裝載器的引用
+    - 到類別Class的引用 : JVM為每個加載的類型 (類別和介面) 都創建一個 java.lang.Class的實例  而JVM必須以某種方式把Class的這個實例和儲存的在方法區中的類型數據聯繫起來
+
+
+
+## JMM : Java Memory Model
+
+- 主要是規定執行緒與記憶體之間的關係
+- 根據JMM的設計 系統存在一個主記憶體 (Main Memory)
+- Java的所有變量都儲存在主記憶體 對於所有執行緒都是共享的
+- 每個執行緒都有自己的工作記憶體 (Working Memory) 工作記憶體保存的是主記憶體中某些變量的複製
+- 執行緒對所有變量的操作都是在工作記憶體中進行 執行緒之間無法相互直接訪問 變量傳遞均需要通過主記憶體完成
+
+
+
+#### 衍伸問題 - 執行緒變數非同步問題
+
+- JMM規定了所有的變量都儲存在主記憶體中 每個執行緒都有自己的工作記憶體
+- 執行緒的工作記憶體保存了當前執行緒使用到的變量到主記憶體的複製  執行緒對變量的所有操作都必須在自己的工作記憶體完成 而不能直接讀寫主記憶體的變量
+- 不同執行緒間無法直接訪問對方工作記憶體中的變量 執行緒間變量值的傳遞均需要在主記憶體完成
+- 也就是當一個執行緒修改了自己工作記憶體中的變量 其他執行緒是不可見的 導致執行緒間執行的不安全
+- 因此JMM制定的標準保證我們在使用多執行緒的時候 能夠控制什麼時候記憶體會被同步給其他執行緒
+- JMM制定8種交互操作
+  - lock 鎖定 : 作用於主記憶體的變量 把一個變量標示成執行緒獨佔狀態
+  - unlock 解鎖 : 作用於主記憶體的變量 把一個處於鎖定狀態的變量釋放 釋放後的變量才可以被其他執行緒鎖定
+  - read 讀取 : 作用於主記憶體變量 把一個變量的值從主記憶體傳輸到執行緒的工作記憶體中 以便隨後的load動作
+  - load 載入 : 作用於工作記憶體的變量 把read操作從主記憶體中變量放入工作記憶體中
+  - use 使用 : 作用於工作記憶體中的變量 把工作記憶體的變量傳輸給執行引擎 每當虛擬機遇到一個需要使用的變量的值 就會使用這個指令
+  - assign 賦值 : 作用於工作記憶體中的變量 把一個從執行引擎中接受到的值放入工作記憶體的變量副本中
+  - store 儲存 : 作用於主記憶體中的變量 把一個工作記憶體中一個變量的值傳送到主記憶體中 以便後續的write使用
+  - write 寫入 : 作用於主記憶體中的變量 把store操作從工作記憶體中得到的變量的值放入主記憶體的變量中
+
+
+
+## 共享對象可見性
+
+- 一個執行緒對共享變量值的修改 能夠即時的被其他執行緒看到 
+
+
+
+## JVM 和 JMM 間的關係
+
+- JMM中的主記憶體 工作記憶體 與 JVM中的 Stack Heap 方法區並不是同一個層次的記憶體劃分 兩者基本上沒有關係
+- 從變量 主記憶體 工作記憶體的定義來看 主記憶體主要對應於Java Heap中的對象實例數據 工作記憶體則對應於虛擬機Stack中的部分區域
+- 主記憶體直接對應於物理硬體的記憶體 為了獲取更好的運行速度 虛擬機可能會讓工作記憶體優先儲存於暫存器或高速緩存中 因為程式運行時主要訪問讀寫的是工作記憶體
+
+
+
+
+
+## JVM的內部
+
+#### 本地方法棧
+
+- 此部分主要與虛擬機用到的Native方法相關
+
+
+
+#### 程式計數器
+
+- JVM支援多個執行緒同時執行 每個執行緒都有自己的程式計數器 
+- 假如當前執行的是JVM的方法 則該計數器會儲存當前執行指令的位址
+- 假如執行native方法 則計數器為null
+
+
+
+#### Heap
+
+- Heap的記憶體是JVM所有執行緒共享的部分 在虛擬機啟動時就已建立 所有的物件和陣列都會在Heap上面進行分配
+- 這部分的空間可通過GC進行回收 當申請不到空間時會丟擲OutOfMemoryError (OOM)
+
+
+
+#### 方法區
+
+- 與所有執行緒共享 主要儲存類的資訊 常量池 方法資料 方法程式碼
+- 方法區的邏輯上屬於Heap的一部份 但是為了與Heap做區分 又稱為 非Heap
+
+
+![擷取_2021_11_26_21_55_46_999](https://i.imgur.com/EnYBrAk.png)
+
+
+
+
+
+#### 雙親委派機制
+
+1. 類別加載器收到了類別加載的請求 
+2. 將這個請求向上委派給父類的加載器 直到根加載器
+3. 啟動加載器檢查是否能夠加載當前的類別 能加載就使用當前的加載器 否則拋出異常 通知子加載器進行加載
+4. 重複步驟 3
+
+- 為了安全性 防止override JVM中上層加載器重複的類別
+- 層級關係
+  - 應用程式加載器 < 擴展類加載器 < 根加載器
+- 反之 如果 根加載器沒有執行的類 則會依序往下找
+- 也就是說 我們自己定義的Class基本上都是由APP加載器處理
+
+
+
+#### 判斷引用與類別的地址
+
+- hashCode 
+  - 根據地址通過一個函數計算出的一個數值
+
+
+- java獲取不到 -->  底層是由C C++語言撰寫
+
+```java
+public class Car {
+    public static void main(String[] args) {
+        //類是模板 對象是具體的
+
+        // 建立三個引用 指向Car對象
+        Car car1 = new Car();
+        Car car2 = new Car();
+        Car car3 = new Car();
+        // 輸出三個引用結果 發現每個引用都是獨特的
+        System.out.println(car1.hashCode());
+        System.out.println(car2.hashCode());
+        System.out.println(car3.hashCode());
+        // 從引用getClass()
+        Class<? extends Car> aClass1 = car1.getClass();
+        Class<? extends Car> aClass2 = car1.getClass();
+        Class<? extends Car> aClass3 = car1.getClass();
+        // 發現每一個引用返回的是同一個Class值
+        System.out.println(aClass1.hashCode());
+        System.out.println(aClass2.hashCode());
+        System.out.println(aClass3.hashCode());
+		ClassLoader classLoader = aClass1.getClassLoader();
+        // AppClassLoader 應用程式加載器
+        System.out.println(classLoader); 
+        // PlatformClassLoader
+        System.out.println(classLoader.getParent()); 
+        // null 1.不存在 2.JAVA 無法獲取
+        System.out.println(classLoader.getParent().getParent()); 
+    }
+}
+```
+
+
+
+
+
+
+
+## 沙箱安全機制 (sandbox)
+
+- java安全模型的核心就是java sandbox 
+- sandbox是一個限制程式運行的環境
+- sandbox機制是將java程式碼限定在虛擬機(JVM)特定的運行範圍中 且嚴格限制程式碼對本地系統資源訪問 通過這樣的措施保證程式碼的有效隔離 防止對系統造成破壞
+- sandbox主要限制系統資源訪問 系統資源包括
+  - CPU
+  - 記憶體
+  - 文件系統
+  - 網路
+- 不同級別的sandbox對這些資源訪問的限制也可以不一樣
+
+
+
+#### 目前的安全機制
+
+- 引入了域(Domain)概念 虛擬機會把所有程式碼載入到不同的系統域和應用域
+- 系統域部分專門負責與關鍵資源進行交互
+- 各個應用域部分通過系統域的部分代理對各種需要的資源進行訪問
+- 虛擬機中不同的受保護域(Protected Domain) 對應不一樣的權限(Permission) 存在於不同域中的類權限就具有了當前域的全部權限
+
+
+
+## Native 方法
+
+- Native Method
+
+  - java 呼叫非 java程式碼的介面 
+
+- native : 帶有native關鍵字 說明超出了java的可作用範圍 要回去使用底層的C語言
+
+- 會進入本地方法棧 (Native Method Stack)
+
+- 調用本地方法 本地接口(java native interface)
+
+- JNI的作用 : 擴展java的使用 融合不同的語言為java所用  最初是 : C C++
+
+- 在記憶體中開闢了一塊標記區域 : Native Method Stack 登記native方法
+
+- 在最終執行的時候 通過 JNI 載入本地方法庫中的方法
+
+  
+
+## 方法區
+
+- 又稱為靜態區 與Heap相同 被所有的執行緒共享
+- 方法區包含整個程式中永遠唯一的元素 ex class , static變數
+- 主要用於儲存類的訊息 常量池 方法數據 方法程式碼
+- 方法區邏輯上屬於Heap的一部分 但是為了與Heap進行區分 又稱為 非Heap
+
+
+
+## Stack 堆疊 (棧)
+
+- 每個執行緒包含一個Stack區 Stack中止儲存基礎資料型別的物件和自定義物件的引用
+- 每個Stack的資料都是私有的 不同的Stack不能進行訪問
+- 分為三個部分
+  - 基本型別變數區
+  - 執行環境上下文
+  - 操作指令區 (存放操作指令)
+
+- 存放Class引用的數值 (存放地址 )
+- 管理程式的執行 生命週期 執行緒同步
+- 執行緒結束 記憶體釋放 就結束Stack
+- 對於Stack來說 不存在垃圾回收
+
+
+
+## StackOverFlowError
+
+- 當Thread呼叫一個方法時 Stack會被建立 該方法的參數及方法內產生的本地原始型別變數會被存放在JVM的Stack區 此時Stack記憶體不足便會發生
+- 只有原始型別資料 (primitive type data) 及 物件參照 (object reference address) 會存放在Stack區 而方法產生的物件則在Heap區 當方法執行結束Stack區會被釋放
+- 通常引起StackOverFlowError的原因是 方法被無限制的遞迴(recursive call) 也就是方法中的參數及本地變數不斷的被產生並放在Stack記憶體直到耗盡
+
+
+
+## 三種JVM
+
+- Sun公司  HotSpot  
+  - Java HotSpot(TM) 64-Bit Server VM (build 16.0.1+9-24, mixed mode, sharing)
+- BEA JRockit
+- IBM J9 VM
+
+
+
+## Heap 堆疊
+
+- 比起一個執行緒有一個Stack  一個JVM只會有一個Heap
+- 存放Class實例的資料
+- 類別載入器載入了.class檔案後 一般會把什麼放到Heap中
+- 類別
+  - 方法
+  - 常數
+  - 變數
+  - 保存我們所有引用類型的實例對象
+
+- Heap的記憶體大小是可以進行調整的
+
+
+
+### Heap記憶體的區域
+
+#### 新生代
+
+- 新生代中執行的GC稱為 Minor GC 
+- 類別誕生和成長 甚至死亡的區域
+  - Eden Space（伊甸園）
+    - 所有的對象都是在此區域new出來的
+    - 而不能被回收的物件則會放到下一區
+- Survivor Space(倖存者區)
+  - 儲存Eden space區中沒有被GC的物件
+    - 此須分為 To Survivor 和 From Survivor 兩個區域的空間大小是一樣的
+    - 執行GC時 Eden區域不能被回收的物件放入到空的Survivor 也就是 To Survivor區 同時Eden區域的記憶體會被全部釋放
+    - From Survivor裡不能被回收的物件也會被放入 To Survivor 然後兩個Survivor的標記交換  始終保持一個Survivor是空的 
+  - 也就是null的空間是 To Survivor
+
+#### Old Gen（老年代）
+
+- 用於存放新生代中經過多次GC後仍然存在的物件 , 也有可能是新生代分配不了記憶體的大物件會直接進入此區
+- 當此區域被放滿後 JVM會進行垃圾回收 稱為 Major GC  會對整個Heap進行掃描及回收  又稱為 Full GC
+
+整個Heap區即為堆記憶體 整個Heap大小 = 新生代 + 老年代的大小 
+
+Heap記憶體預設為實體記憶體的1/64
+
+預設空餘Heap記憶體小於40%時 JVM會增大直到-Xmx的最大限制
+
+預設空餘Heap記憶體大於70%時 JVM會減少直到-Xms的最小限制
+
+
+
+#### OutOfMemoryError
+
+- 當heap的這些區域被堆滿時 造成Heap溢出 OOM
+
+```java
+import java.util.Random;
+
+public class jvm01 {
+    public static void main(String[] args) {
+        String str = "123456";
+
+        while(true){
+            str += str + new Random().nextInt(1234) + new Random().nextInt(5678);
+        }
+    }
+}
+```
+
+輸出結果
+
+```java
+Exception in thread "main" java.lang.OutOfMemoryError: Overflow: String length out of range
+```
+
+
+
+## 非Heap記憶體的區域
+
+#### Code Cache(程式碼快取區)
+
+- 此區域是可能被充滿的 當Code Cache滿時 後台會收到CodeCache is full的訊息
+
+#### Perm Gen（永久代） Permanent Generation space
+
+- 指記憶體的永久儲存區域 
+- 這個區域存放Class和Meta的資訊 Class在被Loader的時候被放入這個區域
+- 因為Perm裡儲存的資料永遠不會被JVM垃圾回收 所以如果應用程式Load很多Class的話 很有可能出現PermGen  space錯誤  預設為實際記憶體的1/64
+
+- 永久區
+  - 此區域的記憶體是常駐的
+  - 存放JDK自身攜帶的Class對象 interface資料 儲存Java運行時的環境 
+  - 這個區域不存在垃圾回收 關閉JVM時就會釋放此區域的記憶體
+  - 一個啟動類 載入了大量第三方jar包 Tomcat部署了太多的應用 大量動態生成的反射類不斷的被載入 直到記憶體滿了 就會出現OOM
+  - 永久區(perrmanent Generation) 是方法區的具體實現
+  - 元空間是方法區的一部分 方法區沒有GC 元空間放在Heap中 所以GC可以進行回收
+  - 方法區不在Heap中 屬於非Heap 
+    - 空間上不屬於Heap空間 但是儲存的內容特性上被稱為Heap
+  - jdk1.6前
+    - 永久代 常量池是在方法區
+  - jdk1.7
+    - 永久代 慢慢的退化 去永久代 常量池在Stack中
+  - jdk1.8後
+    - 無永久代 常量池在元空間
+
+![擷取_2021_12_06_12_11_27_374](https://i.imgur.com/88golkf.png)
+
+
+
+#### 元空間
+
+- 移除永久代之後新命名的區域 本質與永久代類似 都是對JVM規範中方法區的實現
+- 與永久代最大的差別在於 元空間不在虛擬機中 而是使用本地記憶體 因此元空間的大小僅受本地記憶體的限制
+- 儲存類的元資料資訊
+- 元資料 (Meta Data) 關於資料的資料或是用來描述資料的資料或者叫做資訊的資訊
+
+
+
+#### 小結
+
+- 字串存在永久代中 容易出現效能問題和記憶體溢位
+- 類及方法的資訊比較難確定其大小 對於永久代的大小指定比較困難 太小容易出現永久代溢位 太大容易導致老年區溢位
+- 永久代會為GC帶來部必要的複雜度 且回收效率偏低
+
+
+
+
+## 分析OOM
+
+- 出現OOM 該如何排除問題 研究出錯原因
+- VM設定
+  - -Xms1m -Xms8m -XX:+PrintGCDetails
+  - -Xms 設置初始化記憶體分配大小 1/64
+  - -Xmx 設置最大分配記憶體 1/4
+  - -XX:+PrintGCDetails  顯示GC回收的情況
+  - -XX:+HeapDumpOnOutOfMemoryError 顯示heap溢出的情況
+
+
+
+## Garbage Collect (GC) 
+
+#### 垃圾回收 Garbage Collection
+
+- 一種自動的記憶體管理機制 當某個程式占用一部分記憶體空間不再被這個程式存取時 程式會借助垃圾回收演算法像作業系統歸還部分記憶體空間
+- 考慮某個物件在未來的程式執行中 將不會被存取
+- 回收這些物件所占用的記憶體
+
+
+
+JVM進行GC時 並不是對三個區域統一回收 大部分的時候回收的是新生代
+
+- 新生代 :  eden From To 比例為 8 : 1 : 1
+  - 伊甸園 (Eden Space)
+    - 進行GC會將Eden區大部分的對象回收 而沒有被回收的會進到倖存區
+  - 倖存區 (from Survivor  , To Survivor )
+    - 不管是經過GC從Eden進入 或是 倖存區間資料的交換 目的地都是 To Survivor
+    - 而再放入資料至To Survivor 後 會與 From交換 保持To Survivor為null
+    - 保持一個為null  -->  To Survivor
+    - 當經歷了多次 (15) 的GC且對象還存在於此區 則進入老年代
+- 老年代 (Old Gen)
+
+GC的兩種類型 : 普通的GC  , full GC
+
+
+
+### GC問題
+
+#### JVM的記憶體模型和分區 每一個區放什麼
+
+
+
+#### Heap分區有哪些
+
+- Eden
+- from
+- to
+- 老年區
+
+
+
+#### 輕CG和 full CG 發生的時機
+
+- 輕CG主要發生於新生區的Heap堆滿的情況 著重於新生區域中的垃圾處理
+- full CG則是老年區發生Heap堆滿時  會進行整個Heap的清理
+
+
+
+## GC的算法
+
+#### 標記清除法
+
+- 回收時掃描對象 針對不需要清除的對象標記
+- 清除時掃描對象 針對沒有被標記的對象予與清除
+- 優點 : 不需要額外的空間
+- 缺點 : 兩次的掃描 嚴重浪費時間 , 會產生記憶體碎片 (不連續的空間)
+
+- 加入壓縮 (整理) 算法
+  - 將不連續的空間再次經過一次掃描排序
+- 標記清除壓縮 (整理) 法
+  - 經歷了幾次的清除再進行的一次壓縮
+
+![擷取_2021_12_06_21_14_16_60](https://i.imgur.com/Dn77Z8D.png)
+
+
+
+#### 複製算法
+
+- 進行GC時 將 Eden 和 From 區倖存的資料放入 To 區
+- 優點 : 沒有記憶體的碎片  資料的擺放不會過於混亂
+- 缺點 : 浪費了記憶體空間 多了一半的空間永遠是空 ( To )
+  - 極端情況時 資料的存活率100% 進行資料的移動會造成很多資源的消耗
+- 複製算法的使用時機 : 對象存活度較低的時候 ( 新生區 )
+
+![擷取_2021_12_06_19_40_17_55](https://i.imgur.com/pHkbSYT.png)
+
+
+
+#### 引用計數器 
+
+- 對每一個引用過的對象進行計數
+- 計數器本身也會有消耗
+- 效率差 一般不會採用此種方式
+
+
+
+#### 分代收集算法
+
+- GC
+
+- 一般將Java的heap分為新生代 老年代 根據年代的特性採用最適合的算法
+- 新生代中會有大部分的對象被清除 使用複製算法 只需要複製少量的存活對象就可以完成
+- 老年代對象的存活率高 沒有額外的空間 則使用 標記-清理 或是 標記-整理 算法
+- 當Eden區滿了 會觸發一個 YoungGC 新生代的回收 將存活的對象移至倖存區
+- 之後GC會移動倖存區的 From to 作為使用
+- 經過了數次的 YoungGC 還存活的物件將移至老年代
+- 而在老年代的空間也被用完時 將經歷Full GC 對整個Heap進行清理
+- Full GC使用的情況太頻繁的話 也會對系統產生很大的影響
+
+
+
+#### 總結
+
+以現在來說 比起空間複雜度 會更在意時間複雜度
+
+記憶體效率 : 複製算法 > 標記清除算法 > 標記壓縮算法 (時間複雜)
+
+記憶體整齊度 : 複製算法 = 標記壓縮算法 > 標記清除算法
+
+記憶體利用率 : 標記壓縮算法 = 標記清除算法 > 複製算法
+
+沒有最好的算法 只有最適合的算法 --> GC : 分代收集算法
+
+- 新生代
+  - 存活率低
+  - 較適合複製算法
+- 老年代
+  - 區域大 : 存活率高
+  - 較適合標記清除 + 標記壓縮混合使用
+
+
+
+
+
+#### 堆內存調優
+
+
+
+
+
