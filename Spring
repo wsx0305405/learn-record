@@ -1,3 +1,2037 @@
+# Spring
+
+
+
+## 簡介
+
+#### 理念 
+
+- 使現有的技術更加容易使用 整合了現有的技術框架
+
+
+
+```xml
+<!-- https://mvnrepository.com/artifact/org.springframework/spring-webmvc -->
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-webmvc</artifactId>
+    <version>5.3.14</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.springframework/spring-jdbc -->
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-jdbc</artifactId>
+    <version>5.3.14</version>
+</dependency>
+
+```
+
+
+
+#### 優點
+
+- Spring是一個開源免費的框架
+- Spring是一個輕量級 非入侵式的框架
+- **控制反轉 (IOC)  ,   面相切面編成 (AOP)**
+- 支持事務的處理 對框架整合的支持
+
+簡言之 : Spring就是一個輕量級的控制反轉 (IOC) 和面相切面編成的框架
+
+
+
+#### 組成
+
+![2020010313504529](https://i.imgur.com/qP1NZtj.png)
+
+
+
+
+
+#### Spring Boot
+
+- 一個快速開發的架構
+- 基於Spring Boot可以快速的開發單個微服務
+- 約定大於配置
+
+#### Spring Cloud
+
+- 基於Spring Boot實現的
+
+
+
+弊端 : 由於發展的時間過久 違背了原來的理念 配置十分的繁瑣 
+
+
+
+## IOC理論
+
+- UserDao 實現介面
+- UserDaoImpl 實現類
+- UserService 業務實現介面
+- UserServicelmpl 業務實現類
+
+再之前的業務中 用戶的需求可能會影響我們原來的程式碼 我們需要根據用戶的需求去額外更改程式碼 如果程式碼十分大 修改的成本也會隨之增加
+
+
+
+使用一個set介面實現
+
+```java
+public class UserServicelmpl implements UserService{
+    // 不在直接創建對象
+    private UserDao userDao;
+
+    // 利用set進行動態實現值的注入  等待用戶選擇創建的對象
+    public void setUserDao(UserDao userDao){
+        this.userDao = userDao;
+    }
+    @Override
+    public void getUser() {
+        userDao.getUser();
+    }
+}
+```
+
+交由用戶操作
+
+```java
+public class MyTest {
+    public static void main(String[] args) {
+        // 用戶實際調用的是業務層
+        UserService userService = new UserServicelmpl();
+        // 父類別無法使用子類別的方法 需要強制轉型至父類別
+        ((UserServicelmpl) userService).setUserDao(new UserDaoOracle());
+        userService.getUser();
+    }
+}
+```
+
+
+
+控制反轉 : 
+
+- 之前 程式主動創建對象 
+- 加入set 程式被動創建對象  創建的對象由用戶決定
+
+
+
+這種做法從本質上解決了問題 我們不用再去管理對象的創建 系統的耦合性大大降低 可以更加專注在業務的實現上 這是IOC的原型
+
+
+
+## IOC本質
+
+- 控制反轉IOC(Inversion of Control) 是一種設計思想 
+- DI (依賴注入) 是實現IOC的一種方法
+- 沒有IOC的情況下 我們使用面向對向編程 對象的創建與對象間的依賴關係完全應編碼在程式中 
+- 對象的創建由自己控制 控制反轉後將對向的創見轉移給第三方 就是所謂的IOC : 獲得依賴對象的方式反轉
+
+- 採用XML方式配置Bean時 Bean的定義訊息是和實現分離的 採用註解的方式可以將兩者合為一起
+- Bean的定義訊息直接以註解的形式定義在實現類中 達到零配置的目的
+
+
+
+#### 控制反轉
+
+- 一種通過描述 (XML或註解) 並通過第三方去生產或獲取特定對象的方式 在Spring中實現控制反轉的是IOC容器 其實現方式是依賴注入 (Dependency injection DI)
+
+
+
+## Hello Spring
+
+- 創建實體類
+
+```java
+public class Hello {
+    private String str;
+
+    public void setStr(String str) {
+        this.str = str;
+    }
+    public String getStr() {
+        return str;
+    }
+    @Override
+    public String toString() {
+        return "Hello{" +
+                "str='" + str + '\'' +
+                '}';
+    }
+}
+```
+
+- 編寫Xml配置文件
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<!-- 使用Spring創建對象 在Spring中 都稱為Bean
+     類型 變量名 = new 類型();
+     Hello hello = new Hello();
+
+     bean = 對象  new Hello()
+     id = 變量名
+     class = new 的對象
+     property 相當於給對象中的屬性設置一個值
+-->
+    <bean id="hello" class="com.pojo.Hello">
+        <property name="str" value="Spring"></property>
+    </bean>
+</beans>
+```
+
+- 測試使用
+  - 使用ClassPathXmlApplicationContext的配置為導入xml文件的固定用法
+
+```java
+public class MyTest {
+    public static void main(String[] args) {
+//      獲取Spring上下文對象
+        ApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
+//      我們的對象現在都在Spring中管理 我們要使用 直接去裡面取出來
+        Hello hello = (Hello)context.getBean("hello");
+        System.out.println(hello.toString());
+    }
+}
+```
+
+
+
+- Hello的對象是誰創建的
+  - hello對象是由Spring創建的
+
+- Hello對象的屬性是怎麼設置的
+  - hello對象的屬性是由Spring設置的
+
+過程稱為控制反轉
+
+- 控制 :
+  - 傳統應用程式的對象是由程式本身創建 (new)
+  - 使用Spring後 對象是由Spring創建
+- 反轉 :
+  - 程式本身不創建對象 變成被動的接收對象
+
+
+
+依賴注入
+
+- 就是利用Class中定義的 **set方法** 進行注入
+
+
+
+IOC
+
+- IOC是一種編程思想 由主動的編程變成被動的接收
+- 也就是 對象由Spring創建 管理 裝配
+
+
+
+#### 範例2
+
+配置文件
+
+- 如果沒有屬性的配置 則不需要set方法
+- 設置屬性 value 為基本數據類型
+- ref 為已創建的class對象
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="Daolmpl" class="com.dao.UserDaolmpl"></bean>
+    <bean id="DaoMySQL" class="com.dao.UserDaoMySQL"></bean>
+    <bean id="DaoOracle" class="com.dao.UserDaoOracle"></bean>
+
+    <bean id="UserServicelmpl" class="com.service.UserServicelmpl">
+        <property name="userDao" ref="DaoMySQL"></property>
+    </bean>
+    <!--    value 具體的值 基本數據類型
+        ref 引用Spring容器中以創建好的對象
+     -->
+
+</beans>
+```
+
+測試使用
+
+```java
+public class MyTest {
+    public static void main(String[] args) {
+
+        // 獲取ApplicationContext  拿到Spring的容器
+        ApplicationContext Context = new ClassPathXmlApplicationContext("beans.xml");
+        // 需要什麼 get什麼
+        UserServicelmpl userServicelmpl = (UserServicelmpl)Context.getBean("UserServicelmpl");
+        userServicelmpl.getUser();
+
+    }
+}
+```
+
+
+
+
+
+## IOC創建對象
+
+- 使用無參建構創建對象 (預設)
+
+
+
+#### 有參建構注入
+
+實體類
+
+```java
+public class User {
+    private String name;
+
+    public User(String name){
+        this.name = name;
+        System.out.println("有參建構");
+    }
+    public void setName(String name) { this.name = name;   }
+       
+    public String getName() { return name;   }
+       
+    public void show(){ System.out.println("name " + name);    }
+       
+}
+```
+
+- 如果要使用有參建構創建對象
+
+  - 下標賦值
+
+  ```xml
+  <!-- 下標賦值   -->
+  <bean id="user" class="com.pojo.User">
+      <constructor-arg index="0" value="BBB"></constructor-arg>
+  </bean>
+  ```
+
+  - 類型
+
+  ```xml
+  <!-- 按照類型創建  一般參數直接輸入type int  部分參數需要全域名
+  不建議使用   -->
+      <bean id="user" class="com.pojo.User">
+          <constructor-arg type="java.lang.String" value="CCC"></constructor-arg>
+      </bean>
+  ```
+
+  - 參數名
+
+  ```xml
+  <!-- 直接通過參數名設置   -->
+      <bean id="user" class="com.pojo.User">
+          <constructor-arg name="name" value="FFF"></constructor-arg>
+      </bean>
+  ```
+
+
+
+#### 對象實例化的時間
+
+```java
+public class MyTest {
+    public static void main(String[] args) {
+        ApplicationContext Context = new ClassPathXmlApplicationContext("beans.xml");
+        User user = (User)Context.getBean("user");
+        user.show();
+    }
+}
+```
+
+輸出結果
+
+```java
+有參建構
+User2有參建構
+name FFF
+```
+
+- 在Beans中的對象 無論有沒有被呼叫 都會在 ApplicationContext 被創建時就實例化
+  - 在配置文件載入時 容器中管理的對象就已經初始化了
+
+
+
+#### 單例模式 singleton
+
+- 同時建立相同Bean 得到的實例會是同一個
+
+```java
+User user = (User)Context.getBean("user");
+User user2 = (User)Context.getBean("user");
+System.out.println(user == user2);
+```
+
+輸出結果
+
+```
+true
+```
+
+
+
+## Spring配置
+
+
+
+#### 別名 
+
+- 不常使用 有更為簡便的替代方式
+
+```xml
+<!-- 別名 增加了別名 我們也可以使用別名獲取到這個對象   -->
+    <alias name="user" alias="userrrrr"></alias>
+```
+
+
+
+#### Bean的配置
+
+```xml
+<!--
+      id : bean的唯一標示符 也就是相當於我們學的對象名
+      class : bean對象所對應的類型
+      name : 也是別名 可以同時取多個別名
+  -->
+    <bean id="user2" class="com.pojo.User2" name="user22,u2 u3;u4">
+        <property name="name" value="ABC"></property>
+    </bean>
+```
+
+
+
+#### import
+
+- 一般用於團隊開發使用 可以將多個配置文件導入合併為一個
+- 利用import將所有人開發的beans合併
+- 使用的時候直接get import所有檔案的文件即可
+
+```xml
+<import resource="beans1.xml"></import>
+<import resource="beans2.xml"></import>
+<import resource="beans3.xml"></import>
+```
+
+
+
+## 依賴注入
+
+
+
+#### 建構器注入
+
+
+
+#### set方式注入 (重點)
+
+- 依賴注入 : set注入
+  - 依賴 : bean對象的創建依賴於容器
+  - 注入 : bean對象中的所有屬性 由容器來注入
+
+
+
+環境搭建
+
+- 複雜類型
+
+```java
+package com.pogo;
+
+public class Address {
+    private String address;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+}
+```
+
+- 真實測試對象
+
+```java
+package com.pogo;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class Student {
+    private String name;
+    private Address address;
+    private String[] books;
+    private List<String> hobbys;
+    private Map<String,String> card;
+    private Set<String> games;
+    private String wife;
+    private Properties info;
+	// get set toString
+}
+```
+
+- beans.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+</beans>
+```
+
+- 測試類
+
+```java
+public class MyTest {
+    public static void main(String[] args) {
+        ApplicationContext Context = new ClassPathXmlApplicationContext("beans.xml");
+        Student student = (Student)Context.getBean("student");
+        System.out.println(student.toString());
+    }
+}
+```
+
+
+
+完善注入訊息
+
+```xml
+<bean id="address" class="com.pogo.Address"></bean>
+
+<bean id="student" class="com.pogo.Student">
+    <!--  第一種 普通值注入  value   -->
+    <property name="name" value="AAA"></property>
+    <!--  第二種 Bean注入 ref     -->
+    <property name="address" ref="address"></property>
+    <!--  陣列注入     -->
+    <property name="books">
+        <array>
+            <value>www</value>
+            <value>xxx</value>
+            <value>yyy</value>
+            <value>zzz</value>
+        </array>
+    </property>
+    <!--  list注入     -->
+    <property name="hobbys">
+        <list>
+            <value>sleep</value>
+            <value>program</value>
+            <value>movie</value>
+        </list>
+    </property>
+    <!--  map注入     -->
+    <property name="card">
+        <map>
+            <entry key="身分證" value="1234567"></entry>
+            <entry key="卡" value="987654"></entry>
+        </map>
+    </property>
+    <!--  set注入     -->
+    <property name="games">
+        <set>
+            <value>lol</value>
+            <value>coc</value>
+            <value>bob</value>
+        </set>
+    </property>
+    <!--  null注入     -->
+    <property name="wife">
+        <null></null>
+    </property>
+    <!--  Properties  key = value   -->
+    <property name="info">
+        <props>
+            <prop key="學號">246810</prop>
+            <prop key="性別">male</prop>
+            <prop key="姓名">AAA</prop>
+        </props>
+    </property>
+</bean>
+```
+
+
+
+#### 拓展方式
+
+- 我們可以使用p命名空間和c命名空間進行注入
+
+- 兩個命名空間需要導入xml約束才能使用
+- c命名空間的使用需要在實體類中加上有參數的建構子
+
+
+
+xml配置
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<!--  p命名空間注入 可以直接注入屬性的值 property     -->
+        <bean id="user" class="com.pogo.User" p:name="AAA" p:age="12"></bean>
+
+<!--  c命名空間注入 通過建構器注入 construct-args    -->
+        <bean id="user2" class="com.pogo.User" c:name="BBB" c:age="13"></bean>
+
+
+</beans>
+```
+
+測試使用 
+
+```java
+@Test
+public void test1(){
+    ApplicationContext Context = new ClassPathXmlApplicationContext("userbeans.xml");
+    User user = Context.getBean("user2", User.class);
+    System.out.println(user);
+}
+```
+
+
+
+
+
+## Bean的作用域
+
+- singleton 單例模式
+  - 創建的所有實例都是同一個對象
+  - 預設情況下Bean的模式
+
+```xml
+<bean id="user" class="com.pogo.User" p:name="AAA" p:age="12" scope="singleton"></bean>
+```
+
+- prototype 原型模式
+  - 每次從容器中get時 都會產生一個新對象
+  - 有狀態的Bean需要使用此模式
+
+```xml
+<bean id="user" class="com.pogo.User" p:name="AAA" p:age="12" scope="prototype"></bean>
+```
+
+- request session application websocket 只有在web開發時才會使用
+
+
+
+狀態場景
+
+- 每次調用Bean方法 prototype都會提供一個新的對象(重新new) 並不保存原有的實例
+- 而singleton多次調用Bean 實際上使用的是同一個singleton對象 保存了對象的狀態訊息
+
+
+
+## Bean的自動裝配
+
+- 自動裝配是Spring滿足bean依賴的一種方式
+- Spring會在上下文中自動尋找 並自動給bean裝配屬性
+- 自動獲取容器裡的實例並返回
+
+
+
+Spring中有三種自動裝配的方式
+
+- 在xml中顯示的配置
+- 在java中顯示配置
+- 隱式的自動裝配bean (重點)
+
+
+
+#### 測試
+
+環境搭建 
+
+- 一般情況
+  - 根據ref中的值 找尋對應的id (cat dog)
+
+```xml
+<bean id="cat" class="com.pojo.Cat"></bean>
+<bean id="dog" class="com.pojo.Dog"></bean>
+
+<bean id="people" class="com.pojo.People">
+    <property name="name" value="AAA"></property>
+    <property name="dog" ref="dog"></property>
+    <property name="cat" ref="cat"></property>
+</bean>
+```
+
+
+
+#### ByName自動裝配
+
+- 根據Class中的set方法中對應的名稱自動裝配 setCat setDog
+- 依據導入的class中的id  cat dog進行匹配後裝配
+
+```xml
+<bean id="cat" class="com.pojo.Cat"></bean>
+
+<bean id="dog" class="com.pojo.Dog"></bean>
+<!--
+    byName 會自動在容器上下文查找 和自己對象 set方法 後面的值對應的beanid
+-->
+<bean id="people" class="com.pojo.People" autowire="byName">
+    <property name="name" value="AAA"></property>
+</bean>
+```
+
+```java
+public void setCat(Cat cat) {
+    this.cat = cat;
+}
+public void setDog(Dog dog) {
+    this.dog = dog;
+}
+```
+
+
+
+#### ByType自動裝配
+
+- 根據導入的bean類型自動裝配
+- 同樣類型的bean只能有一個不然會產生衝突
+- 不需要設置id即可執行
+
+```xml
+<bean id="cat" class="com.pojo.Cat"></bean>
+
+<bean class="com.pojo.Dog"></bean>
+<!--
+    byType 會自動在容器上下文查找 和自己對象屬性類型相同的bean 不需要設置id
+    必須保證類型只有一個
+-->
+<bean id="people" class="com.pojo.People" autowire="byType">
+    <property name="name" value="AAA"></property>
+</bean>
+```
+
+
+
+小結:
+
+- byname的時候 需要保證所有bean的id唯一 並且這個bean需要和自動注入的屬性的set方法的值一致
+- bytype的時候 需要保證所有bean的class唯一 並且這個beaan需要和自動注入的屬性類型一致
+
+
+
+#### 註解實現自動裝配
+
+
+
+##### 註解說明
+
+```
+@Autowired : 自動裝配通過類型,名字
+	如果Autowired不能唯一自動裝配上屬性 則需要通過@Qualifier(value="xxx")
+@Nullable : 字串標記了這個註解 說明這個字串可以為null
+@Resource : 自動裝配通過名字,類型
+@Component : 組件 放在類上 說明這個類被Spring管理 就是bean
+```
+
+
+
+##### 註解的使用
+
+1.導入約束 : context
+
+2.配置註解的支持 : context:annotation-config
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+
+</beans>
+```
+
+
+
+##### @Autowired
+
+- 直接在屬性上使用即可 也可以在set方法上使用
+- 使用Autowired我們也可以不用編寫set方法 前提是這個自動裝配的屬性在IOC (Spring) 容器中存在 且符合bytype  
+  - 先尋找bytype再尋找byname  如果bytype找出來的數量大於1 就會繼續用byname
+  - 先尋找bytype再尋找byname 如果byname還是沒有對應的名字 則裝配失敗
+  - 在多個實現類中 bytype的方式不再唯一 因此需要byname的方式支援
+- 但是一般建議寫在set方法上
+
+```java
+@Autowired
+private Cat cat;
+@Autowired
+private Dog dog;
+```
+
+
+
+```
+@Nullable String標記了這個註解 說明這個String可以為null
+```
+
+```java
+public @interface Autowired {
+    boolean required() default true;
+}
+```
+
+測試
+
+```java
+public class People {
+    // 定義required=false 說明這個對象可以為null 否則不允許為空
+    @Autowired(required = false)
+    private Cat cat;
+    @Autowired
+    private Dog dog;
+    private String name;
+}
+```
+
+
+
+##### @Qualifier 
+
+- 如果@Autowired自動裝配的環境比較複雜 自動裝配無法通過一個註解 (@Autowired) 完成的時候
+- 我們可以使用 @Qualifier 去配合 @Autowired的使用 指定一個唯一的bean對象注入
+
+```java
+public class People {
+    @Autowired(required = false)
+    @Qualifier(value = "cattt")
+    private Cat cat;
+    @Autowired
+    @Qualifier(value = "doggg")
+    private Dog dog;
+    private String name;
+}
+```
+
+
+
+##### @Resource
+
+- 版本過高的JDK已經不支援使用
+
+
+
+小結 : 
+
+@Resource 和 @Autowired的區別 
+
+- 都是用來自動裝配的 都可以放在屬性字串上
+- @Autowired 通過bytype的方式實現 找不到則再利用byname的方式
+- @Resource 預設通過byname的方式實現 如果找不到名字 則通過bytype實現 如果都找不到的話即失敗
+
+
+
+
+
+## 使用註解開發
+
+- 需要導入aop
+- 使用註解需要導入context約束 增加註解的支持
+
+```xml
+<!-- 指定要掃描的包 這個包下的註解就會生效  -->
+    <context:component-scan base-package="com.pojo"></context:component-scan>
+<!-- 開啟註解支持  -->
+    <context:annotation-config></context:annotation-config>
+```
+
+
+
+1.bean
+
+2.屬性如何注入
+
+```java
+// 等價於在xml中 <bean id="User" class="com.pojo.User"/>
+@Component
+public class User {
+    // 相當於 <property name="name" value="ABCDE"/>
+    @Value("ABCDE")
+    public String name;
+}
+```
+
+3.衍生的註解
+
+@Component有幾個衍生註解 我們在web開發中 會按照mvc三層架構分層
+
+- dao   @Repository
+- service  @Service
+- controller  @Controller
+
+​	這四個註解功能相同 都代表將某個類註冊到Spring容器中 裝配Bean
+
+4.自動裝配
+
+```
+@Autowired : 自動裝配通過類型,名字
+	如果Autowired不能唯一自動裝配上屬性 則需要通過@Qualifier(value="xxx")
+@Nullable : 字串標記了這個註解 說明這個字串可以為null
+@Resource : 自動裝配通過名字,類型
+```
+
+5.作用域 
+
+```java
+@Scope("prototype")
+public class User {
+    // 相當於 <property name="name" value="ABCDE"/>
+    @Value("ABCDE")
+    public String name;
+}
+```
+
+6.小結
+
+- xml與註解 : 
+
+  - xml更加萬能 適用於任何場合 維護簡單方便
+  - 註解 不是自己的類使用不了 維護相對複雜
+
+- xml與註解最佳實踐 : 
+
+  - xml用來管理bean
+  - 註解只負責完成屬性的注入
+  - 我們在使用的過程中 只需要注意必須讓註解生效 就需要開啟註解的支持
+
+  ```xml
+  <!-- 指定要掃描的包 這個包下的註解就會生效  -->
+      <context:component-scan base-package="com"></context:component-scan>
+  <!-- 開啟註解支持  -->
+      <context:annotation-config></context:annotation-config>
+  ```
+
+
+
+
+
+## 使用Java的方式配置Spring
+
+- 我們現在要完全不使用Spring的xml配置 全交給java來做
+
+- JavaConfig是Spring的一個子項目
+- 純java的配置類 在SpringBoot中隨處可見
+
+
+
+#### 註解
+
+- @Configuration 將被標註的類變成配置文件
+- @ComponentScan 會掃描路徑下的所有類 找尋@Component註解
+  - 相當於在配置文件中開啟註解掃描
+- @Component 標註的實體類 被掃描後會將此類變成交由IOC容器由Spring管理的Bean
+- @Bean 標註在配置類的方法上 會將標註的方法返回的類型註冊為Bean 
+  - **Spring會將方法名作為 bean id**
+  - 相當於配置文件中的 bean標籤
+- 這兩種方法可以擇一使用 如果兩者都使用 會創建兩個對象
+  - 一個是bean標籤創建的 @Bean
+  - 一個是通過掃描使用@Component Spring自動創建的User對象
+
+```
+用了@ComponentScan而且在類上有了@Component的話 不需要另外使用@bean標籤配置
+
+在註解編程中@bean的作用通常是注入別人寫的類 ex jdbc連接池
+```
+
+
+
+實體類
+
+```java
+// 這裡的註解說明這個類被Spring接管 註冊到容器中
+// 另外 使用Component聲明的類會被@ComponentScan掃描 並註冊為Bean 這樣配置類就不用使用@Bean
+@Component
+public class User {
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    @Value("ABC")
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                '}';
+    }
+}
+```
+
+配置類
+
+```java
+// @Configuration這個註解會另此類被Spring容器託管 註冊到容器中 因為他本來就是一個@Component
+// @Configuration代表這是一個配置類 和beans.xml相同
+// @ComponentScan 負責掃描路徑下由@Component的類到IOC容器中
+@Configuration
+@ComponentScan("com.pojo")
+@Import(JavaConfig2.class)
+public class JavaConfig {
+
+    // 表示將當前方法交給ioc容器管理
+    // 註冊一個Bean 就相當於我們之前寫的一個bean標籤
+    // 這個方法的名字 就相當於bean標籤中的id屬性
+    // 這個方法的返回值 就相當於bean標籤中的class屬性
+    @Bean
+    public User getuser(){
+        return new User(); // 就是返回要注入到bean的對象
+    }
+}
+```
+
+測試使用
+
+```java
+public class MyTest {
+    public static void main(String[] args) {
+        // 如果完全使用配置類方式 我們需要通過AnnotationConfig上下文方式獲取容器
+        // 通過配置類的Class對象載入
+        ApplicationContext Context = new AnnotationConfigApplicationContext(JavaConfig.class);
+        User getUser = Context.getBean("getuser", User.class);
+        System.out.println(getUser.getName());
+
+
+    }
+}
+```
+
+
+
+
+
+## 代理模式
+
+代理模式 : 是SpringAOP的底層 (SpringAOP 和 SpringMVC)
+
+代理模式分類 : 
+
+- 靜態代理
+- 動態代理
+
+![擷取_2022_01_03_20_42_19_629](https://i.imgur.com/pB29Wx8.png)
+
+
+
+角色分析:
+
+- 抽象角色 : 一般會使用介面或是抽象類
+- 真實角色 : 被代理的角色
+- 代理角色 : 代理真實角色 代理真實角色後 我們一般會做一些附屬操作
+- 客戶 : 訪問代理對象的人
+
+
+
+#### 靜態代理
+
+- 介面
+
+```java
+// 租屋 方法
+public interface Rent {
+    public void rent();
+}
+```
+
+- 真實角色
+
+```java
+// 房東
+public class Renter implements Rent{
+    @Override
+    public void rent() {
+        System.out.println("房東出租房子");
+    }
+}
+```
+
+- 代理角色
+
+```java
+// 代理
+public class Proxy implements Rent{
+    private Renter renter;
+
+    public Proxy() {
+    }
+
+    public Proxy(Renter renter) {
+        this.renter = renter;
+    }
+
+    @Override
+    public void rent() {
+        seeHouse();
+        renter.rent();
+        flee();
+        contrast();
+    }
+
+    // 看房
+    public void seeHouse(){
+        System.out.println("仲介 -> 看房");
+    }
+    // 收仲介費
+    public void flee(){
+        System.out.println("收仲介費");
+    }
+    // 簽合約
+    public void contrast(){
+        System.out.println("簽合約");
+    }
+}
+```
+
+- 客戶訪問代理角色
+
+```java
+public class Client {
+    public static void main(String[] args) {
+        // 房東租房
+        Renter renter = new Renter();
+        // 代理 仲介幫房東租房子 但是代理一般會有一些附屬操作
+        Proxy proxy = new Proxy(renter);
+        // 不用面對房東 直接找仲介租房
+        proxy.rent();
+    }
+}
+```
+
+
+
+代理模式的優點 : 
+
+- 可以使真實角色的操作更加純粹 不用去關注一些公共的業務
+- 公共業務就是交給代理角色 實現了業務的分工
+- 公共業務發生擴展的時候 方便集中管理
+
+代理模式的缺點 :
+
+- 一個真實角色會產生一個代理角色 會增加額外的程式量 使開發效率變低
+
+
+
+#### 加深理解
+
+代理模式原則 : 在不改變原有程式的基礎上 進行程式的更動
+
+開閉原則 : 對於擴展是開放的 但是對於修改是封閉的
+
+AOP
+
+- 由原本的縱向開發 由dao類更改基底
+- 改為橫向開發 不改動基底程式碼的情況 對程式進行改動
+  - AOP實現機制
+
+![擷取_2022_01_03_21_56_55_93](https://i.imgur.com/wD8yb9a.png)
+
+
+
+程式理解
+
+- 基礎介面
+
+```java
+public interface UserService {
+    public void add();
+    public void delete();
+    public void update();
+    public void query();
+}
+```
+
+- 實作類別
+
+```java
+public class UserServicelmpl implements UserService{
+    @Override
+    public void add() {
+        System.out.println("add a client");
+    }
+
+    @Override
+    public void delete() {
+        System.out.println("delete a client");
+    }
+
+    @Override
+    public void update() {
+        System.out.println("update a client");
+    }
+
+    @Override
+    public void query() {
+        System.out.println("query a client");
+    }
+}
+```
+
+- 代理類別
+
+```java
+// 代理真實類 以真實類為基底 增加更多功能
+public class UserServiceProxy implements UserService{
+    // 為真實類增加功能 先創建一個真實類 執行原先類中的方法
+    private UserServicelmpl userService;
+
+    // 設置真實類
+    public void setUserService(UserServicelmpl userService) {
+        this.userService = userService;
+    }
+
+    @Override
+    public void add() {
+        log("add");
+        userService.add();
+    }
+
+    @Override
+    public void delete() {
+        log("delete");
+        userService.delete();
+    }
+
+    @Override
+    public void update() {
+        log("update");
+        userService.update();
+    }
+
+    @Override
+    public void query() {
+        log("query");
+        userService.query();
+    }
+    // 加入日誌方法
+    public void log(String msg){
+        System.out.println("使用了"+msg+"方法");
+    }
+}
+```
+
+- 客戶端使用
+
+```java
+public class Client {
+    public static void main(String[] args) {
+        UserServicelmpl userService = new UserServicelmpl();
+        // 使用代理模式
+        UserServiceProxy proxy = new UserServiceProxy();
+        // 設置需要代理的真實類
+        proxy.setUserService(userService);
+        // 使用代理模式執行方法
+        proxy.add();
+    }
+}
+```
+
+
+
+#### 動態代理
+
+- 動態代理和靜態代理的角色一樣
+- 動態代理的代理類是動態生成的 
+- 動態代理分為兩大類 
+  - 基於介面的動態代理
+    - JDK動態代理
+  - 基於類的動態代理
+    - cglib
+  - java字元碼實現 : javassist
+
+
+
+需要了解兩個類
+
+- Proxy 代理
+- InvocationHandler 調用處理程序 
+
+
+
+動態代理優點 : 
+
+- 可以使真實角色的操作更加純粹 不用去關注一些公共的業務
+- 公共業務就是交給代理角色 實現了業務的分工
+- 公共業務發生擴展的時候 方便集中管理
+- 一個動態代理類代理的是一個介面 一般就是對應的一類業務
+- 一個動態代理類可以代理多個類 只要是實現了一個介面即可
+
+
+
+
+
+##### 範例
+
+
+
+```java
+public interface UserService {
+    public void add();
+    public void delete();
+    public void update();
+    public void query();
+}
+```
+
+
+
+```java
+public class UserServicelmpl implements UserService{
+    @Override
+    public void add() {
+        System.out.println("add a client");
+    }
+
+    @Override
+    public void delete() {
+        System.out.println("delete a client");
+    }
+
+    @Override
+    public void update() {
+        System.out.println("update a client");
+    }
+
+    @Override
+    public void query() {
+        System.out.println("query a client");
+    }
+}
+```
+
+
+
+```java
+// 使用這個類 自動生成代理
+public class ProxyInvocationHandler implements InvocationHandler {
+
+    // 被代理的介面 (代理一個介面)
+    private Object target;
+
+    public void setTarget(Object target) {
+        this.target = target;
+    }
+
+    // 生成得到代理類
+    // 返回了代理對象 這個代理對象是代理類的一個實例
+    // 代理類也實現了Rent介面重寫了rent方法
+    // 所以代理對象proxy調用rent方法就會在代理類的rent方法中調用invoke方法
+    public Object getProxy(){
+        return Proxy.newProxyInstance(this.getClass().getClassLoader(),
+                target.getClass().getInterfaces(),this);
+    }
+
+    // 處理代理實例 並返回結果
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        // 動態代理的本質 就是使用反射機制實現
+        Object result = method.invoke(target, args);
+        return result;
+    }
+}
+```
+
+
+
+```java
+public class Client {
+    public static void main(String[] args) {
+        // 真實角色
+        UserServicelmpl userService = new UserServicelmpl();
+        // 代理角色 目前不存在
+        ProxyInvocationHandler pih = new ProxyInvocationHandler();
+        // 設置要代理的對象
+        pih.setTarget(userService);
+        // 動態生成代理類
+        UserService proxy = (UserService)pih.getProxy();
+        proxy.add();
+    }
+}
+```
+
+
+
+
+
+## AOP
+
+什麼是AOP 
+
+- 面向切面編程 (Aspect Oriented Programming)
+- 通過預編譯的方式和運行其動態代理實現程式功能的統一維護的一種技術
+- AOP是OOP的延續
+
+
+
+#### AOP在Spring中的作用
+
+提供聲明式事務 允許用戶自定義切面
+
+- 橫切關注點 : 跨越應用程式多個模塊的方法或功能 即是 與我們業務邏輯無關的 但是我們需要關注的部分 就是橫切關注點 如日誌 安全 暫存 事務等等
+- 切面(ASPECT) : 橫切關注點 被模塊化的特殊對象 即 他是一個類
+- 通知 (Advice) : 切面必須要完成的工作 即 他是類中的一個方法
+- 目標 (Target) : 被通知對象
+- 代理 (Proxy) : 向目標對象應用通知之後創建
+- 切入點 (PointCut) : 切面通知 執行的"地點"的定義
+- 連接點 (JointPoint) : 與切入點匹配的執行點
+
+![擷取_2022_01_04_20_42_44_262](https://i.imgur.com/ZPeYXn1.png)
+
+
+
+SpringAOP中 通過Advice定義橫切邏輯 Spring中支持五種類型的Advice
+
+| 通知類型     | 連接點               | 實現介面                                        |
+| ------------ | -------------------- | ----------------------------------------------- |
+| 前置通知     | 方法前               | org.springframework.aop.MethodBeforeAdvice      |
+| 後置通知     | 方法後               | org.springframework.aop.AfterReturningAdvice    |
+| 環繞通知     | 方法前後             | org.aopalliance.intercept.MethodInterceptor     |
+| 異常拋出通知 | 方法拋出異常         | org.springframework.aop.ThrowsAdvice            |
+| 引介通知     | 類中增加新的方法屬性 | org.springframework.aop.IntroductionInterceptor |
+
+即Aop在不改變原有程式碼的情況下 增加新的功能
+
+
+
+#### 使用Spring實現Aop
+
+- 使用Aop 需要導入依賴包
+
+```xml
+<!-- https://mvnrepository.com/artifact/org.aspectj/aspectjweaver -->
+<dependency>
+    <groupId>org.aspectj</groupId>
+    <artifactId>aspectjweaver</artifactId>
+    <version>1.9.7</version>
+    <scope>runtime</scope>
+</dependency>
+```
+
+
+
+#### SpringAPI介面實現Aop
+
+方式一 : 使用Spring的API介面 (主要由SpringAPI介面實現)
+
+- 介面
+
+```java
+public interface UserService {
+    public void add();
+    public void delete();
+    public void update();
+    public void query();
+}
+```
+
+- 實現類
+
+```java
+public class UserServicelmpl implements UserService{
+    @Override
+    public void add() {
+        System.out.println("增加一個用戶");
+    }
+    @Override
+    public void delete() {
+        System.out.println("刪除一個用戶");
+    }
+    @Override
+    public void update() {
+        System.out.println("更新一個用戶");
+    }
+    @Override
+    public void query() {
+        System.out.println("查詢一個用戶");
+    }
+}
+```
+
+- 前置
+
+```java
+// 前置
+public class Log implements MethodBeforeAdvice {
+    // method : 要執行的目標對象的方法
+    // args : 參數
+    // target : 目標對象
+    @Override
+    public void before(Method method, Object[] args, Object target) throws Throwable {
+        System.out.println(target.getClass().getName()+"的"+method.getName()+"被執行了");
+    }
+}
+```
+
+- 後置
+
+```java
+public class AfterLog implements AfterReturningAdvice {
+    // returnValue : 返回值
+    @Override
+    public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
+        System.out.println("執行了"+method.getName()+"返回結果為"+returnValue);
+    }
+}
+```
+
+- 配置文件
+  - 註冊bean
+  - 配置aop約束
+  - 切入點
+    - execution 指向執行的類名 方法名 參數
+    - execution (要執行的位置 修飾詞 返回值 類名 方法名 參數)
+  - 執行環繞
+    - 前置
+    - 後置
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+<!-- 註冊bean   -->
+    <bean id="userService" class="com.service.UserServicelmpl"></bean>
+    <bean id="log" class="com.log.Log"></bean>
+    <bean id="afterLog" class="com.log.AfterLog"></bean>
+
+<!--    方式一 : 使用原生Spring API介面  -->
+<!-- 配置aop 需要導入aop的約束  -->
+    <aop:config>
+<!--   切入點 : expression : 表達式 execution(要執行的位置 修飾詞 返回值 類名 方法名 參數)    -->
+        <aop:pointcut id="pointcut" expression="execution(* com.service.UserServicelmpl.*(..))"/>
+<!-- 執行環繞增加   -->
+        <aop:advisor advice-ref="log" pointcut-ref="pointcut"></aop:advisor>
+        <aop:advisor advice-ref="afterLog" pointcut-ref="pointcut"></aop:advisor>
+
+    </aop:config>
+
+</beans>
+```
+
+
+
+#### 自定義來實現Aop
+
+方式二 : 自定義來實現Aop (主要是切面定義)
+
+
+
+實體類 (用於切入)
+
+```java
+public class DiyPointCut {
+    public void before(){
+        System.out.println("=======方法執行前=======");
+    }
+    public void after(){
+        System.out.println("=======方法執行後=======");
+    }
+}
+```
+
+實體類繼承介面 (用於執行)
+
+```java
+public class UserServicelmpl implements UserService{
+    @Override
+    public void add() {
+        System.out.println("增加一個用戶");
+    }
+
+    @Override
+    public void delete() {
+        System.out.println("刪除一個用戶");
+    }
+
+    @Override
+    public void update() {
+        System.out.println("更新一個用戶");
+    }
+
+    @Override
+    public void query() {
+        System.out.println("查詢一個用戶");
+    }
+}
+```
+
+配置文件
+
+```xml
+<!-- 方式二 自定義類   -->
+    <bean id="userService" class="com.service.UserServicelmpl"></bean>
+	<bean id="diy" class="com.diy.DiyPointCut"></bean>
+
+    <aop:config>
+<!--   自定義切面 ref 要引用的類     -->
+        <aop:aspect ref="diy">
+<!--      切入點      -->
+        <aop:pointcut id="point" expression="execution(* com.service.UserServicelmpl.*(..))"/>
+<!--       通知     -->
+            <aop:before method="before" pointcut-ref="point"></aop:before>
+            <aop:after method="after" pointcut-ref="point"></aop:after>
+        </aop:aspect>
+    </aop:config>
+```
+
+
+
+#### 註解實現Aop
+
+方式三 : 註解實現Aop
+
+
+
+輸出順序 : xml -> diy -> 環繞 -> 註解 -> 執行方法 -> 註解 -> 環繞 -> diy -> xml
+
+
+
+
+
+- 實體類
+
+```java
+// 方式三 : 使用註解方式實現Aop
+// 標註這個類是一個切面
+@Aspect
+public class AnnotationPointCut {
+
+    @Before("execution(* com.service.UserServicelmpl.*(..))")
+    public void before(){
+        System.out.println("======方法執行前======");
+    }
+
+    @After("execution(* com.service.UserServicelmpl.*(..))")
+    public void after(){
+        System.out.println("======方法執行後======");
+    }
+
+//  在環繞增強中 我們可以給定一個參數 代表我們要獲取處理切入的點
+    @Around("execution(* com.service.UserServicelmpl.*(..))")
+    public void around(ProceedingJoinPoint jp) throws Throwable {
+        System.out.println("環繞前");
+        // 執行方法
+        Object proceed = jp.proceed();
+        // 獲得簽名
+//        System.out.println("signature = " + jp.getSignature());
+        System.out.println("環繞後");
+    }
+
+}
+```
+
+- 配置文件
+  - 註冊類
+  - 開啟註解支持
+
+```xml
+<bean id="userService" class="com.service.UserServicelmpl"></bean>
+<!-- 方式三   -->
+<!--  註冊bean  -->
+    <bean id="annotationPointCut" class="com.diy.AnnotationPointCut"></bean>
+<!--  開啟註解支持  -->
+<!--  JDK(預設 proxy-target-class="false")  JDK代理需要介面 只能代理介面實現類 -->
+<!--  cjlib proxy-target-class="true" cjlib代理需要類 可以代理沒有實現介面的類 -->
+    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+```
+
+
+
+
+
+## 整合Mybatis
+
+步驟 :
+
+- 導入相關jar包
+  - junit
+  - mybatis
+  - mysql資料庫
+  - spring
+  - aop織入
+  - mybatis-spring
+- 編寫配置文件
+- 測試
+
+
+
+#### 回憶mybatis
+
+- 編寫實體類
+- 編寫核心配置文件
+- 編寫介面
+- 編寫Mapper.xml
+- 測試
+
+```java
+public class MyTest {
+
+    @Test
+    public void test() throws IOException {
+        String resources = "mybatis-config.xml";
+        InputStream in = Resources.getResourceAsStream(resources);
+
+        SqlSessionFactory sessionFactory = new SqlSessionFactoryBuilder().build(in);
+        SqlSession sqlSession = sessionFactory.openSession(true);
+
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        List<User> userList = mapper.selectUser();
+        for (User user : userList) {
+            System.out.println(user);
+        }
+
+        sqlSession.close();
+
+    }
+}
+```
+
+
+
+#### Mybatis-spring
+
+- 編寫數據源配置
+  - dataSource  -->  DriverManagerDataSource
+    - 配置對應的MySql
+- SqlSessionFactory
+  - SqlSessionFactoryBean
+- SqlSessionTemplate
+  - SqlSessionTemplate
+
+```xml
+<?xml version="1.0" encoding="UTF8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<!-- DataSource : 使用Spring的數據源 替換 Mybatis的配置 c3p0 dbcp druid
+     這裡使用Spring提供的JDBC org.springframework.jdbc.datasource
+-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>
+        <property name="url" value="jdbc:mysql://localhost:3306/mybatis?useSSL=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=GMT"></property>
+        <property name="username" value="root"></property>
+        <property name="password" value="123456"></property>
+    </bean>
+
+<!-- sqlSessionFactory-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+<!--  綁定Mybatis配置文件      -->
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+        <property name="mapperLocations" value="UserMapper.xml"></property>
+    </bean>
+
+<!--  SqlSessionTemplate 就是我們使用的sqlSession  -->
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+<!--   只能使用建構器注入sqlSessionFactory  因為他沒有set方法     -->
+        <constructor-arg index="0" ref="sqlSessionFactory"></constructor-arg>
+    </bean>
+
+<!-- 註冊類 -->
+    <bean id="userMapper" class="com.mapper.UserMapperlmpl">
+        <property name="sqlSessionTemplate" ref="sqlSession"></property>
+    </bean>
+
+
+</beans>
+```
+
+- 需要為介面加實現類
+  - 設置 set sqlSessionTemplate
+
+```java
+public class UserMapperlmpl implements UserMapper{
+
+    // 過去 我們的所有操作 都使用sqlSession來執行
+    // 現在都使用SqlSessionTemplate
+    private SqlSessionTemplate sqlSessionTemplate;
+
+    public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+        this.sqlSessionTemplate = sqlSessionTemplate;
+    }
+
+    @Override
+    public List<User> selectUser() {
+        UserMapper mapper = sqlSessionTemplate.getMapper(UserMapper.class);
+        return mapper.selectUser();
+    }
+}
+```
+
+- 將自己寫的實現類 注入到Spring中
+  - 使用import統整所有配置文件
+
+```xml
+<?xml version="1.0" encoding="UTF8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="spring-dao.xml"></import>
+
+    <!-- 註冊類 -->
+    <bean id="userMapper" class="com.mapper.UserMapperlmpl">
+        <property name="sqlSessionTemplate" ref="sqlSession"></property>
+    </bean>
+</beans>
+```
+
+- 測試使用
+
+```java
+public class MyTest {
+
+    @Test
+    public void test() throws IOException {
+
+        ApplicationContext Context = new ClassPathXmlApplicationContext("applicationContext.xml");
+        UserMapper userMapper = Context.getBean("userMapper", UserMapper.class);
+        for (User user : userMapper.selectUser()) {
+            System.out.println(user);
+        }
+    }
+}
+```
+
+
+
+#### SqlSessionDaoSupport
+
+- 實體類
+  - 繼承SqlSessionDaoSupport 提供了getSqlSession()方法 獲取 sqlSession
+
+```java
+public class UserMapperlmpl2 extends SqlSessionDaoSupport implements UserMapper{
+
+    @Override
+    public List<User> selectUser() {
+        SqlSession sqlSession = getSqlSession();
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        return mapper.selectUser();
+    }
+}
+```
+
+- 註冊
+
+```xml
+<bean id="userMapper2" class="com.mapper.UserMapperlmpl2">
+    <property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+</bean>
+```
+
+
+
+
+
+## 聲明式事務
+
+
+
+#### 回顧事務
+
+- 一組業務當成一個業務 都成功 or 都失敗
+- 事物在項目開發中 十分重要 涉及到數據的一致性問題
+- 確保完整性和一致性
+
+
+
+#### 事務ACID原則  
+
+- 原子性 
+  - 確保都成功 都失敗
+- 一致性 
+  - 一旦事務完成 資源都被提交 or 都沒被提交 
+- 隔離性  
+  - 多個業務可能操作同一個資源 防止數據損壞
+- 持久性
+  - 事務一旦提交 無論系統發生什麼問題 結果都不會再被影響 被持久化的寫到儲存器中
+
+
+
+#### Spring中的事務管理
+
+- 聲明式事務 : AOP的應用
+
+- 編程式事務 : 需要在程式中 進行事務管理
+
+
+
+為什麼需要事務 : 
+
+- 如果不配置事務 可能存在資料提交不一致的情況
+- 如果我們不在Spring中去配置聲明式事務 就必須在程式碼中手動配置事務
+- 事務在項目的開發中十分重要　涉及到資料的一致性和完整性
+
+
+
+#### propagatior 
+
+在聲明式事務處理中 配置一個切面 需要用到propagatior 表示打算對這些方法怎麼使用事務
+
+propagatior 中有七種配置 預設是REQUIRED
+
+| REQUIRED      | 支持當前事務 如果當前沒有事務 就新建一個事務 最常見 預設選擇 |
+| ------------- | ------------------------------------------------------------ |
+| SUPPORTS      | 支持當前事務 如果當前沒有事務 就以非事務方式執行             |
+| MANDATORY     | 支持當前事務 如果當前沒有事務 則拋出異常                     |
+| REQUIRES_NEW  | 新建事務 如果當前存在事務 把當前事務掛起 (暫停當前事務 建立一個新事物 新建事務執行完畢 原事務繼續執行) |
+| NOT_SUPPORTED | 以非事務方式執行操作 如果當前存在事務 就把當前事務掛起       |
+| NEVER         | 以非事務方式執行 如果當前存在事務 則拋出異常                 |
+| NESTED        | 支持當前事務 如果當前事務存在 則執行一個嵌套事務 如果當前沒有事務 就新建一個事務 |
+
+
+
+
+
+- 介面
+
+```java
+public interface UserMapper {
+
+    public List<User> selectUser();
+
+//    添加一個用戶
+    public int addUser(User user);
+//    刪除一個用戶
+    public int deleteUser(int id);
+}
+```
+
+- 實體類
+
+```java
+public class UserMapperlmpl extends SqlSessionDaoSupport implements UserMapper{
+
+    @Override
+    public List<User> selectUser() {
+        User user = new User(5, "GGG", "456789");
+
+        UserMapper mapper = getSqlSession().getMapper(UserMapper.class);
+
+        mapper.addUser(user);
+        mapper.deleteUser(5);
+        return mapper.selectUser();
+    }
+
+    @Override
+    public int addUser(User user) {
+        return getSqlSession().getMapper(UserMapper.class).addUser(user);
+    }
+
+    @Override
+    public int deleteUser(int id) {
+        return getSqlSession().getMapper(UserMapper.class).deleteUser(id);
+    }
+}
+```
+
+- 配置文件 UserMapper.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.UserMapper">
+
+    <select id="selectUser" resultType="com.pojo.User">
+        select * from mybatis.user;
+    </select>
+    <insert id="addUser" parameterType="com.pojo.User">
+        insert into mybatis.user (id,name,pwd) values (#{id},#{name},#{pwd});
+    </insert>
+    <delete id="deleteUser" parameterType="int">
+        delete from mybatis.user where id=#{id};
+    </delete>
+
+</mapper>
+```
+
+- 配置文件Spring-dao.xml
+  - 配置聲明式事務
+    - 開啟事務
+  - 結合AOP  導入tx
+    - 配置事務通知
+    - 為方法配置事務
+    - 配置事務傳播特性
+  - 配置事務切入AOP  導入 aop
+    - 切入點
+
+```xml
+<!-- 配置聲明式事務   -->
+<!-- 開啟事務-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <constructor-arg ref="dataSource" />
+    </bean>
+
+<!-- 結合AOP實現事務的織入   -->
+<!-- 配置事務通知   -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager" >
+<!--   為哪些方法配置事務     -->
+<!--   配置事務的傳播特性     -->
+        <tx:attributes>
+            <tx:method name="add" propagation="REQUIRED"/>
+            <tx:method name="delete" propagation="REQUIRED"/>
+            <tx:method name="update" propagation="REQUIRED"/>
+            <tx:method name="query" read-only="true"/>
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+<!-- 配置事務切入AOP   -->
+    <aop:config>
+<!--    切入點    -->
+        <aop:pointcut id="txPointCut" expression="execution(* com.mapper.*.*(..))"/>
+<!--    切入     -->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut"></aop:advisor>
+    </aop:config>
+```
+
+- 配置文件 整合
+
+```xml
 <?xml version="1.0" encoding="UTF8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -11,3 +2045,6 @@
     </bean>
 
 </beans>
+```
+
+
