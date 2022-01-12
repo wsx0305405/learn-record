@@ -1,0 +1,1220 @@
+# SpringMVC
+
+特點 : 
+
+- 輕量級 
+- 高效能 基於請求響應的MVC框架
+- 與Spring相容性佳
+- 約定優於配置
+- 功能強大 : RESTful 數據驗證 格式化 本地化 主題
+- 簡潔靈活
+
+
+
+## MVC
+
+- 是一種軟體設計規範
+- 將業務邏輯 數據 顯示 分離的方法來組織程式
+- 主要作用是降低了視圖與業務邏輯間的雙向耦合
+- MVC是一種架構模式
+
+
+
+#### MVC
+
+- model模型 (dao service 處理數據)
+  - 數據模型 提供要展示的數據 包含數據和行為 可以認為是領域模型或是JavaBean組件
+  - Value Object (數據Dao)
+  - 服務層 (行為Service)
+  - 模型提供了模型數據查詢和模型數據的狀態更新等功能
+- view視圖 (jsp 展示數據)
+  - 負責進行模型的展示 一般就是我們見到的用戶介面
+- controller 控制器 (Servlet 請求 轉發)
+  - 進行資料調度的工作
+  - 接收用戶請求 委託給模型進行處理 處理完畢後將返回的模型數據返回給視圖 由視圖負責展示
+
+典型的MVC為 JSP + servlet + javabean 模式
+
+
+
+#### 職責分析
+
+- Controller 控制器
+  - 取得表單數據
+  - 調用業務邏輯
+  - 轉向指定的頁面
+- Model 模型
+  - 業務邏輯
+  - 保存數據的狀態
+- View 視圖
+  - 顯示頁面
+
+
+
+MVC框架做了哪些事情
+
+- 將url映射到java類或java類的方法
+
+- 封裝用戶提交的數據
+
+- 處理請求 調用相關的業務處理 封裝響應數據
+
+- 將響應的數據進行渲染 .jsp/html等表示層數據
+
+  
+
+## Servlet
+
+導入jar包
+
+```xml
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-webmvc</artifactId>
+    <version>5.3.13</version>
+</dependency>
+<dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>servlet-api</artifactId>
+    <version>2.5</version>
+    <scope>provided</scope>
+</dependency>
+<dependency>
+    <groupId>javax.servlet.jsp</groupId>
+    <artifactId>jsp-api</artifactId>
+    <version>2.2</version>
+    <scope>provided</scope>
+</dependency>
+<dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>jstl</artifactId>
+    <version>1.2</version>
+</dependency>
+```
+
+- 建立實體類
+  - 繼承 HttpServlet
+  - 建立方法 deGet dePost
+
+```java
+public class HelloServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//        獲取前端參數
+        String method = req.getParameter("method");
+        if("add".equals(method)){
+            req.getSession().setAttribute("msg","執行了add方法");
+        }
+        if("delete".equals(method)){
+            req.getSession().setAttribute("msg","執行了delete方法");
+        }
+
+//        調用業務層
+//        視圖轉發或者重定向
+        // 轉發
+        req.getRequestDispatcher("/WEB-INF/jsp/test.jsp").forward(req,resp);
+
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doGet(req, resp);
+    }
+}
+```
+
+- 配置web.xml
+  - servlet
+  - servlet-mapping
+
+```xml
+<servlet>
+    <servlet-name>hello</servlet-name>
+    <servlet-class>com.servlet.HelloServlet</servlet-class>
+</servlet>
+
+ <servlet-mapping>
+     <servlet-name>hello</servlet-name>
+     <url-pattern>/hello</url-pattern>
+ </servlet-mapping>
+```
+
+- 配置表單
+
+```jsp
+<form action="/hello" method="post">
+    <input type="text" name="method">
+    <input type="submit">
+</form>
+```
+
+
+
+
+
+## MVC執行原理
+
+![擷取_2022_01_06_15_52_35_782](https://i.imgur.com/myneArn.png)
+
+直線 : 程式內部運行
+
+弧線 : 自由設計
+
+
+
+#### 解析請求
+
+１　２　３　４　相當於原來的servlet-mapping
+
+- DispatcherServlet 前置控制器 
+
+  - SpringMVC的控制中心
+
+  - 用戶發出的請求 都會被他接收請求並攔截請求
+  - 接收前端的所有路徑請求 接收後根據路徑找尋對應的controller方法
+  - 因為每一個controller方法都被用@RequestMapping註解給予對應的路徑
+
+  - 假設
+    - 請求的url為 http ://localhost:8080/SpringMVC/hello
+    - http ://localhost:8080 伺服器域名
+    - SpringMVC部署在伺服器上的web站點
+    - hello表示控制器
+    - 通過分析 如上url表示為 請求位於伺服器localhost:8080上的SpringMVC站點的hello控制器
+
+- HandlerMapping為處理器映射 
+
+  - 由DispatcherServlet自行調用
+  - HandlerMapping根據請求url查找Handler
+
+- HandlerExecution表示具體的Handler 
+
+  - 主要作用是根據url尋找控制器  ex  如上url被尋找的控制器為 hello
+  - 將解析後的訊息傳遞給DispatcherServlet  如解析控制器映射等
+
+
+
+#### 處理請求
+
+５　６　７　８  相當於原來的servlet
+
+- HandlerAdapter 為處理器適配器
+  - 按照特定的規則去執行Handler
+  - 特定的規則
+    - 實作Controller介面的類 都會去適配
+    - Handler讓具體的Controller執行
+    - 具體的Controller 
+      - 實作了Controller介面且重寫了方法
+        - 創建 ModelAndView
+        - 調用業務層 (Serivce MySql .. )
+        - 封裝對象 放在ModelAndView中
+        - 封裝要跳轉的視圖 放在ModelAndView中
+        - 返回  ModelAndView
+- Controller
+  - 將具體的執行訊息返回給HandlerAdapter  ex 如 ModelAndView
+- HandlerAdapter將視圖邏輯名 (ModelAndView) 或模型傳遞給DispatcherServlet
+
+
+
+#### 視圖解析
+
+９　１０　１１　１２  相同於servlet 請求轉發 重定向
+
+- DispatcherServlet 調用視圖解析器 (ViewResolver)來解析 HandlerAdapter 傳遞的邏輯視圖名 (ModelAndView)
+  - 獲取了ModelAndView的數據
+  - 解析ModelAndView的視圖名字
+  - 拼接視圖名字 找到對應的視圖 /WEB-INF/jsp/hello.jsp
+  - 將數據渲染到這個視圖上
+- ViewResolver 視圖解析器 將解析的邏輯視圖名傳給 DispatcherServlet 
+- DispatcherServlet  根據視圖解析器解析的視圖結果 調用具體的視圖
+- 最後將視圖呈現給用戶
+
+
+
+#### 小結
+
+前端控制器接收用戶的請求並攔截 
+
+根據對應的請求找到對應的Controller處理器
+
+處理器調用業務層並返回訊息給前端控制器 
+
+前端控制器調用視圖解析器找到對應的視圖並將數據渲染
+
+
+
+實際上我們要做的事情 
+
+- Controller層調用業務層
+- 設置視圖返回的名字
+
+
+
+
+
+## HelloSpringMVC
+
+- 新建一個Moudle 添加web支持
+- 確定導入了SpringMVC的依賴
+
+![擷取_2022_01_06_20_47_10_637](https://i.imgur.com/kjRPNvT.png)
+
+- 配置web.xml 註冊DispatcherServlet
+  - 綁定Spring配置文件  classpath:springmvc-servlet.xml
+
+```xml
+<?xml version="1.0" encoding="UTF8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+<!-- 配置DispatcherServlet   SpringMVC的核心 請求分發器 前端控制器 -->
+    <servlet>
+        <servlet-name>springmvc</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+<!-- 配置DispatcherServlet要綁定Spring的配置文件   -->
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:springmvc-servlet.xml</param-value>
+        </init-param>
+<!--  啟動級別:1  與伺服器一起啟動    -->
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+<!--
+    在SpringMVC中  /  /*
+    / : 會只匹配所有的請求 不會匹配jsp
+    /* : 匹配所有的請求 包括jsp
+
+  -->
+    <servlet-mapping>
+        <servlet-name>springmvc</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+</web-app>
+```
+
+- 配置文件Springmvc
+  - 處理器映射器
+    - 配置對應的Controller
+    - 配置對應的url
+  - 處理器適配器
+  - 視圖解析器
+    - 前綴 資料夾路徑至 jsp 檔案路徑
+    - 後綴  .jsp 副檔名
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+<!-- 處理器映射器 -->
+    <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"></bean>
+<!-- 處理器適配器 -->
+    <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"></bean>
+<!-- 視圖解析器 : 模板引擎 Thymeleof Freemarker -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" id="InternalResourceViewResolver">
+<!--   前綴    -->
+        <property name="prefix" value="/WEB-INF/jsp/"></property>
+<!--   後綴    -->
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+
+<!-- BeanNameUrlHandlerMapping : bean -->
+    <bean id="/hello" class="com.comtroller.HelloController"></bean>
+
+</beans>
+```
+
+- Controller
+  - 處理業務
+  - 視圖跳轉
+    - 配置跳轉頁面test
+
+```java
+public class HelloController implements Controller {
+    @Override
+    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        ModelAndView mv = new ModelAndView();
+
+//      業務
+        String result = "HelloSpringMVC";
+        mv.addObject("msg",result);
+
+//      視圖跳轉
+        mv.setViewName("test");
+
+        return mv;
+    }
+}
+```
+
+- 跳轉頁面 .jsp
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+
+${msg}
+
+</body>
+</html>
+```
+
+
+
+#### 基本流程
+
+- 發出請求
+- 找尋 配置DispatcherServlet要綁定Spring的配置文件 
+- 對應綁定配置文件 springmvc-servlet.xml
+- 處理器映射器
+  - 映射 /hello 返回處理class
+- 處理器適配器
+  - 找尋HelloController處理
+- Controller 處理具體的業務
+  - 返回ModelAndView 交由視圖解析器
+- 視圖解析器
+
+
+
+
+
+## 註解開發SpringMVC
+
+- 配置DispatcherServlet
+  - 綁定 springmvc-servlet.xml
+
+```xml
+<?xml version="1.0" encoding="UTF8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <!-- 配置DispatcherServlet   SpringMVC的核心 請求分發器 前端控制器 -->
+    <servlet>
+        <servlet-name>springmvc</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!-- 配置DispatcherServlet要綁定Spring的配置文件   -->
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:springmvc-servlet.xml</param-value>
+        </init-param>
+        <!--  啟動級別:1  與伺服器一起啟動    -->
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <!--
+        在SpringMVC中  /  /*
+        / : 會只匹配所有的請求 不會匹配jsp
+        /* : 匹配所有的請求 包括jsp
+
+      -->
+    <servlet-mapping>
+        <servlet-name>springmvc</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+</web-app>
+```
+
+- 配置 springmvc-servlet.xml
+  - 加入註解  導入註解支援
+  - 掃描包 讓指定包下的註解生效 (Controller)
+  - 使用註解的Driver 取代 處理器映射器 處理器適配器
+  - 只有視圖解析器需要另外配置
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+<!-- 自動掃描包 讓指定包下的註解生效 由IOC容器統一管理   -->
+    <context:component-scan base-package="com.controller"></context:component-scan>
+
+<!--  讓Spring MVC不處理靜態資源  .css .js .html .mp4 -->
+    <mvc:default-servlet-handler></mvc:default-servlet-handler>
+
+<!--
+    支持mvc註解驅動
+        在Spring中一般採用@RequestMapping註解來完成映射關係
+        要想使@RequestMapping註解生效
+        必須向上下文註冊DefaultAnnotationHandlerMapping
+        這兩個實例分別在類級別漢方法級別處理
+        而annotation-driven配置幫助我們自動完成上述兩個實例的注入
+  -->
+    <mvc:annotation-driven></mvc:annotation-driven>
+
+    <!-- 視圖解析器 : 模板引擎 Thymeleof Freemarker -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" id="InternalResourceViewResolver">
+        <!--   前綴    -->
+        <property name="prefix" value="/WEB-INF/jsp/"></property>
+        <!--   後綴    -->
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+
+</beans>
+```
+
+- 配置Controller
+  - @Controller 為掃描包下使用  導入bean至Spring中
+  - @RequestMapping("/h1") 為url的路徑 也就是 localhost:8080/h1
+  - 返回 "hello" 作為視圖解析器 連接前綴後綴至jsp檔案
+
+```java
+@Controller
+public class HelloController {
+
+    @RequestMapping("/h1")
+    public String hello(Model model){
+        // 封裝數據
+        model.addAttribute("msg","Hello,SpringMVCAnnotation");
+
+        return "hello"; // 會被視圖解析器處理
+    }
+}
+```
+
+- 視圖的jsp檔案
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+
+${msg}
+
+</body>
+</html>
+```
+
+
+
+#### 小結 實現步驟
+
+- 新建一個web項目
+- 導入相關jar包
+- 編寫web.xml 註冊DispatcherServlet
+- 編寫Springmvc配置文件
+- 接下來創建對應的控制類 Controller
+- 最後完善前端視圖漢Controller之間的對應
+- 測試
+
+使用SpringMVC必要配置的三大件
+
+- 處理器映射器
+- 處理器適配器
+- 視圖解析器
+
+通常我們只需要手動配置視圖解析器
+
+而處理器映射器 處理器適配器只需要開啟註解驅動即可
+
+
+
+
+
+## Controller配置
+
+
+
+#### Controller 控制器
+
+- 控制器複雜提供訪問應用程式的行為 通常通過介面定義或註解定義兩種方法實現
+- 控制器負責解析用戶的請求並將其轉換為一個模型
+- 在SpringMVC中 一個控制器類可以包含多個方法
+- 在SpringMVC中 對於Controllere的配置方式有很多種
+
+
+
+```
+@Component		組件
+@Service		service
+@Controller		controller
+@Repository		dao
+```
+
+
+
+#### 一般方式
+
+- 實現了Controller介面的類
+
+```java
+// 實現了Controller介面的類 說明這是一個控制器
+public class ControllerTest1 implements Controller {
+
+    @Override
+    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        ModelAndView mv = new ModelAndView();
+        mv.addObject("msg","ControllerTest1");
+        mv.setViewName("test");
+
+        return mv;
+    }
+}
+```
+
+- 配置bean路徑
+
+```xml
+<bean name="/h1" class="com.controller.ControllerTest1"></bean>
+```
+
+
+
+
+
+#### 使用註解@Controller
+
+- @Controller註解聲明Spring類的實例是一個Controller
+- Spring可以使用掃描機制來找到應用程式中所有基於註解的控制器類 為了保證Spring能找到控制器 需要在配置文件中聲明組件掃描
+
+```xml
+<!--  自動掃描指定的包 下面所有註解類交給IOC容器管理 -->
+<context:component-scan base-package="com.controller"></context:component-scan>
+
+<mvc:default-servlet-handler></mvc:default-servlet-handler>
+    <mvc:annotation-driven></mvc:annotation-driven>
+```
+
+- Controller
+  - 標記@Controller
+  - 且方法上標記@RequestMapping
+  - 兩者回傳的是同一個檔案位置 test
+  - 不管有幾個方法 都可以共用同一個檔案進行視圖的顯示
+  - 控制器與視圖之間視弱耦合關係
+
+```java
+// 代表這個類被Spring接管 被這個註解了類中所有方法 如果返回值是String
+// 並且有具體頁面可以跳轉 那麼就會被視圖解析器解析
+@Controller
+public class ControllerTest2 {
+
+    @RequestMapping("/t2")
+    public String test1(Model model){
+        model.addAttribute("msg","ControllerTest2");
+        return "test"; // WEB-INF/jsp/test.jsp
+        }
+
+    @RequestMapping("/t3")
+    public String test2(Model model){
+        model.addAttribute("msg","Test3");
+        return "test"; // WEB-INF/jsp/test.jsp
+        }
+}
+```
+
+
+
+#### @RequestMapping
+
+- 用於映射url到控制器類或一個特定的處理程序方式 可用於類或方法上
+- 用於類上 表示類中的所有響應請求的方法都視以該地址作為父路徑
+- 註解在方法上
+  - 訪問路徑為 http: //localhost:8080/項目名/t1
+
+```java
+@Controller
+public class ControllerTest3 {
+
+    @RequestMapping("/t1")
+    public String test3(Model model){
+        model.addAttribute("msg","ControllerTest3");
+        return "test";
+    }
+}
+```
+
+- 註解在方法和類上
+  - 訪問路徑為 http: //localhost:8080/項目名/c3/t1
+
+```java
+@Controller
+@RequestMapping("/c3")
+public class ControllerTest3 {
+
+    @RequestMapping("/t1")
+    public String test3(Model model){
+        model.addAttribute("msg","ControllerTest3");
+        return "test";
+    }
+}
+```
+
+
+
+
+
+## RestFul
+
+概念
+
+- RestFul是一個資源定位和資源操作的風格 不是標準也不是協議 只是一種風格
+- 基於這個風格設計的軟體 可以更簡潔 更有層次 更易於實現暫存等機制
+
+功能
+
+- 資源 : 網路上所有的事物都可以被抽象為資源
+- 資源操作 : 使用POST DELETE PUT GET 使用不同方法對資源進行操作
+- 分別對應 添加 刪除 修改 查詢
+
+
+
+傳統方式操作資源
+
+- 通過不同的參數實現不同的效果 方法單一 post 和 get
+
+- http ://127.0.0.1/item/queryItem.action?id=1 查詢,GET
+- http ://127.0.0.1/item/saveItem.action 新增,POST
+- http ://127.0.0.1/item/updateItem.action 更新,POST
+- http ://127.0.0.1/item/deleteItem.action?id=1 刪除,GET或POST
+
+
+
+使用RESTful操作資源 
+
+- 可以通過不同的請求方式實現不同的效果
+  - 請求地址一樣 但是功能可以不同
+- http ://127.0.0.1/item/1 查詢,GET
+- http ://127.0.0.1/item 新增,POST
+- http ://127.0.0.1/item 更新,PUT
+- http ://127.0.0.1/item/1 刪除,DELETE
+
+
+
+
+
+使用@PathVariable註解 讓方法參數的值對應綁定到一個URL模板變量上
+
+```java
+@Controller
+public class RestFulController {
+
+    // 原來的方式 : http://localhost:8080/Springmvc_04/add?a=2&b=3
+    // RestFul : http://localhost:8080/Springmvc_04/add/a/b
+
+//    @RequestMapping(value = "/add/{a}/{b}",method = RequestMethod.DELETE)
+    @RequestMapping(value = "/add/{a}/{b}")
+    public String test1(@PathVariable int a,@PathVariable String b, Model model){
+        String res = a + b;
+        model.addAttribute("msg","結果1為" + res);
+
+        return "test";
+    }
+}
+```
+
+- 設置指定的傳參方式
+  - method = RequestMethod.GET
+
+```java
+	@RequestMapping(value = "/add/{a}/{b}",method = RequestMethod.GET)
+    public String test1(@PathVariable int a,@PathVariable String b, Model model){
+        String res = a + b;
+        model.addAttribute("msg","結果1為" + res);
+        return "test";
+    }
+```
+
+
+
+- 使用註解指定傳參
+
+```
+@GetMapping
+@PostMapping
+@PutMapping
+@DeleteMapping
+@PatchMapping
+```
+
+```java
+@Controller
+public class RestFulController {
+
+    @PostMapping (value = "/add/{a}/{b}")
+    public String test1(@PathVariable int a,@PathVariable String b, Model model){
+        String res = a + b;
+        model.addAttribute("msg","結果1為" + res);
+
+        return "test";
+    }
+}
+```
+
+
+
+補充 : 
+
+Post方法 參數是放在請求體(body)裡面 只能用@requestbody接收參數
+
+
+
+
+
+## SpringMVC 跳轉方式
+
+
+
+#### ModelAndView
+
+- 設置ModelAndView 根據view的名稱和視圖解析器跳轉到指定的頁面
+- 頁面 : {視圖解析器前綴} + viewName + {視圖解析器後綴}
+- 視圖解析器
+  - 配置基本上是固定的
+
+```xml
+<!-- 視圖解析器 -->
+<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" id="internalResourceViewResolver">
+    <property name="prefix" value="/WEB-INF/jsp/"></property>
+    <property name="suffix" value=".jsp"></property>
+</bean>
+```
+
+
+
+#### ServletAPI
+
+- 通過設置ServletAPI 不需要視圖解析器
+- 通過HttpServletResponse進行輸出
+- 通過HttpServletResponse實現重定向
+- 通過HttpServletRequest實現轉發
+
+```java
+// 重定向
+rsp.sendRedirect("/index.jsp");
+// 轉發
+req.getRequestDispatcher("/WEB-INF/jsp/test.jsp").forward(req,rsp);
+```
+
+- 重定向是客戶端行為 狀態碼 307
+- 轉發是伺服端行為 狀態碼 302
+
+配合Servlet使用
+
+```java
+@Controller
+public class ModelTest1 {
+
+    @RequestMapping("/m1/t1")
+    public String test(HttpServletRequest request, HttpServletResponse response){
+        HttpSession session = request.getSession();
+        System.out.println(session.getId());
+        return "test";
+    }
+}
+```
+
+
+
+#### SpringMVC
+
+- 通過SpringMVC實現轉發和重定向 無需視圖解析器
+
+```java
+@Controller
+public class ModelTest1 {
+
+    // 轉發1
+    @RequestMapping("/m1/t1")
+    public String test(){
+        return "/test.jsp";
+    }
+    // 轉發2
+    @RequestMapping("/m1/t1")
+    public String test(){
+        return "forword:/test.jsp";
+    }
+    // 重定向
+    @RequestMapping("/m1/t1")
+    public String test(){
+        return "redirect:/test.jsp";
+    }
+}
+```
+
+- forward和redirect都不會走視圖解析器 只有兩個都不寫時才會走視圖解析器
+
+
+
+
+
+
+
+## 接收請求參數及數據回傳顯示
+
+
+
+```
+接收請求參數
+```
+
+#### 參數名一致
+
+- 提交的域名稱和處理方法的參數名一致
+- 提交數據 http ://localhost:8080/hello?name=AAA
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    @GetMapping("/t1")
+    public String test1(String name, Model model){
+        // 接收前端參數
+        System.out.println("接收到前端的參數為:" + name);
+        // 將返回的結果傳遞給前端
+        model.addAttribute("msg",name);
+        // 跳轉視圖
+        return "test";
+    }
+```
+
+#### 參數不一致
+
+- 提交的域名稱和處理方法的參數名不一致
+  - @RequestParam 指定接收的字串類型
+- 提交數據 http ://localhost:8080/hello?username=AAA
+
+```java
+@Controller
+@RequestMapping("/user")
+public class UserController {
+    // @RequestParam 指定接收的字串類型
+    // localhost: 8080/user/t1 ? name=xxx;
+    @GetMapping("/t1")
+    public String test1(@RequestParam("username") String name, Model model){
+        // 接收前端參數
+        System.out.println("接收到前端的參數為:" + name);
+        // 將返回的結果傳遞給前端
+        model.addAttribute("msg",name);
+        // 跳轉視圖
+        return "test";
+    }
+```
+
+
+
+#### 提交一個對象
+
+- 要求提交的表單域和對象的屬性名一致 參數使用對象即可
+
+實體類
+
+```
+public class User{
+	private int id;
+	private String name;
+	private int age;
+	// constructure
+	// get set
+	// toString
+}
+```
+
+提交數據 http ://localhost:8080/mvc04/user?name=AAA&id=1&age=15
+
+處理方法
+
+```java
+// 前端接收的是一個對象 : id name age
+    /*
+        1. 接收前端用戶傳遞的參數 判斷參數的名字 假設名字直接在方法上 可以直接使用
+        2. 假設傳遞的是一個對象User 匹配User對象中的字串 如果名字一致則ok 否則匹配失敗
+     */
+    @GetMapping("/t2")
+    public String test2(User user){
+        System.out.println(user);
+        return "test";
+    }
+```
+
+後台輸出 User(id=1,name="AAA",age=15)
+
+如果使用對話的話 前端傳遞的參數名和對象名必須一致 否則就是null
+
+
+
+#### 數據顯示到前端
+
+
+
+基本操作
+
+```java
+@GetMapping("/t1")
+public String test1(@RequestParam("username") String name, Model model){
+	// model 設置前端msg的數值
+    model.addAttribute("msg",name);
+    return "test";
+}
+```
+
+
+
+```
+Model 
+精簡版 大部分情況直接使用
+只有幾個方法適合用於儲存數據 簡化了新手對於Model的操作和理解
+
+ModelMap  
+繼承LinkedHashMap 除了實現自身的一些方法 同樣繼承了LinkedHashMap的方法和特性
+
+LinkedHashMap
+可以在儲存數據的同時 進行設置返回的邏輯視圖 進行控制展視層的跳轉
+```
+
+
+
+
+
+#### 亂碼問題
+
+- SpringMVC中提供
+  - 配置SpringMVC的亂碼過濾器
+  - /* 不忽略jsp檔案
+  - /  忽略所有jsp檔案
+
+```xml
+<filter>
+    <filter-name>encoding</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+        <param-name>encoding</param-name>
+        <param-value>utf-8</param-value>
+    </init-param>
+</filter>
+<filter-mapping>
+    <filter-name>encoding</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+
+
+
+
+## JSON
+
+- JavaScript Object Notation 
+  - 是一種輕量級的數據交換格式
+- 採用完全獨立於編程語言的文本格式來儲存和表示數據
+- 簡潔和清晰的層是結構使得JSON成為理想的數據交換語言
+
+
+
+- JavaScript中 一切都是對象 因此 任何JavaScript支持的類型都可以通過JSON表示
+- 例如 字串 數字 對象 陣列 
+  - 對象表示為鍵值對 數據由逗號分隔
+  - 花括號保存對象
+  - 方括號保存陣列
+
+
+
+- JSON鍵值對是用來保存JavaScript對象的一種方式 和JavaScript類似
+- 鍵/值對組合中的鍵名寫在前面並用雙引號 ""包裹
+
+```
+{"name": "AAA"}
+{"age": "3"}
+{"gender: "male"}
+```
+
+
+
+- JSON是JavaScript對象的字串表示法 使用了文本表示一個JS對象的訊息 本質是一個字串
+
+
+
+#### JSON和JavaScript對象互換
+
+```html
+<script type="text/javascript">
+    // 編寫一個javascript對象
+    let user = {
+        name : "AAA",
+        age : 3,
+        gender : "male"
+    };
+    console.log(user);
+
+    // 將JS對象轉換成JSON對象
+
+    let json = JSON.stringify(user);
+    console.log(json);
+
+    // 將JSON對象轉換成JS對象
+    let parse = JSON.parse(json);
+    console.log(parse);
+
+</script>
+```
+
+
+
+#### jackson使用
+
+- 返回Json格式的數據 前端可以訪問這個後端提供的接口拿到數據進行渲染
+- 後台只需要提供這種Json數據就行了  實現前後端分離
+
+
+
+##### ex1
+
+- Controller 會走視圖解析器
+  - 允許通過類路徑掃描自動檢測實現類
+- @ResponseBody  不會走視圖解析器 會直接返回一個字串
+- @RequestMapping
+  - produces = "application/json;charset=utf-8") 設置解決亂碼問題
+- Class上標記 RestController   不會走視圖解析器
+  - 只會返回一個字串
+
+```java
+@Controller
+public class UserController {
+
+    @RequestMapping(value = "/j1",produces = "application/json;charset=utf-8")
+    @ResponseBody // 不會走視圖解析器 會直接返回一個字串
+    public String json1() throws JsonProcessingException {
+
+        //jackson ObjectMapper
+        ObjectMapper mapper = new ObjectMapper();
+
+        // 創建一個對象
+        User user = new User("AAA", 3, "男");
+        String s = mapper.writeValueAsString(user);
+        return s;
+    }
+}
+```
+
+- 配置文件中解決亂碼問題
+
+```xml
+<mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <bean 		class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8"/>
+            </bean>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper">
+                    <bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
+                        <property name="failOnEmptyBeans" value="false"/>
+                    </bean>
+                </property>
+            </bean>
+        </mvc:message-converters>
+</mvc:annotation-driven>
+```
+
+
+
+##### ex2
+
+```java
+@RequestMapping("/j2")
+public String json2() throws JsonProcessingException {
+
+    //jackson ObjectMapper
+    ObjectMapper mapper = new ObjectMapper();
+    ArrayList<User> userlist = new ArrayList<User>();
+    // 創建一個對象
+    User user1 = new User("AAA", 3, "男");
+    User user2 = new User("BBB", 3, "男");
+    User user3 = new User("CCC", 3, "男");
+    User user4 = new User("DDD", 3, "男");
+
+
+    userlist.add(user1);
+    userlist.add(user2);
+    userlist.add(user3);
+    userlist.add(user4);
+    String str = mapper.writeValueAsString(userlist);
+
+    return str;
+}
+```
+
+
+
+##### ex3
+
+- 獲取現在時間
+
+```java
+@RequestMapping("/j3")
+public String json3() throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
+
+    // 不使用時間戳timestamp的方式
+    mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,false);
+
+    // 自定義日期的格式
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    mapper.setDateFormat(sdf);
+
+    Date date = new Date();
+
+    // ObhectMapper 時間解析後的預設格式為 Timestamp 時間戳
+    return mapper.writeValueAsString(date);
+
+}
+```
+
+
+
+- 使用utils類進行資料的儲存 簡化實現操作的複雜度
+
+```java
+public class JsonUtils {
+    public static String getJson(Object object,String dataFormat){
+        ObjectMapper mapper = new ObjectMapper();
+
+        // 不使用時間戳timestamp的方式
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,false);
+
+        // 自定義日期的格式
+        SimpleDateFormat sdf = new SimpleDateFormat(dataFormat);
+        mapper.setDateFormat(sdf);
+
+        try {
+            return mapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+```
+
+- 簡化後
+
+```java
+@RequestMapping("/j3")
+public String json3() throws JsonProcessingException {
+
+    Date date = new Date();
+
+    // ObhectMapper 時間解析後的預設格式為 Timestamp 時間戳
+    return JsonUtils.getJson(date,"yyyy-MM-dd HH:mm:ss");
+
+}
+```
+
+
+
