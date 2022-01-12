@@ -1,0 +1,2809 @@
+# JavaWeb
+
+
+
+## 基本概念
+
+Web開發 : 
+
+- web 網頁
+- 靜態web
+  - html , css 
+  - 提供給所有人看的資料始終不會發生變化
+- 動態web
+  - 幾乎所有的網站
+  - 提供給所有人看的資料始終會產生變化
+  - 技術線 : Servlet / JSP
+- 動態web資源開發的技術統稱JavaWeb
+
+
+
+### web應用程式
+
+web應用程式 : 可以提供瀏覽器訪問的程式 : 
+
+- a.html b.html  多個web資源 這些web資源可以被外界訪問 對外界提供服務
+- 網路上訪問到的任何一個網頁或是資源 都實際存在在某一台電腦上
+- URL
+- 這個統一的web資源會被放在同一個資料夾下
+- 一個web應用由多個部分組成 (靜態web 動態web)
+  - html css js
+  - jsp servlet
+  - java程式
+  - jar包
+  - 配置文件(Properties)
+- web應用程式編寫完畢後 若想提供給外界訪問 : 需要一個伺服器統一管理
+
+
+
+### 靜態web
+
+- *.htm ,  *.html : 網頁的後綴 如果伺服器上一直存在這些東西 就可以直接進行讀取
+
+![擷取_2021_12_02_21_31_02_381](https://i.imgur.com/XidJKGM.png)
+
+- 靜態web存在的缺點
+  - 網頁無法動態更新 所有的使用者都看到一樣的畫面
+    - 輪播圖 , 點擊特效 : 偽動態
+    - JavaScript : 實際開發中使用最多
+    - VBScript
+  - 無法和數據庫交互 (數據無法持久化 使用者無法交互)
+
+
+
+### 動態web
+
+- 網頁會動態的展示  因人而異產生不同的樣子
+
+![擷取_2021_12_02_21_45_27_132](https://i.imgur.com/YBRUOXr.png)
+
+#### 缺點
+
+- 如果伺服器的動態web資源出現錯誤 需要重新編寫後台程式 重新啟動
+  - 停止網站活動 --> 維護
+
+#### 優點
+
+- web頁面可以動態更新 所有使用者看到的都不是同一個頁面
+- 可以與資料庫一起使用 (資料持久化)
+
+![擷取_2021_12_02_21_51_19_954](https://i.imgur.com/USs0WfC.png)
+
+
+
+
+
+## web Server
+
+### 技術講解
+
+#### ASP
+
+- microsoft :  最早流行的是ASP
+- 在HTML中嵌入VB腳本 , ASP + COM;
+- ASP的開發中 基本一個頁面都有數千行的業務程式碼  頁面混亂
+- 難以維護 C# , ils
+
+```html
+<h1>
+    <h1>
+        <h1>
+            <%>
+                System.out.println("...")
+                </%>
+        </h1>
+    </h1>
+</h1>
+```
+
+
+
+#### php
+
+- php開發速度快 功能強大 跨平台 程式碼簡單
+- 無法承載大訪問量的情況 (侷限性)
+
+
+
+#### JSP/Servlet
+
+- B/S : 瀏覽器與伺服器
+- C/S : 客戶端與伺服器
+  - sun公司推行的B/S架構
+  - 基於java語言
+  - 可以承載三高問題 (高併發 高可用 高性能) 帶來的影響
+  - 語法與ASP相似
+
+
+
+### web Server
+
+- 伺服器是一種被動的動作 用來處理用戶的請求和給予用戶響應
+
+
+
+#### lls
+
+- microsoft : ASP , windows內建
+
+
+
+#### Tomcat
+
+- 目前較為流行的web應用伺服器
+- Tomcat屬於免費的開源程式 屬於輕量級應用伺服器
+
+
+
+## Tomcat
+
+
+
+#### tomcat啟動配置
+
+資料夾作用
+
+```
+bin		 --> 啟動 關閉的腳本文件
+conf	 --> 配置
+lib 	 --> 依賴的jar包
+logs 	 --> 日誌
+webapps  --> 存放網站
+```
+
+
+
+啟動 關閉 Tomcat
+
+```
+檔案資料夾 --> bin  
+-->  startup.bat  開啟
+-->  shutdown.bat 關閉
+```
+
+
+
+訪問測試 :  http ://localhost:8080/
+
+
+
+啟動可能遇到的問題 : 
+
+- java環境變數沒有配置
+- 閃退問題 : 需要配置相容性
+- 亂碼問題 : 配置文件中設置
+
+
+
+#### 配置
+
+伺服器核心配置文件
+
+```
+檔案資料夾 --> conf --> server.xml
+```
+
+
+
+可以配置啟動的port
+
+- tomcat的預設端口為 : 8080
+- mysql : 3306
+- http : 80
+- https : 443
+
+```html
+<!-- 改動port中的數值 可以更改自己進入的port -->
+<Connector port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443" />
+```
+
+
+
+可以配置主機的名稱
+
+- 預設的主機名 : localhost -> 127.0.0.1
+- 預設網站應用存放位置為 : webapps
+
+```html
+<!-- 單純修改了localhost DNS會解析失敗 無法正確找到網頁-->
+<Host name="localhost"  appBase="webapps"
+            unpackWARs="true" autoDeploy="true">
+```
+
+
+
+#### 網站如何進行訪問
+
+- 輸入一個網域名
+- 檢查電腦中 C:\Windows\System32\drivers\etc\hosts 目錄下有沒有這個網域名的映射
+  - 有 : 返回對應的ip地址
+  - 沒有 : 去DNS (全世界的網域名位置) 伺服器尋找 找到的話返回 反之則找不到了
+
+![擷取_2021_12_11_00_24_45_632](https://i.imgur.com/gwXZfk5.png)
+
+
+
+#### 發佈一個web網站
+
+- 根據預設路徑 localhost 放置的對應資料夾位置為 webapps
+
+網站應該有的結構
+
+```
+--webapps : Tomcat伺服器的web目錄
+	-ROOT  -- 預設的伺服器路徑
+	-branch -- 自己建立的網頁資料夾
+		- WEB-INF
+			-classes : java程式
+			-lib : web應用所依賴的jar包
+			-web.xml : 網頁配置文件
+		- index.html 新建立的預設首頁
+        - static
+        	-css
+        		-style.css
+        	-js
+        	-img
+        -...
+```
+
+
+
+## http
+
+```
+什麼是http
+```
+
+http (超文本傳輸協議) 是一個簡單的請求-響應協議 通常用運行在TCP上
+
+- 文本 : html  字串 ...
+- 超文本 : 圖片 音樂 影片 定位 地圖 ...
+- port : 80
+
+https : 較http安全
+
+- 443
+
+
+
+#### 兩個時代
+
+- http1.0
+  - HTTP/1.0 : 客戶端可以與web伺服器連接後 只能獲得一個web資源
+- http2.0
+  - HTTP/1.1
+
+
+
+#### Http請求
+
+- 客戶端 --> 發請求 (Request) --> 伺服器
+
+
+
+```
+請求行
+```
+
+General
+
+```java
+// 請求地址
+Request URL: https://ogs.google.com/u/0/widget/app?bc=1&origin=chrome-untrusted%3A%2F%2Fnew-tab-page&origin=chrome%3A%2F%2Fnew-tab-page&cn=app&pid=1&spid=243&hl=zh-TW
+// get方法 post方法
+Request Method: GET
+// 狀態碼
+Status Code: 200
+// Remote(遠程)
+Remote Address: 172.217.160.110:443
+Referrer Policy: strict-origin-when-cross-origin
+```
+
+- 請求行中的請求方式 : GET
+- 請求方式 : Get , Post , HEAD , DELETE , PUT , TRACT..
+  - get ; 請求能夠攜帶的餐庫比較小 大小有限制 會在瀏覽器的URL中顯示資料內容 不安全 但效率高
+  - post : 請求能夠攜帶的參數沒有限制 大小沒有限制 不會在瀏覽器的URL地址欄顯示資料內容 安全 但效率不高
+
+ 
+
+```
+消息頭 (頭欄位 頭字串)
+```
+
+Request Headers
+
+```java
+Accept : 告訴瀏覽器 他所支持的數據類型
+Accept-Encoding : 支持哪種編碼格式 GBK UTF-8 GB2312 ISO8859-1
+Accept-Language : 告訴瀏覽器語言環境
+Cache-Control : 暫存控制
+Connection : 告訴瀏覽器 請求完程式緞開還是保持連續
+HOST : 主機...
+```
+
+
+
+#### Http響應
+
+- 伺服器 --> 響應 (Respose)--> 客戶端
+
+Response Headers
+
+```java
+// 暫存控制
+cache-control: private, max-age=0
+// 編碼
+content-encoding: gzip
+// 類型   
+content-type: text/html; charset=utf-8
+```
+
+
+
+響應體
+
+```
+Accept : 告訴瀏覽器 他所支持的數據類型
+Accept-Encoding : 支持哪種編碼格式 GBK UTF-8 GB2312 ISO8859-1
+Accept-Language : 告訴瀏覽器語言環境
+Cache-Control : 暫存控制
+Connection : 告訴瀏覽器 請求完程式緞開還是保持連續
+HOST : 主機...
+Reflush : 告訴客戶端 多久刷新一次
+Location : 讓網頁重新定位
+```
+
+:
+
+#### 響應狀態碼
+
+- 200 : 請求響應成功
+- 3** : 請求重新導向
+  - ​	重新導向 : 重新到給予的新位址
+- 4xx : 找不到資源
+  - 資源不存在
+- 5xx : 伺服器代碼錯誤 
+  - 500
+  - 502 網關錯誤
+
+
+
+#### 問題
+
+瀏覽器中輸入網址後到網頁展示出來後 經歷了什麼
+
+
+
+## Maven
+
+```
+學習理由
+```
+
+- 在javaweb開發中 常需要使用大量的jar包 需要手動導入
+- 如何能夠讓一個東西自動幫我們導入和配置jar包
+
+
+
+#### Maven項目架構管理工具
+
+使我們更方便導入jar包
+
+Maven核心概念 : 約定大於配置
+
+- 有約束 不要去違反
+
+Maven會規定好如何去編寫java程式 必須按照此規範進行
+
+
+
+#### 配置環境變數
+
+配置 : 
+
+- M2_HOME                  -->      maven目錄下的bin目錄
+- MAVEN_HOME           -->     maven的目錄
+- 在系統的path中配置  -->     %MAVEN_HOME\bin
+
+測試Maven是否配置成功
+
+![擷取_2021_12_18_12_38_36_740](https://i.imgur.com/3jJpFUy.png)
+
+
+
+#### IDEA中使用Maven
+
+1.啟動IDEA
+
+2.建立一個Maven項目
+
+Create from archetype 使用Maven模板
+
+![擷取_2021_12_18_13_54_22_337](https://i.imgur.com/gdOz5fH.png)
+
+Groupid 群組id
+
+Artifactid 項目名
+
+![擷取_2021_12_18_14_00_39_6](https://i.imgur.com/b2yY4py.png)
+
+Maven home path : 下載的Maven路徑
+
+User settings file : Maven中 conf路徑下的 settings.xml檔案
+
+Local repository : 本地倉庫路徑
+
+![擷取_2021_12_18_14_03_08_276](https://i.imgur.com/CxLyaP0.png)
+
+
+
+3. 等待初始化下載   
+
+![擷取_2021_12_18_14_08_12_265](https://i.imgur.com/nZ6KQya.png)
+
+成功會提示  BUILD SUCCESS
+
+
+
+4.觀察Maven倉庫的資料
+
+5.IDEA中的Maven設置
+
+ IDEA項目創建完成後 需要確認一下settings的配置
+
+ 確認MavenHome的配置路徑為自己所配置的 避免IDEA設置成預設的路徑
+
+![擷取_2021_12_18_14_18_18_579](https://i.imgur.com/O87LRd5.png)
+
+
+
+#### Maven創建的項目
+
+在Web應用下
+
+WEB-INF   -->  Web配置
+
+web.xml   -->  Web配置
+
+index.jsp  -->  網頁
+
+![擷取_2021_12_18_14_33_05_521](https://i.imgur.com/MZ5kpJ4.png)
+
+
+
+#### 標記文件夾功能
+
+Sources Root				 原始碼目錄
+
+Test Sources Root    	測試原始碼目錄
+
+Resources Root			 資源目錄
+
+Test Resources Root    測試資源目錄
+
+
+
+![image-20211218143624338](https://i.imgur.com/nVl6Mqn.png)
+
+
+
+#### pom文件
+
+pom.xml為Maven的核心
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Maven版本和頭文件 -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+<!-- 一開始配置的GAV -->
+  <groupId>com.exp</groupId>
+  <artifactId>javaweb-01-maven</artifactId>
+  <version>1.0-SNAPSHOT</version>
+<!-- 項目的打包方式
+jar : java應用
+war : JavaWeb應用
+-->
+  <packaging>war</packaging>
+
+  <name>javaweb-01-maven Maven Webapp</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+<!-- 配置 -->
+  <properties>
+<!--  項目的預設建構編碼  -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+<!--  編碼版本  -->
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+<!-- 項目依賴 -->
+  <dependencies>
+<!-- 具體依賴的jar包配置文件   -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+<!-- 項目建構用 -->
+  <build>
+    
+  </build>
+</project>
+```
+
+
+
+手動導入jar包 Maven會自動抓取依賴的jar包
+
+```xml
+<!-- Maven會自動導入jar包所依賴的其他jar包 -->
+    <!-- https://mvnrepository.com/artifact/org.springframework/spring-webmvc -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>5.3.14</version>
+    </dependency>
+```
+
+
+
+#### 資源導出失敗問題
+
+由於Maven約定大於配置的特性 我們可能遇到寫入的配置文件無法被導出或生效的問題 
+
+解決辦法 :
+
+```xml
+<!-- 在bulid中配置resources 防止我們資源導出失敗的問題 -->
+<build>
+	<resources>
+    	<resource>
+        	<directory>src/main/resources</directory>
+            <includes>
+            	<include>**/*.properties</include>
+                <include>**/*.xml</include>
+            </includes>
+            <filtering>false</filtering>
+        </resource>
+        <resource>
+        	<directory>src/main/java</directory>
+            <include>
+            	<include>**/*.properties</include>
+                <include>**/*.xml</include>
+            </include>
+            <filtering>false</filtering>
+        </resource>
+    </resources>
+</build>
+```
+
+
+
+
+
+```
+Maven側邊攔
+```
+
+Lifecycle  :  Maven命令行操作
+
+Plugins  :  插件 根據使用方式也可以移除
+
+Dependencies  :  項目依賴
+
+![擷取_2021_12_18_16_32_52_424](https://i.imgur.com/Y0trKsa.png)
+
+
+
+
+
+
+
+#### IDEA中配置Tomcat
+
+使用index.jsp呈現網頁
+
+![擷取_2021_12_18_15_00_47_904](https://i.imgur.com/vO56Dz4.png)
+
+
+
+#### IDEA操作
+
+目錄樹 : Maven中jar包的關聯圖
+
+![擷取_2021_12_18_17_31_28_803](https://i.imgur.com/9lOWKeg.png)
+
+
+
+#### 
+
+## Servlet
+
+
+
+#### Servlet簡介
+
+- 動態web的一門技術
+- API中提供一個介面 : Servlet
+- 開發Servlet只需要完成兩個動作
+  - 編寫一個類別 實作Servlet介面
+  - 把開發好的java類別部屬到Web伺服器中
+- 把**實現了Servlet介面**的Java程式叫做Servlet
+
+
+
+客戶端  ---  HTTP請求  -->  HTTP伺服器  -->   Servlet容器  -->  Servlet
+
+客戶端 <-- HTTP'響應  <--  HTTP伺服器  <--   Servlet容器  <--  Servlet
+
+
+
+
+
+#### HelloServlet
+
+Servlet介面在Sum公司有兩個預設的實作類 : HttpServlet
+
+
+
+1.建構一個普通的Maven項目,刪除src目錄 以後學習在這個項目裡面建立Moudel 
+
+這個空的工程就是Maven主工程
+
+```
+Project資料夾
+Javaweb-02-servlet 為所創建的Project (父類)
+帶有了最下方的pom.xml 此pom中帶有的依賴會繼承到子類 
+
+servlet-01 創建的子類 繼承了父類擁有的依賴
+main -- 網頁資料夾
+web.xml -- 網頁配置文件
+index.jsp -- 網頁原始碼
+```
+
+![擷取_2021_12_19_17_20_45_88](https://i.imgur.com/4ivxGsc.png)
+
+
+
+
+
+尋找javax.servlet-api 及 javax.servlet.jsp-api 導入
+
+```xml
+<dependencies>
+        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/javax.servlet.jsp/javax.servlet.jsp-api -->
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>javax.servlet.jsp-api</artifactId>
+            <version>2.3.3</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+```
+
+
+
+2.Maven父子工程理解 : 
+
+父項目中會有
+
+```xml
+<!-- 父項目中多了modules   -->
+    <modules>
+        <module>servlet-01</module>
+    </modules>
+```
+
+父項目中的java包子項目可以直接使用
+
+```java
+son extends father
+```
+
+
+
+3.Maven環境最佳化
+
+- 修改web.xml為最新的
+- 將maven的結構搭建完整
+
+4.編寫一個Servlet
+
+- 編寫一個普通類別
+- 實作Servlet介面 在此直接繼承HttpServlet
+
+```java
+public class HelloServlet extends HttpServlet {
+    // 由於get或是post只是請求實現的不同的方式 可以相互調用 業務邏輯一樣
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        //ServletOutputStream outputStream = resp.getOutputStream();
+        PrintWriter writer = resp.getWriter(); // 響應流
+
+        writer.print("Hello,Serlvet");
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doPost(req, resp);
+    }
+}
+```
+
+
+
+5.Servlet結構
+
+- 但是我們使用上只需要令我們自己建立的 HelloServlet 繼承 HttpServlet 即可
+
+![擷取_2021_12_19_19_59_46_508](https://i.imgur.com/23QJ2Ln.png)
+
+
+
+6.編寫Servlet的映射
+
+- 為什麼需要映射 : 由於寫的是Java程式 要通過瀏覽器的訪問  
+- 瀏覽器需要連接web伺服器 所以我們需要在web服務中註冊我們寫的Servlet 還需要一個瀏覽器能夠訪問的路徑
+
+```xml
+<!--  註冊Servlet-->
+  <servlet>
+    <servlet-name>hello</servlet-name>
+    <servlet-class>com.servlet.HelloServlet</servlet-class>
+  </servlet>
+<!--  Servlet請求路徑-->
+  <servlet-mapping>
+    <servlet-name>hello</servlet-name>
+    <url-pattern>/hello</url-pattern>
+  </servlet-mapping>
+```
+
+ 
+
+7.配置Tomcat
+
+URL路徑命名為 http://localhost:8080/s1/
+
+![擷取_2021_12_19_21_43_47_299](https://i.imgur.com/2BuJ7S0.png)
+
+8.啟動測試
+
+由Tomcat所自行命名的 /s1路徑
+
+則預設路徑 localhost:8080/s1 顯示的頁面為 index.jsp 中的網頁程式
+
+- 根據之前在web.xml中的設定 在進入子目錄 http://localhost:8080/s1/hello
+- 由url請求/hello中 尋找mapping中的name 找尋servlet中對應的name
+- 根據servlet中執行HelloServlet中的程式
+
+![image-20211219214705487](https://i.imgur.com/I47fgng.png)
+
+成功後會建立target目錄 為網站的架構
+
+![擷取_2021_12_19_21_41_28_809](https://i.imgur.com/aPM7bMs.png)
+
+
+
+#### Servlet原理
+
+Servlet是由Web伺服器調用 Web伺服器在收到瀏覽器的請求後
+
+![擷取_2021_12_20_11_38_20_380](https://i.imgur.com/dc9vPJh.png)
+
+
+
+#### Mapping問題
+
+- 一個Servlet可以指定一個映射路徑
+
+```xml
+<servlet-mapping>
+  <servlet-name>hello</servlet-name>
+  <url-pattern>/hello</url-pattern>
+</servlet-mapping>
+```
+
+- 一個Servlet可以指定多個映射路徑
+
+```xaml
+<servlet-mapping>
+  <servlet-name>hello</servlet-name>
+  <url-pattern>/hello</url-pattern>
+</servlet-mapping>
+<servlet-mapping>
+  <servlet-name>hello</servlet-name>
+  <url-pattern>/hello2</url-pattern>
+</servlet-mapping>
+```
+
+- 一個Servlet可以指定通用映射路徑
+
+```xml
+<servlet-mapping>
+  <servlet-name>hello</servlet-name>
+  <url-pattern>/hello</url-pattern>
+</servlet-mapping>
+<servlet-mapping>
+  <servlet-name>hello</servlet-name>
+  <url-pattern>/hello/*</url-pattern>
+</servlet-mapping>
+```
+
+- 預設請求路徑
+  - 不建議使用 會覆蓋起始業面
+
+```xml
+<!--  預設請求路徑-->
+<servlet-mapping>
+  <servlet-name>hello</servlet-name>
+  <url-pattern>/*</url-pattern>
+</servlet-mapping>
+```
+
+- 指定一些後綴或者前綴等
+
+```xml
+<!--  可以自定義後綴實現請求映射
+	  注意 * 前面不能加上映射的路徑 -->
+<servlet-mapping>
+  <servlet-name>hello</servlet-name>
+  <url-pattern>*.do</url-pattern>
+</servlet-mapping>
+```
+
+- 優先級問題
+  - 指定了固有的映射路徑優先級最高  (狹義 大於 廣義定義) 
+    - 也就是 /* 與 /hello  如果輸入了/hello 則優先級較高
+  - 如果找不到就會走預設的處理請求
+
+```xml
+<!--  404  -->
+  <servlet>
+    <servlet-name>error</servlet-name>
+    <servlet-class>com.servlet.ErrorServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>error</servlet-name>
+    <url-pattern>/*</url-pattern>
+  </servlet-mapping>
+```
+
+
+
+#### ServletContext
+
+web容器在啟動的時候 他會為每一個web程式都創建一個對應的ServletContext對象 它代表了當前的web應用
+
+![擷取_2021_12_20_14_35_05_291](https://i.imgur.com/ATE8Nli.png)
+
+
+
+##### 共享數據
+
+- 在這個Servlet中保存的數據 可以在另一個Servlet中拿到
+- 得先到設置的hello裡進行Resquest Response 才能進入Context的傳遞資料
+
+```java
+// 負責設置資料的類別
+public class HelloServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//        this.getInitParameter() 初始化參數
+//        this.getServletConfig() Servlet配置
+//        this.getServletContext() Servlet上下文
+        ServletContext Context = this.getServletContext();
+        String user = "AAA";
+        // 將一個數據保存在ServletContext中 名字為 username 值為 username
+        Context.setAttribute("username",user);
+
+        System.out.println("Hello");
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doPost(req, resp);
+    }
+}
+```
+
+
+
+```java
+// 負責取得資料的類別
+public class getServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        ServletContext servletContext = this.getServletContext();
+        String username = (String)servletContext.getAttribute("username");
+
+        // 響應
+        // resp.setContentType("text/html;charset=utf-8"); 一次寫入兩個
+        resp.setContentType("text/html");
+        resp.setCharacterEncoding("utf-8");
+
+        resp.getWriter().print("名字" + username);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doPost(req, resp);
+    }
+}
+```
+
+web.xml中的配置
+
+```xml
+<servlet>
+  <servlet-name>getc</servlet-name>
+  <servlet-class>com.servlet.getServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+  <servlet-name>getc</servlet-name>
+  <url-pattern>/getc</url-pattern>
+</servlet-mapping>
+```
+
+
+
+##### 獲取初始化參數
+
+配置參數
+
+```xml
+<!--配置web應用初始化參數-->
+<context-param>
+  <param-name>url</param-name>
+  <param-value>jdbc:mysql://localhost:3306/mybatis</param-value>
+</context-param>
+```
+
+
+
+```java
+public class ServletDemo03 extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        ServletContext context = this.getServletContext();
+        String url = context.getInitParameter("url");
+        resp.getWriter().print(url);
+    }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doPost(req, resp);
+    }
+}
+```
+
+得到
+
+```java
+jdbc:mysql://localhost:3306/mybatis
+```
+
+
+
+##### 請求轉發
+
+A  -->   B    -->   C 
+
+A無法直接與C傳輸資料
+
+A向B找尋資料 但是資料在C中   B向C取得後 回傳給A
+
+
+
+重定向原理 : 
+
+A  -->   B  
+
+A  -->   C
+
+A向B找尋資料  但是資料在C中  B回傳訊息叫A去C找   A 自已尋找C取得資料
+
+```java
+public class ServletDemo04 extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        ServletContext context = this.getServletContext();
+        System.out.println("進入了ServletDemo04");
+        // 獲得請求轉發
+          // 轉發的請求路徑
+//        RequestDispatcher requestDispatcher = context.getRequestDispatcher("/gp");
+//        // 轉發給同為擁有 request和response
+//        requestDispatcher.forward(req,resp); // 調用forward方法實現請求轉發
+        
+        // 合併語句 實行了ServletDemo04 轉發到了路徑 /gp 顯示了gp下的資料
+        context.getRequestDispatcher("/gp").forward(req,resp);
+
+
+    }
+}
+```
+
+
+
+##### 讀取資源文件
+
+Properties
+
+- 在java目錄下新建properties
+- 在resources目錄下新建properties
+
+發現都被打包到了同一個路徑下 : classes 一般稱為 classpath
+
+思路 : 需要一個文件流
+
+```
+username=root
+password=123456
+```
+
+
+
+```java
+public class ServletDemo05 extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 把資源變成流  獲取此路徑下的資源
+        InputStream is = this.getServletContext().getResourceAsStream("/WEB-INF/classes/com/db.properties");
+        Properties prop = new Properties();
+        prop.load(is);
+        String user = prop.getProperty("username");
+        String pwd = prop.getProperty("password");
+        resp.getWriter().print(user + " : " + pwd);
+    }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doPost(req, resp);
+    }
+}
+```
+
+
+
+#### HttpServletResponse
+
+- web伺服器接受到客戶端的http請求 針對這個請求 分別創建
+  - 一個代表請求的HttpServletRequest對象 
+  - 一個代表響應的HttpServletResponse對象
+- 如果要獲取客戶端請求過來的參數 : 找HttpServletRequest
+- 如果要給客戶端響應一些訊息 : 找HttpServletResponse
+
+
+
+##### 簡單分類
+
+負責向瀏覽器發送數據的方法
+
+```java
+// ServletResponse
+// 傳送流
+public ServletOutputStream getOutputStream() throws IOException;
+// 傳送文字
+public PrintWriter getWriter() throws IOException;
+```
+
+負責向瀏覽器發送響應頭的方法
+
+```java
+// ServletResponse
+public void setCharacterEncoding(String charset);
+public void setContentLength(int len);
+public void setContentLengthLong(long len);
+public void setContentType(String type);
+// HttpServletResponse
+public void setDateHeader(String name, long date);
+public void addDateHeader(String name, long date);
+public void setHeader(String name, String value);
+public void addHeader(String name, String value);
+public void setIntHeader(String name, int value);
+public void addIntHeader(String name, int value);
+```
+
+響應的狀態
+
+```java
+int SC_OK = 200;
+int SC_NOT_FOUND = 404;
+int SC_INTERNAL_SERVER_ERROR = 500;
+int SC_BAD_GATEWAY = 502;
+```
+
+
+
+##### 下載文件應用
+
+- 向瀏覽器輸出訊息
+- 下載文件
+  - 要獲取下載文件的路徑
+  - 下載的文件名是什麼
+  - 設置想辦法讓瀏覽器能夠支持下載我們需要的東西
+  - 獲取下載文件的輸入流
+  - 創建緩衝區
+  - 獲取OutputStream對象
+  - 將FileOutputStream流寫入到buffer緩衝區
+  - 使用OutputStream將緩衝區中的數據輸出到客戶端
+
+```java
+public class FileServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//        - 要獲取下載文件的路徑
+        //C:\Users\wsx03\IdeaProjects\javaweb-02-servlet\response\src\main\resources\1.jpg
+        // String realPath = this.getServletContext().getRealPath("/1.jpg");
+        String realPath = "C:\\Users\\wsx03\\IdeaProjects\\javaweb-02-servlet\\response\\src\\main\\resources\\1.jpg";
+        System.out.println("下載文件的路徑 : " + realPath);
+//        - 下載的文件名是什麼
+        String fileName = realPath.substring(realPath.lastIndexOf("//") + 1);
+//        - 設置想辦法讓瀏覽器能夠支持(Content-disposition)下載我們需要的東西    轉譯
+        resp.setHeader("Content-disposition","attachment;filename=" + URLEncoder.encode(fileName,"UTF-8"));
+//        - 獲取下載文件的輸入流
+        FileInputStream in = new FileInputStream(realPath);
+//        - 創建緩衝區
+        int len = 0;
+        byte[] buffer = new byte[1024];
+//        - 獲取OutputStream對象
+        ServletOutputStream out = resp.getOutputStream();
+//        - 將FileOutputStream流寫入到buffer緩衝區 使用OutputStream將緩衝區中的數據輸出到客戶端
+        while((len = in.read(buffer))> 0){
+            out.write(buffer,0,len);
+        }
+        in.close();
+        out.close();
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doPost(req, resp);
+    }
+}
+```
+
+
+
+##### image refresh
+
+```java
+public class ImageServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 讓瀏覽器3秒刷新一次
+        resp.setHeader("refresh","3");
+        // 在記憶體中創建一個圖片
+        BufferedImage image = new BufferedImage(80,20,BufferedImage.TYPE_INT_RGB);
+        // 得到圖片
+        Graphics2D g = (Graphics2D)image.getGraphics(); // 筆
+        // 設置圖片的背景顏色
+        g.setColor(Color.white);
+        g.fillRect(0,0,80,20);
+        // 為圖片寫入數據
+        g.setColor(Color.blue);
+        g.setFont(new Font(null,Font.BOLD,20));
+        g.drawString(makeNum(),0,20);
+
+        // 告訴瀏覽器 這個請求用圖片的方式打開
+        resp.setContentType("image/png");
+        // 網站存在暫存 不讓瀏覽器暫存
+        resp.setDateHeader("expires",-1);
+        resp.setHeader("Cache-control","no-cache");
+        resp.setHeader("Pragma","no-cache");
+        // 把圖片寫給瀏覽器
+        boolean write = ImageIO.write(image,"png",resp.getOutputStream());
+    }
+
+    private String makeNum(){
+        Random random = new Random();
+        String num =  random.nextInt(9999999) + "";
+        StringBuffer sb = new StringBuffer();
+        // 判斷不足7位數時0補全
+        for (int i = 0; i < 7-num.length(); i++) {
+            sb.append("0");
+        }
+        // 00xxxxx
+        num =  sb.toString() + num;
+        return num;
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doPost(req, resp);
+    }
+}
+```
+
+
+
+#### HttpServletRequest
+
+- HttpServletRequest代表客戶端的請求 
+- 用戶通過Http協議訪問伺服器 HTTP請求中的所有訊息會被封裝到HttpServletRequest 
+- 通過這個HttpServletRequest方法 獲得客戶端的所有訊息
+
+
+
+##### 獲取前端傳遞的參數-請求轉發
+
+```java
+public String getParameter(String name);
+public String[] getParameterValues(String name);
+```
+
+
+
+getRequestDispatcher 請求轉發
+
+```
+可以用request調用 也可以用 getServletContext()調用
+request.getRequestDispatcher(url) 中的url 可以是相對也可以是絕對路徑
+this.getServletContext().getRequestDispatcher(url) 中的Url 只能是絕對路徑
+```
+
+
+
+LoginServlet
+
+```java
+public class LoginServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String username = req.getParameter("username");
+        String password = req.getParameter("password");
+        String[] hobbies = req.getParameterValues("hobbies");
+        System.out.println("=========================");
+        System.out.println(username);
+        System.out.println(password);
+        System.out.println(Arrays.toString(hobbies));
+        System.out.println("=========================");
+        // 通過請求轉發
+        // 這裡的 / 代表當前的web應用路徑
+        req.getRequestDispatcher("/success.jsp").forward(req,resp);
+    }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doGet(req, resp);
+    }
+}
+```
+
+
+
+##### 請求轉發 重定向 區別
+
+- 相同點
+  - 頁面都會實行跳轉
+- 不同點
+  - 請求轉發時 url不會產生變化  307
+  - 重定向時 url會發生變化  302
+
+
+
+## Cookie Session
+
+
+
+#### 會話 
+
+會話
+
+- 用戶打開瀏覽器 點擊多個超連結 訪問多個web資源 關閉瀏覽器 這個過程 稱為會話
+
+有狀態會話 : 
+
+- 一個學生來過教室 下次再來教室 我們會知道他曾經來過  稱為有狀態會話
+
+一個網站 如何證明你來過  伺服端如何證明客戶端來過
+
+- 伺服端給予客戶端一個信件 客戶端下次訪問伺服端帶上信件  cookie
+- 伺服端登記你來過了  下次再來的時候進行匹配  session
+
+
+
+#### 保存會話的兩種技術
+
+cookie
+
+- 客戶端技術 (響應,請求)
+
+session
+
+- 伺服端技術 利用這個技術 可以保存用戶的會話訊息  我們可以把訊息或數據放在Session中
+
+常見使用 : 網站登入後  下一次訪問就不用再登入了
+
+
+
+## Cookie
+
+- 從請求中拿到cookie訊息
+- 從伺服器響應創建返回到客戶端儲存的cookie
+
+```java
+Cookie[] cookies = req.getCookies();// 獲得Cookie
+cookie.getName(); // 獲得cookie中的key
+cookie.getValue(); // 獲得cookie中的value
+new Cookie("lastLoginTime", System.currentTimeMillis() + ""); // 新建一個cookie
+cookie.setMaxAge(60*60*24); // 設置cookie的有效期限
+resp.addCookie(cookie); // 響應給客戶端一個cookie
+```
+
+
+
+Cookie: 一般會保存在本地的用戶目錄下 appdata
+
+一個網站cookie是否存在上限 細節問題
+
+- 一個Cookie只能保存一個訊息
+- cookie只能儲存鍵值對的字串類型
+- 一個web站點 (伺服器) 可以給瀏覽器發送多個cookie 最多存放20個cookie
+- Cookie大小有限制 4KB
+- 瀏覽器上限 300 cookie
+
+刪除Cookie:
+
+- 不設置有效期 關閉瀏覽器 自動失效
+- 設置有效期為0 
+
+
+
+#### 程式實作
+
+##### 保存上次訪問時間
+
+```java
+// 保存用戶上一次訪問的時間
+public class CookieDemo01 extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 伺服器告訴你來過的時間 將這個時間封裝成一個信件 下次使用這個信件表示來過
+
+        // 解決中文亂碼
+        req.setCharacterEncoding("utf-16");
+        resp.setCharacterEncoding("utf-16");
+
+        // response 
+        PrintWriter out = resp.getWriter();
+
+        // Cookie 伺服端從客戶端獲取
+        Cookie[] cookies = req.getCookies();// 返回陣列 說明Cookie可能存在多個
+        // 判斷Cookie是否存在
+        if(cookies != null){
+            // 如果存在Cookie 遍歷陣列
+            out.write("上次訪問的時間是 : ");
+            for (int i = 0; i < cookies.length; i++) {
+                Cookie cookie = cookies[i];
+                // 獲得Cookie的名字 判斷與發送的cookiename是否一致
+                if(cookie.getName().equals("lastLoginTime")){
+                    // 獲取cookie中的值  cookievalue String --> long
+                    long lastLoginTime = Long.parseLong(cookie.getValue());
+                    Date date = new Date(lastLoginTime); // Date 格式
+                    // date 轉 String  將這些格式以String的方式表示
+                    // 若使用toString()遇到了 null 會導致null pointer異常(500)
+                    out.write(date.toLocaleString());
+                }
+            }
+        }else{
+            out.write("這是第一次訪問");
+        }
+        // 不論是否第一次 每一次的訪問 伺服端給客戶端響應一個Cookie
+        // 寫在else的話 永遠都會是第一次訪問的時間
+        Cookie cookie = new Cookie("lastLoginTime", System.currentTimeMillis() + "");
+        // 設置到期時間 second * minute * hour
+        cookie.setMaxAge(60*60*24);
+        // 響應一個cookie給客戶端
+        resp.addCookie(cookie);
+
+    }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doGet(req, resp);
+    }
+}
+```
+
+##### 刪除cookie
+
+```java
+// 刪除cookie 設置存活時間為0
+public class CookieDemo02 extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 創建一個cookie  名字必須要和要刪除的名字一致
+        Cookie cookie = new Cookie("lastLoginTime", System.currentTimeMillis() +"");
+        // 將有效期設為0
+        cookie.setMaxAge(0);
+
+        resp.addCookie(cookie);
+
+    }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doGet(req, resp);
+    }
+}
+```
+
+##### 中文資料傳輸
+
+```java
+// 中文資料傳輸
+public class CookieDemo03 extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 解決中文亂碼
+        req.setCharacterEncoding("utf-16");
+        resp.setCharacterEncoding("utf-16");
+        // resp.setHeader("context-type","text/html;charset=UTF-8");
+
+        // Cookie 伺服端從客戶端獲取
+        Cookie[] cookies = req.getCookies();
+
+        PrintWriter out = resp.getWriter();
+        // 判斷Cookie是否存在
+        if(cookies != null){
+            // 如果存在Cookie 遍歷陣列
+            out.write("上次訪問的時間是 : ");
+            for (int i = 0; i < cookies.length; i++) {
+                Cookie cookie = cookies[i];
+                // 獲得Cookie的名字 判斷與發送的cookiename是否一致
+                if(cookie.getName().equals("name")){
+                    System.out.println(cookie.getValue());
+                }
+            }
+        }else{
+            out.write("這是第一次訪問");
+        }
+        // 中文編碼 value --> URLEncoder.encode("中文","utf-8")
+        // 獲取時解碼 URLDecoder.decode(cookie.getValue(),"utf-8")
+        Cookie cookie = new Cookie("name", "名字");
+        resp.addCookie(cookie);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doGet(req, resp);
+    }
+}
+```
+
+##### 編碼解碼問題
+
+```java
+// 中文編碼 value
+URLEncoder.encode("中文","utf-8")
+// 獲取時解碼 
+URLDecoder.decode(cookie.getValue(),"utf-8")
+```
+
+
+
+## Session (重點)
+
+
+
+#### session 
+
+- 伺服器會為每一個用戶 (瀏覽器) 創建一個Session對象
+  - 每一個用戶會得到屬於自己的SessionID
+  - 根據SessionID去伺服端找尋 取得裡面對應的資料
+- 一個Session會獨佔一個瀏覽器 只要瀏覽器沒有關閉 這個Session就會存在
+- 用戶登入之後 整個網站都可以訪問 --> 保存用戶的訊息 保存購物車訊息
+- 整個網站經常使用的數據 保存在session中
+- servletContext是所有用戶共用一個
+
+```java
+// 得到唯一標示符
+public String getId();
+// 獲得ServletContext
+public ServletContext getServletContext();
+// 獲得一個節點
+public Object getAttribute(String name);
+// 設置一個節點
+ public void setAttribute(String name, Object value);
+// 移除一個節點
+public void removeAttribute(String name);
+// 註銷
+public void invalidate();
+// 判斷是不是新的
+public boolean isNew();
+```
+
+
+
+
+
+#### Session和cookie區別
+
+- 數據儲存位置 
+  - cookie保存在客戶端  可以保存多個
+  - session保存在伺服器端 保存重要訊息 減少伺服器資源浪費
+- 資料儲存大小
+  - cookie儲存大小有限,不超過4KB  
+  - session是無限制的
+- 資料儲存類型
+  - cookie 只能儲存鍵對(key value)的字串類型 
+  - session可以儲存任意類型
+- 預設有效期不同
+  - cookie預設是會話級別的cookie  
+  - session預設有效期是30分鐘
+
+
+
+#### 使用session
+
+```java
+public class SessionDemo01 extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 解決亂碼問題
+        req.setCharacterEncoding("UTF-16");
+        resp.setCharacterEncoding("UTF-16");
+        // 設置瀏覽器響應格式
+        resp.setContentType("text/html;charset=utf-8");
+
+        // 得到session
+        HttpSession session = req.getSession();
+
+        // 為session中存東西
+        session.setAttribute("name",new Person("ABC",2) );
+        // 獲取session的ID
+        String sessionid = session.getId();
+        // 判斷session是不是新創建的
+        if(session.isNew()){
+            resp.getWriter().write("session創建成功,ID:" + sessionid);
+        }else{
+            resp.getWriter().write("session在伺服器已經存在,ID:" +sessionid);
+        }
+
+        // Session創建的時候做了什麼事情
+//        Cookie cookie = new Cookie("JSESSIONID",sessionid);
+//        resp.addCookie(cookie);
+
+    }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doGet(req, resp);
+    }
+}
+
+
+//
+// 得到session  req得到session
+HttpSession session = req.getSession();
+// session方法獲取
+Person person = (Person) session.getAttribute("name");
+// print會自動調用class的toString
+System.out.println(person);
+
+//
+// 獲取session
+HttpSession session = req.getSession();
+// 取消Attribute (name)
+session.removeAttribute("name");
+// 手動註銷 session
+session.invalidate();
+```
+
+
+
+會話自動過期 web.xml
+
+```xml
+ <!-- 設置session預設的失效時間 -->
+<session-config>
+ <!-- 15分鐘後自動失效 分為單位 -->
+      <session-timeout>15</session-timeout>
+  </session-config>
+```
+
+
+
+
+
+
+
+## JSP
+
+
+
+#### 什麼是JSP
+
+Java Server Pages : java伺服端頁面 和 Servlet一樣 用於開發動態web技術
+
+最大的特點 :
+
+- 寫JSP就像在寫HTML
+- 區別 : 
+  - HTML只給用戶提供靜態數據
+  - JSP頁面可以嵌入java程式碼 為用戶提供動態數據
+
+
+
+#### JSP原理
+
+jsp如何執行
+
+-  伺服器內部工作
+   - tomcat中有一個work目錄
+   - IDEA中使用Tomcat 會在IDEA的tomcat中產生一個work目錄
+
+
+
+IDEA路徑
+
+```
+C:\Users\wsx03\AppData\Local\JetBrains\IntelliJIdea2021.2\tomcat\1e904e4e-b84a-4a4a-a5f8-c3964d54cb77\work\Catalina\localhost\s1\org\apache\jsp
+```
+
+路徑下的JSP檔轉成了java檔
+
+![擷取_2021_12_22_15_34_43_103](https://i.imgur.com/KRTtAbt.png)
+
+
+
+瀏覽器向伺服器發送請求 不管訪問甚麼資源 其實都是在訪問Servlet
+
+- JSP最終會被轉換成為一個java類
+- JSP本質上就是一個Servlet
+
+```java
+// 初始化
+public void _jspInit() {
+}
+// 銷毀
+public void _jspDestroy() {
+}
+// JSPService 
+public void _jspService(HttpServletRequest request, HttpServletResponse response)
+```
+
+1.判斷請求
+
+2.內置一些對象
+
+```java
+final jakarta.servlet.jsp.PageContext pageContext;  // 頁面上下文
+jakarta.servlet.http.HttpSession session = null;    // session
+final jakarta.servlet.ServletContext application;   // applicationContext
+final jakarta.servlet.ServletConfig config; 		// config
+jakarta.servlet.jsp.JspWriter out = null; 			// out
+final java.lang.Object page = this; 			    // page 當前頁面
+HttpServletRequest request 							// 請求
+HttpServletResponse response						// 響應
+```
+
+3.輸出頁面前 增加的程式碼
+
+```java
+response.setContentType("text/html");		// 設置響應的頁面類型
+pageContext = _jspxFactory.getPageContext(this, request, response,
+         null, true, 8192, true);
+_jspx_page_context = pageContext;
+application = pageContext.getServletContext();
+config = pageContext.getServletConfig();
+session = pageContext.getSession();
+out = pageContext.getOut();
+_jspx_out = out;
+```
+
+4. 以上的這些對象 可以在JSP頁面中直接使用
+
+
+
+#### JSP流程
+
+- 用戶訪問伺服器
+- 伺服器中存在web容器
+- 判斷對應的請求(.JSP) -->  JSP頁面  
+- 轉換 將JSP頁面轉換為Java文件
+- xxx_jsp.java
+- 編譯
+- xxx.jsp.class
+- 返回伺服器
+- 最終用戶真正拿到的就是伺服器處理完畢的class對象 就是Servlet
+
+
+
+在JSP頁面中:
+
+- 只要是JAVA程式碼就會原封不動的輸出
+- 如果是HTML程式碼 就會變轉換成
+
+```java
+out.write("<html>\r\n");
+```
+
+這樣的格式輸出到前端
+
+
+
+#### JSP基礎語法
+
+
+
+##### jsp表達式
+
+```jsp
+<%-- jsp表達式
+作用 : 用來將程式的輸出 輸出到客戶端
+<%= 變量或者表達式 %>
+--%>
+<%= new java.util.Date() %>
+```
+
+
+
+##### jsp腳本片段
+
+```jsp
+<%-- jsp腳本片段 --%>
+  <%
+    int sum = 0;
+    for (int i = 1; i <= 100; i++) {
+        sum += i;
+    }
+    out.println("<h1> sum =" + sum + "</h1>");
+  %>
+```
+
+
+
+##### 腳本片段的再實現
+
+```jsp
+  <%
+    int x = 10;
+    out.println(x);
+  %>
+  <p> 這是一個jsp文件 </p>
+  <%
+    int y = 20;
+    out.println(y);
+  %>
+  <hr>
+
+<%-- 在程式碼中嵌入HTML元素 --%>
+  <%
+    for (int i = 0; i < 5; i++) {
+  %>
+<h1> Hello,world  <%=i%> </h1>
+  <%
+    }
+  %>
+```
+
+
+
+JSP聲明
+
+```jsp
+<%!
+  static{
+    System.out.println("loading Servlet");
+  }
+  private int grobalvar = 0;
+  public void jsp(){
+    System.out.println("進入方法jsp");
+  }
+%>
+```
+
+
+
+jsp聲明 : 會被編譯到JSP生成java的類中  其他的會被生成到jspService方法
+
+在JSP嵌入java程式碼即可
+
+```jsp
+<%%> 		腳本片段
+<%=%>  		表達式
+<%!%> 		聲明
+<%--JSP註解--%>
+<!--HTML註解-->
+```
+
+JSP的註解不會在客戶端顯示 HTML的註解會被顯示
+
+
+
+#### JSP指令
+
+```jsp
+<%@page args...%>
+<%@include file=""  %>
+
+<%-- @include會將兩個頁面合二為一 --%>
+<%@include file="common/header.jsp"%>
+<h1> 網頁主體 </h1>
+<%@include file="common/footer.jsp"%>
+
+<%-- JSP標籤
+    jsp:include 拼接頁面 本質還是三個 變數互不影響
+    一般使用此種方式 靈活性更高
+--%>
+<jsp:include page="/common/header.jsp"></jsp:include>
+<h1> 網頁主體 </h1>
+<jsp:include page="/common/footer.jsp"></jsp:include>
+
+```
+
+
+
+#### JSP錯誤頁面轉發
+
+xml檔中捕捉錯誤訊息
+
+發生錯誤訊息時轉發給對應的jsp檔處理
+
+```xml
+<error-page>
+    <error-code>404</error-code>
+    <location>/error/404.jsp</location>
+</error-page>
+
+<error-page>
+    <error-code>500</error-code>
+    <location>/error/500.jsp</location>
+</error-page>
+```
+
+404
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+	<h1> 定義404錯誤頁面 </h1>
+	<img src="${pageContext.request.contextPath}/img/404.png" alt="404">
+</body>
+</html>
+```
+
+500
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+	<h1> 自定義500錯誤 </h1>
+	<img src="${pageContext.request.contextPath}/img/500.png" alt="500">
+</body>
+</html>
+```
+
+
+
+#### 九大內置對象
+
+```
+輸入輸出對象
+```
+
+- Request : 封裝來自客戶端 瀏覽器的各種資料
+- Response  : 封裝伺服器的響應訊息
+- out : 用於向客戶端  瀏覽器輸出數據
+
+```
+通信控制對象
+```
+
+- Application (SerlvetContext) : 代表當前應用程式的上下文 可以在不同用戶間共享訊息
+- Session : 用來保存會話訊息 也就是可以實現在一個用戶的不同請求間共享數據
+- PageContext  提供對JSP頁面所有對象及命名空間的訪問
+
+```
+Servlet對象
+```
+
+- page : 指向當前JSP程式本身 (幾乎不用)
+- config (SerlvetConfig) : 封裝應用程式的配置訊息
+
+```
+錯誤訊息對象
+```
+
+- exception : 封裝JSP程式執行過程中發生的異常和錯誤訊息
+
+
+
+#### 四大作用域
+
+- page : 只在一個頁面保留數據
+- request : 只在一個請求中保存數據 (請求轉發會攜帶此數據)
+- Session : 在一次會話中保存數據 僅供單個用戶使用
+  - 從打開瀏覽器到關閉瀏覽器
+- Application : 在整個伺服器(tomcat)中保存數據 全部用戶共享 
+  - 從打開伺服器到關閉伺服器
+
+
+
+page01存放資料
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+<%-- 內置對象 --%>
+<%
+    // 保存的數據只在一個頁面中有效
+    pageContext.setAttribute("name1","AAA1"); 
+    // 保存的數據指在一次請求中有效 請求轉發會攜帶這個數據
+    request.setAttribute("name2","AAA2");    
+    // 保存的數據只會在一次會話中有效 從打開瀏覽器到關閉瀏覽器
+    session.setAttribute("name3","AAA3");   
+    // 保存的數據只在伺服器中有效 從打開伺服器到關閉伺服器
+    application.setAttribute("name4","AAA4");   
+%>
+<%-- 腳本片段中的程式碼  會被原封不動的生成到.JSP.java
+要求 : 這裡面的程式碼 必須保證Java語法的正確性
+--%>
+<%
+// 從pageContext取出 通過尋找的方式
+// 從底層到高層 (作用域) : page -> request -> session -> application
+    String name1 = (String)pageContext.findAttribute("name1");
+    String name2 = (String)pageContext.findAttribute("name2");
+    String name3 = (String)pageContext.findAttribute("name3");
+    String name4 = (String)pageContext.findAttribute("name4");
+    String name5 = (String)pageContext.findAttribute("name5");
+%>
+
+<%-- 使用EL表達式輸出 ${}  一般使用EL表達式 --%>
+<h1> 取出的值為 : </h1>
+<h3>${name1}</h3>
+<h3>${name2}</h3>
+<h3>${name3}</h3>
+<h3>${name4}</h3>
+<%-- 輸出 null  --%>
+<h3><%=name5%></h3>
+</body>
+</html>
+```
+
+
+
+請求轉發
+
+- forward("跳轉的頁面") 使用請求轉發可以將 request.setAttribute 中的數據一起保存轉發
+
+```jsp
+// 轉發
+pageContext.forward("/index.jsp");
+```
+
+request : 客戶端向伺服端發送請求 產生的數據 用戶看完就沒用了 : 新聞
+
+session : 客戶端向伺服端發送請求 產生的數據 用戶用完還有用 : 購物車
+
+application : 客戶端像伺服端發送請求 產生的數據 一個用戶用完了 其他用戶還可能使用 : 聊天資訊
+
+
+
+#### JSP標籤 JSTL標籤 EL表達式
+
+```xml
+<!--    JSTL 表達式的依賴    -->
+<dependency>
+    <groupId>javax.servlet.jsp.jstl</groupId>
+    <artifactId>jstl-api</artifactId>
+    <version>1.2</version>
+</dependency>
+<!--    standard標籤依賴    -->
+<dependency>
+    <groupId>taglibs</groupId>
+    <artifactId>standard</artifactId>
+    <version>1.1.2</version>
+</dependency>
+```
+
+ EL表達式 : ${ }
+
+- 獲取數據
+- 執行運算
+- 獲取web開發的常用對象
+- 調用java方法
+
+
+
+##### JSP標籤
+
+```jsp
+<%-- jsp include --%>
+<%--
+http://localhost:8080/jsptag.jsp?name=AAA&age=22
+--%>
+<%-- 跟著轉發一起傳遞參數  --%>
+<jsp:forward page="jsptag2.jsp">
+    <jsp:param name="name" value="AAA"></jsp:param>
+    <jsp:param name="age" value="22"></jsp:param>
+</jsp:forward>
+```
+
+
+
+#####  JSTL表達式
+
+JSTL標籤酷的使用就是為了彌補HTML標籤的不足 他自定義了許多標籤 供我們使用 標籤的功能和Java程式一樣
+
+
+
+核心標籤
+
+```
+<c:out>	用於在JSP中顯示數據 如同 <%= ...> 
+<c:set>	用於保存數據 
+<c:remove>	用於刪除數據 
+<c:if>	與我們在一般程式中使用的if相同   
+<c:choose>	本身只作為<c:when>和<c:otherwish>的父標籤
+<c:when>	<c:choose>的子標籤 用來判斷條件是否成立  
+<c:otherwise>	<c:choose>的子標籤 接在<c:when>標籤後 當<c:when>標籤判斷為false時被執行
+<c:forEach>	基礎迭代器 接受多種集合類型
+<c:url>	使用可選的查詢參數來創造一個URL 
+```
+
+格式化標籤
+
+SQL標籤
+
+XML標籤
+
+
+
+JSTL標籤庫使用步驟
+
+- 引入對應的taglib
+- 使用其中的方法
+- 在Tomcat需要引入JSTL的jar包
+  - jstl-api
+  - standard
+
+
+
+core : if
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+
+<h4> if測試 </h4>
+<hr>
+<%-- 表單提交(submit)的目的地 coreif.jsp  使用get方法 --%>
+<form action="coreif.jsp" method="get">
+<%-- EL表達式 ${ } 獲取表單中的數據
+     ${param.參數名}
+--%>
+    <input type="text" name="username" value="${param.username}">
+    <input type="submit" value="login">
+</form>
+
+<%--
+<%
+    if(request.getParameter("username").equals("admin")){
+        out.print("登入成功");
+    }
+%>
+--%>
+<%-- 判斷如果提交的用戶名是管理員 則登入成功  --%>
+<c:if test="${param.username=='admin'}" var="isAdmin">
+    <c:out value="管理員"/>
+</c:if>
+
+<c:out value="$(isAdmin)"/>
+
+</body>
+</html>
+```
+
+
+
+core : when
+
+```jsp
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+<%-- 定義一個變數 score 值為 85 --%>
+<c:set var="score" value="85"></c:set>
+
+<c:choose>
+    <c:when test="${score>=90}">
+        score > 90
+    </c:when>
+    <c:when test="${score>=80}">
+        score > 80
+    </c:when>
+    <c:when test="${score>=70}">
+        score > 70
+    </c:when>
+    <c:when test="${score>=60}">
+        score > 60
+    </c:when>
+    <c:when test="${score<60}">
+        score < 60
+    </c:when>
+</c:choose>
+</body>
+</html>
+```
+
+
+
+core : foreach
+
+```jsp
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+<%
+    ArrayList<String> people = new ArrayList<>();
+    people.add(0,"AAA");
+    people.add(1,"BBB");
+    people.add(2,"CCC");
+    people.add(3,"DDD");
+    people.add(4,"EEE");
+    request.setAttribute("list",people);
+%>
+<%--
+var 每一次遍歷出來的變數
+items 受遍歷的對象
+--%>
+<c:forEach var="people" items="${list}">
+    <c:out value="${people}"></c:out> <br>
+</c:forEach>
+
+<hr>
+<%--
+var 每一次遍歷出來的變量
+items 受遍歷的對象
+begin 開始
+end  結束
+step 步長
+--%>
+
+<c:forEach var="people" items="${list}" begin="1" end="3" step="2">
+</c:forEach>
+    
+</body>
+</html>
+```
+
+
+
+## JavaBean
+
+實體類
+
+JavaBean有特定的寫法
+
+- 必須要有一個無參建構子
+- 屬性必須私有化
+- 必須有對應的get set方法
+
+一般用來和資料庫的字串做映射 : ORM
+
+ORM : 對象關係映射
+
+- 表 --> 類
+- 字串 --> 屬性
+- 行記錄 --> 對象
+
+people表格
+
+| id   | name | age  | address |
+| ---- | ---- | ---- | ------- |
+| 1    | AAA  | 20   | X       |
+| 2    | BBB  | 21   | Y       |
+| 3    | CCC  | 22   | Z       |
+
+
+
+MySQL資料庫
+
+```mysql
+create database `jdbc`;
+use `jdbc`;
+
+create table `people`(
+	`id` 		int(20) not null primary key,
+	`name` 		varchar(30) default null,
+    `age` 		varchar(10) default null,	
+    `address` 	varchar(50) default null
+)engine=innodb default charset=utf8;
+```
+
+建立對應的實體類 
+
+```java
+// 實體類 一般和資料庫中的表結構一一對應
+public class People {
+    private int id;
+    private String name;
+    private int age;
+    private String address;
+	
+    // constructor
+    // get
+    // set
+}
+```
+
+連接資料庫 使用JSP操作
+
+```jsp
+<%
+//     People people = new People(); 建立類別
+//     people.setAddress(); 設置參數
+//     people.setId();
+//     people.setAge();
+//     people.setName();
+%>
+<%-- 上下兩者等價 --%>
+<%-- 建立類別 --%>
+<jsp:useBean id="people" class="com.pojo.People" scope="page"></jsp:useBean>
+
+<%-- 設置參數 --%>
+<jsp:setProperty name="people" property="address" value="XX"></jsp:setProperty>
+<jsp:setProperty name="people" property="id" value="1"></jsp:setProperty>
+<jsp:setProperty name="people" property="age" value="20"></jsp:setProperty>
+<jsp:setProperty name="people" property="name" value="AAA"></jsp:setProperty>
+
+<%-- 等於
+<%=people.getAddress()%>
+--%>
+
+<%-- 取出參數 --%>
+姓名 : <jsp:getProperty name="people" property="address"/> <br>
+id : <jsp:getProperty name="people" property="id"/> <br>
+年齡 : <jsp:getProperty name="people" property="age"/> <br>
+地址 : <jsp:getProperty name="people" property="name"/>
+```
+
+
+
+## MVC三層架構
+
+什麼是MVC :  
+
+- Model  模型
+  - 實體類 資料庫對應的字串
+- View  視圖
+  - JSP頁面
+- Controller  控制器
+
+
+
+#### 過去的作法
+
+![擷取_2021_12_24_12_28_59_704](https://i.imgur.com/Jcw2Bp9.png)
+
+用戶直接訪問控制層 控制層就可以直接操作資料庫
+
+```
+servlet --> CRUD --> 資料庫
+弊端 : 程式過於冗余 不利於維護  
+servlet的程式碼中 : 處理請求 響應 視圖跳轉  處理JDBC  處理業務程式 處理業務邏輯程式
+
+架構 : 加一層解決
+調用 --> JBDC  --> MySql,oracle,SqlServer
+```
+
+
+
+#### MVC三層架構
+
+![擷取_2021_12_24_12_29_13_110](https://i.imgur.com/Y0mbh7r.png)
+
+
+
+Model
+
+- 業務處理 : 業務邏輯 (Service)
+- 數據持久層 : CRUD (Dao)
+
+View
+
+- 展示數據
+- 提供鏈接 發起Serivce請求 (a form img)
+
+Controller (Servlet)
+
+- 接受用戶的請求 : (req : 請求參數 Session訊息)
+- 交給業務層處理對應的程式碼
+- 控制視圖的跳轉
+
+```
+登入 --> 接收用戶的登入請求 --> 處理用戶的請求(獲取用戶登入的參數 username password) --> 交給業務層處理登入業務 (判斷用戶密碼是否正確:事務) --> Dao層查詢用戶名和密碼是否正確 --> 資料庫
+```
+
+
+
+## Filter (重點)
+
+filter : 過濾器 用來過濾網站的數據
+
+- 處理中文亂碼
+- 登入驗證
+
+![擷取_2021_12_24_12_52_32_95](https://i.imgur.com/TQWsIkm.png)
+
+
+
+#### Filter開發步驟
+
+1.導入jar包
+
+```xml
+    <dependencies>
+<!--    servlet依賴    -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+<!--        JSP依賴   -->
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>javax.servlet.jsp-api</artifactId>
+            <version>2.3.3</version>
+            <scope>provided</scope>
+        </dependency>
+<!--        JSTL表達式依賴   -->
+        <dependency>
+            <groupId>javax.servlet.jsp.jstl</groupId>
+            <artifactId>jstl-api</artifactId>
+            <version>1.2</version>
+        </dependency>
+<!--     standard標籤庫   -->
+        <dependency>
+            <groupId>org.apache.taglibs</groupId>
+            <artifactId>taglibs-standard-impl</artifactId>
+            <version>1.2.5</version>
+            <scope>runtime</scope>
+        </dependency>
+<!--     連接數據庫    -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.27</version>
+        </dependency>
+    </dependencies>
+```
+
+
+
+2.編寫過濾器
+
+- 實作 Servlet jar包下的 filter介面
+- 實作Filter介面 重寫對應方法
+
+```java
+public class CharacterEncodingFilter implements Filter {
+    // 初始化 web伺服器啟動 就已經初始化了 隨時等待過濾對象出現
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        System.out.println("CharacterEncodingFilter初始化");
+    }
+    // Chain : 鏈
+    /*
+    1. 過濾中的所有程式碼 在過濾特定請求的時候都會執行
+    2. 必須要讓過濾器繼續同行
+        chain.doFilter(request,response)
+     */
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        request.setCharacterEncoding("utf-8");
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("text/html;charset=UTF-8");
+
+        System.out.println("CharacterEncodingFilter執行前...");
+        // 讓我們的請求繼續走 如果不寫 程式到這邊就會被攔截停止
+        chain.doFilter(request,response);
+        System.out.println("CharacterEncodingFilter執行後...");
+    }
+    // 銷毀
+    @Override
+    public void destroy() {
+        System.out.println("CharacterEncodingFilter銷毀");
+    }
+}
+```
+
+3.web.xml中配置對應的filter過濾器
+
+```xml
+<filter>
+    <filter-name>CharacterEncodingFilter</filter-name>
+    <filter-class>com.filter.CharacterEncodingFilter</filter-class>
+</filter>
+
+<filter-mapping>
+    <filter-name>CharacterEncodingFilter</filter-name>
+    <!-- 只要是/servlet下的任何請求 都會經過這個過濾器 -->
+    <url-pattern>/servlet/*</url-pattern>
+</filter-mapping>
+```
+
+
+
+## 監聽器
+
+實作一個監聽器的介面
+
+1.編寫一個監聽器
+
+實現監聽器的介面
+
+```java
+// 統計網站人數 : 統計Session
+public class OnlineCountListener implements HttpSessionListener {
+    // 創建session監聽
+    // 一旦創建一個Session就會觸發一次這個事件
+    @Override
+    public void sessionCreated(HttpSessionEvent se) {
+        ServletContext ctx = se.getSession().getServletContext();
+
+        System.out.println(se.getSession().getId());
+        Integer onlineCount = (Integer)ctx.getAttribute("OnlineCount");
+        if(onlineCount == null){
+            onlineCount = new Integer(1);
+        }else {
+            int count = onlineCount.intValue();
+            onlineCount = new Integer(count+1);
+        }
+        ctx.setAttribute("OnlineCount",onlineCount);
+
+    }
+    // 銷毀Session監聽
+    // 一旦銷毀一個Session就會觸發一次這個事件
+    /*
+    Session銷毀
+    1. 手動銷毀 getSession().invalidate();
+    2. 自動銷毀
+     */
+    @Override
+    public void sessionDestroyed(HttpSessionEvent se) {
+        HttpSessionListener.super.sessionDestroyed(se);
+    }
+}
+```
+
+
+
+2.web.xml中註冊監聽器
+
+```xml
+<!--  註冊監聽器 -->
+    <listener>
+        <listener-class>com.listener.OnlineCountListener</listener-class>
+    </listener>
+```
+
+
+
+
+
+## 過濾器 監聽器常見應用
+
+
+
+監聽器 GUI
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        Frame frame = new Frame("xyz"); // 建立一個窗口
+        Panel panel = new Panel(); // 面板
+        frame.setLayout(null); // 設置窗口的布局
+
+        frame.setBounds(300,300,500,500);
+        frame.setBackground(new Color(0,0,255)); // 設置背景顏色
+
+        panel.setBounds(50,50,300,300);
+        panel.setBackground(new Color(0,255,0)); // 設置背景顏色
+
+        frame.add(panel);
+        frame.setVisible(true);
+        // 監聽事件 監聽關閉事件
+        frame.addWindowListener(new WindowAdapter(){
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+            }
+        });
+
+    }
+}
+```
+
+
+
+用戶登入後才能進入主頁  登入後就不能進入主頁
+
+- 用戶登入後 向Session中放入用戶的數據
+- 進入主頁的時候要判斷用戶是否已經登入 要求 : 過濾器中實現
+
+```java
+public void doFilter(ServletRequest req, ServletResponse resp, FilterChain filterChain) throws IOException, ServletException {
+    // servletRequest --> HttpServletRequest 繼承關係 強制轉換
+    HttpServletRequest request = (HttpServletRequest) req;
+    HttpServletResponse response = (HttpServletResponse) resp;
+    // 判斷 如果USER_SESSION沒有輸入的話 強制轉發至error.jsp
+    if (request.getSession().getAttribute("USER_SESSION") == null){
+        response.sendRedirect("/error.jsp");
+    }
+    // 為了使filter依序傳遞 必要的方法
+    filterChain.doFilter(request,response);
+}
+```
+
+filter攔截
+
+```xml
+<filter>
+    <filter-name>SysFilter</filter-name>
+    <filter-class>com.servlet.SysFilter</filter-class>
+</filter>
+// 當檔案的位置在sys/之下的話會優先進行過濾器的判斷
+<filter-mapping>
+    <filter-name>SysFilter</filter-name>
+    <url-pattern>/sys/*</url-pattern>
+</filter-mapping>
+```
+
+
+
+## JDBC
+
+JDBC : Java DataBase Connection
+
+![擷取_2021_12_24_21_40_44_940](https://i.imgur.com/mQXATne.png)
+
+
+
+需要jar包的支持 : 
+
+- java.sql
+- javax.sql
+- mysql-connector-java 連接驅動
+  - 時區 URL jdbc:mysql"//localhost:3306?serverTimezone=GMT%2B8
+
+
+
+
+#### 搭建環境
+
+1.導入資料庫依賴
+
+```mysql
+<dependencies>
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>8.0.27</version>
+    </dependency>
+</dependencies>
+```
+
+2.IDEA中連接資料庫 
+
+
+
+#### JDBC固定步驟
+
+1. 載入驅動
+2. 連接資料庫 代表資料庫
+3. 向資料庫發送S\QL的對象 Statement : CRUD
+4. 編寫SQL
+5. 執行SQL
+6. 關閉連接
+
+
+
+#### 使用statement
+
+```java
+public class TestJdbc {
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+        // 配置訊息
+        // useUnicode=true&characterEncoding=utf-8 解決中文亂碼
+        String url = "jdbc:mysql://localhost:3306/jdbc?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
+        String username = "root";
+        String password = "123456";
+        // 1 載入驅動
+        Class.forName("com.mysql.jdbc.Driver");
+        // 2 連接資料庫 connection 代表資料庫
+        Connection connection = DriverManager.getConnection(url, username, password);
+        // 3 向資料庫發送SQL的對象 Statement PreparedStatement : CRUD
+        Statement statement = connection.createStatement();
+        // 4 編寫SQL
+        String sql = "select * from users";
+        // 5 執行查詢SQL  返回一個resultset : 結果集
+        ResultSet rs = statement.executeQuery(sql);
+        while(rs.next()){
+            System.out.println("id="+rs.getObject("id"));
+            System.out.println("name="+rs.getObject("name"));
+            System.out.println("password="+rs.getObject("password"));
+            System.out.println("email="+rs.getObject("email"));
+            System.out.println("birthday="+rs.getObject("birthday"));
+        }
+        // 6 關閉連接 釋放資源 (重要)  先開後關
+        rs.close();
+        statement.close();
+        connection.close();
+    }
+}
+```
+
+
+
+#### 預編譯SQL 使用
+
+```java
+public class TestJdbc02 {
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+        // 配置訊息
+        // useUnicode=true&characterEncoding=utf-8 解決中文亂碼
+        String url = "jdbc:mysql://localhost:3306/jdbc?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
+        String username = "root";
+        String password = "123456";
+        // 1 載入驅動
+        Class.forName("com.mysql.jdbc.Driver");
+        // 2 連接資料庫 connection 代表資料庫
+        Connection connection = DriverManager.getConnection(url, username, password);
+        // 3 編寫SQL
+        String sql = "insert into  users(id,name,password,email,birthday) values (?,?,?,?,?);";
+        // 4. 預編譯
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1,4);
+        preparedStatement.setString(2,"xxx");
+        preparedStatement.setString(3,"123456");
+        preparedStatement.setString(4,"xxx@mail");
+        // 得到現在的時間 
+        preparedStatement.setDate(5,new Date(new java.util.Date().getTime()));
+
+        // 5 執行SQL
+        int i = preparedStatement.executeUpdate();
+        if(i>0){
+            System.out.println("插入成功");
+        }
+        // 6 關閉連接 釋放資源 (重要)  先開後關
+        preparedStatement.close();
+        connection.close();
+    }
+}
+```
+
+
+
+#### 事務
+
+都成功 or 都失敗
+
+ACID原則 : 保證數據的安全
+
+- 原子性
+- 一致性
+- 隔離性
+- 持久性
+
+```
+開啟事務
+事務提交 commit()
+事務回滾 rollback()
+關閉事務
+```
+
+```java
+public class TestJdbc03 {
+
+    @Test
+    public void test(){
+        // 配置訊息
+        // useUnicode=true&characterEncoding=utf-8 解決中文亂碼
+        String url = "jdbc:mysql://localhost:3306/jdbc?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC";
+        String username = "root";
+        String password = "123456";
+
+        Connection connection = null;
+        try{
+            // 1 載入驅動
+            Class.forName("com.mysql.jdbc.Driver");
+            // 2 連接資料庫 connection 代表資料庫
+            connection = DriverManager.getConnection(url, username, password);
+            // 3 通知資料庫開啟事務false
+            connection.setAutoCommit(false);
+            String sql = "update  account set money = money - 100 where name = 'AAA';";
+            connection.prepareStatement(sql).executeUpdate();
+
+            //製造錯誤
+            //int i = 1/0;
+            String sql2 = "update  account set money = money + 100 where name = 'BBB';";
+            connection.prepareStatement(sql2).executeUpdate();
+
+            connection.commit(); // 輸入完需要執行的程式碼 一起提交
+            System.out.println("success");
+        }catch (Exception e){
+            try {
+                System.out.println(e);
+                // 出現異常 回滾事務
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+}
+```
+
+
+
+#### Junit 單元測試
+
+導入依賴
+
+```xml
+<!--    單元測試-->
+<dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.12</version>
+    <scope>test</scope>
+</dependency>
+```
+
+簡單使用
+
+@Test註解只有在方法上有效 只要加入這個註解 就可以直接運行
+
+```java
+@Test
+public void hello(){
+    System.out.println("hello");
+}
+```
