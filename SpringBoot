@@ -1,0 +1,3150 @@
+# Spring Boot
+
+
+
+## 自動配置原理
+
+
+
+#### 依賴管理
+
+- 父項目做依賴管理
+
+```xml
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.6.2</version>
+    <relativePath/> <!-- lookup parent from repository -->
+</parent>
+
+父項目的父項目
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-dependencies</artifactId>
+    <version>2.6.2</version>
+  </parent>
+
+父項目的父項目的父項目中
+幾乎聲明了所有開發中常用的依賴的版本號 之後引入依賴會自動配對裡面的版本號
+```
+
+- 無須關注版本  自動選擇最新的版本
+- 可以自行修改版本號
+  - 查看spring-boot-dependencies裡面設定當前的版本用的key
+  - 在項目中裡面重寫配置
+
+```xml
+<properties>
+    <mysql.version>5.1.43</mysql.version>
+</properties>
+```
+
+- 開發導入starter場景啟動器
+
+```
+1. 有很多 *表示某種場景 spring-boot-starter-*  
+2. 只要引入starter 這個場景的所有常規需要的依賴我們都會自動引入
+3. 官網有SpringBoot所有支持的場景 
+4. 見到的 *-spring-boot-starter 第三場為我們提供的簡化開發的場景啟動器
+5. 所有場景啟動器最底層的依賴
+<dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+      <version>2.6.2</version>
+      <scope>compile</scope>
+</dependency>
+```
+
+- SpringBoot自動配置的核心依賴
+
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter</artifactId>
+  <version>2.6.2</version>
+  <scope>compile</scope>
+</dependency>
+```
+
+- 以後引入依賴預設可以不用寫上版本號
+- 引入非版本管理的依賴 需要自己寫上版本號
+
+#### 自動配置
+
+- 自動配好
+
+  - Tomcat
+
+    - 引入Tomcat依賴
+    - 配置Tomcat
+    - 由spring-boot-starter-web中引入
+
+    ```xml
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-tomcat</artifactId>
+      <version>2.6.2</version>
+      <scope>compile</scope>
+    </dependency>
+    ```
+
+  - SpringMVC
+
+    - 自動配好了SpringMVC的常用功能
+    - 由spring-boot-starter-web中引入
+
+    ```xml
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>5.3.14</version>
+      <scope>compile</scope>
+    </dependency>
+    ```
+
+  - Web常見功能 ex 字元編碼功能
+
+    - Springboot幫我們配置好了所有web開發的常用場景
+    - 由主程式觀看
+
+    ```java
+    ConfigurableApplicationContext run = SpringApplication.run(SpringBoot01HelloworldApplication.class, args);
+    for (String beanDefinitionName : run.getBeanDefinitionNames()) {
+        System.out.println(beanDefinitionName);
+    }
+    ```
+
+  - 預設的包結構
+
+    - 主程式所在的包下及下面所有的子包裡面的組件預設都會被掃描進來
+    - 無須在另外添加手動掃描
+    - 主程式MyApplication.java及以下所有的包都會被掃描
+
+    ```
+    com
+     +- example
+         +- myapplication
+             +- MyApplication.java
+             |
+             +- customer
+             |   +- Customer.java
+             |   +- CustomerController.java
+             |   +- CustomerService.java
+             |   +- CustomerRepository.java
+             |
+             +- order
+                 +- Order.java
+                 +- OrderController.java
+                 +- OrderService.java
+                 +- OrderRepository.java
+    ```
+
+    - 改變掃描路徑 在註解後面設置掃描路徑
+
+    ```java
+    @SpringBootApplication(scanBasePackages = "com.exp")
+    ```
+
+  - 各種配置擁有預設值
+
+    - 預設的配置 最終都是映射到MultipartProperties
+    - 配置文件的值 最終會綁定到某個類上  這個類會在容器中有創建對象
+
+  - 按需載入所有自動配置項
+
+    - Springboot有非常多的starter
+    - 我們引入了哪些場景 這個場景的自動配置才會開始
+    - Springbott的所有自動配置功能 都在autoconfigure包裡面
+
+    ```java
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+      <version>2.6.2</version>
+      <scope>compile</scope>
+    </dependency>
+    ```
+
+
+
+## 容器功能
+
+#### 組件添加
+
+- @Configuration
+
+  - 告訴springboot 這是一個配置類 == 配置文件
+
+- 基本使用
+
+  - 例子
+  - bean
+    - 設置 proxyBeanMethods 
+      - true --> 代理模式
+        - 創建組件前會從容器中尋找有無組件 有的話則不另外創建
+      - false --> 非代理模式
+        - 創建組件時不會檢查容器中有無存在的相同組件 每次都會直接創建新的
+
+  ```java
+  /*
+      配置類裡面使用@Bean標註在方法上給容器註冊組件 預設也是單例模式
+      配置類本身也是組件
+      proxyBeanMethods 設定是否代理bean的方法
+      --> true 每次都會從容器中尋找組件  反之 則會每次創建
+      重量級模式 Full (proxyBeanMethods=true)
+      輕量級模式 Lite (proxyBeanMethods=false)  -->  解決組件依賴
+      單純註冊組件 別人也不依賴組件 --> 輕量級模式
+   */
+  @Configuration(proxyBeanMethods=true) // 告訴springboot 這是一個配置類 == 配置文件
+  public class Myconfig {
+  
+      /*
+          外部無論對配置類中的這個組件註冊方法調用多少次獲取的都是之前註冊容器中的單例對象
+       */
+      @Bean // 給容器中添加組件 以方法名作為組件ID  返回類型:組件類型 返回的值:組件在容器中的實例
+      public User user01(){
+          User aaa = new User("AAA", 18);
+          aaa.setPet(tomcatPet());
+  
+          return aaa;
+      }
+  
+      @Bean("tom")
+      public Pet tomcatPet(){
+          return new Pet("tomcat");
+      }
+  }
+  ```
+
+  - 主程式類 (主配置類)
+    - @SpringBootApplication 標註為springboot的主程式應用 
+    - scanBasePackages 設置掃描包的路徑
+
+  ```java
+  // 標註這個類是一個springboot的應用
+  @SpringBootApplication(scanBasePackages = "com.exp")
+  public class SpringBoot01HelloworldApplication {
+      // 將springboot應用啟動
+      public static void main(String[] args) {
+  
+          // 1. 返回我們的IOC容器
+          ConfigurableApplicationContext run = SpringApplication.run(SpringBoot01HelloworldApplication.class, args);
+  
+          // 2. 查看容器裡面的組件
+          String[] names = run.getBeanDefinitionNames();
+          for (String name :names) {
+              System.out.println(name);
+          }
+          // 3. 從容器中獲取組件   兩個組件結果為true  獲取的是同一個組件
+          Pet tom01 = run.getBean("tom", Pet.class);
+          Pet tom02 = run.getBean("tom", Pet.class);
+          System.out.println("組件:"+(tom01==tom02));
+  
+          // 配置類本身也是組件
+          // com.exp.config.Myconfig$$EnhancerBySpringCGLIB$$3b1e2815@44536de4 本身是代理對象
+          Myconfig bean = run.getBean(Myconfig.class);
+          System.out.println(bean);
+  
+          // @Configuration(proxyBeanMethods=true) 代理對象調用方法
+          // true -> 配置對象為代理對象 調用多次方法都會從容器中尋找 不會創建
+          // false -> 配置對象為普通對象 調用方法就是執行代碼 調用幾次就創建幾次對象
+          // Springboot總會檢查這個組件是否存在於容器
+          // 如果有 就不會新創建 保持單例
+          User user1 = bean.user01();
+          User user2 = bean.user01();
+          System.out.println("user1 == user2 :" + (user1 == user2));
+          // 無論是輕量級還是重量級 使用getBean都是從IOC容器中拿同一個組件
+  
+  
+          // 組件依賴
+          User user01 = run.getBean("user01", User.class);
+          Pet tom = run.getBean("tom", Pet.class);
+          System.out.println("用戶的寵物:" + (user01.getPet() == tom));
+  
+      }
+  }
+  ```
+
+  - Full模式和Lite模式
+    - 無依賴關係 單純註冊組件 --> 輕量級配置
+      - 配置類組件之間無依賴關係用Lite模式 加入容器啟動過程 減少判斷
+      - 也就是不需要創建新組件時使用
+    - 依賴關係 --> 重量級配置
+      - 配置類組件之間有依賴關係 方法會被調用得到之前單實例組件 用Full模式
+      - 使用此模式保證取得的組件為IOC中的同一組件
+  - 無論使用哪種模式
+    - 使用getBean時都是從IOC容器中拿同一個組件
+
+- 註解
+
+  - @Bean 
+  - @Component   代表它是一個組件
+  - @Controller  代表它是一個控制器
+  - @Service  代表它是一個業務邏輯組件
+  - @Repository 代表它是一個資料庫層組件
+  - @ComponentScan 通過包掃描 指定掃描規則
+  - @Import 
+    - @Import({User.class, xxx.class})
+    - 給容器中自動創建出這兩個類型的組件 預設組件的名字就是全類名
+
+  
+
+#### 條件裝配
+
+@Conditional
+
+- 條件裝配 : 滿足Conditional指定的條件 則進行組件注入
+- ConditionalOnBean
+  - 當容器中存在指定的Bean 我們才進行操作
+- ConditionalOnMissingBean
+  - 當容器中沒有指定的Bean 我們才進行操作
+- ConditionalOnClass
+  - 當容器中有某些Class時 我們才進行操作
+- ConditionalOnMissingClass
+  - 當容器中沒有某些Class時 我們才進行操作
+- ConditionalOnResource
+  - 當項目中的類路徑存在某一個資源時 才進行操作
+- ConditionalOnJava
+  - 當版本是指定的Java版本號時 才進行操作
+- ConditionalOnWebApplication
+  - 當應用是web應用時
+- ConditionalOnNotWebApplication
+  - 當應用不是web應用時
+- ConditionalOnSingleCandidate
+  - 當容器中指定的這個組件只有一個實例
+  - 或有多個實例 但是有一個為主實例
+- ConditionalOnProperty
+  - 當配置文件配置了某個屬性
+
+![擷取_2022_01_15_12_06_18_142](https://i.imgur.com/Gub317m.png)
+
+
+
+#### 原生配置文件引入
+
+@ImportResource
+
+- ```
+  @ImportResource("classpath:beans.xml") // 導入spring 配置文件
+  ```
+
+
+
+#### 配置綁定
+
+- 如何使用java讀取到properties文件的內容 並且把它封裝到javaBean中
+
+- @ConfigurationProperties
+
+  - 表示這個類是與配置文件綁定的
+
+- @EnableConfigurationProperties + @ConfigurationProperties
+
+  - Car
+    - 使用@ConfigurationProperties綁定配置
+
+  ```java
+  @ConfigurationProperties(prefix = "mycar")
+  public class Car {
+  ```
+
+  - 配置類
+
+    - 配置類需要使用 @EnableConfigurationProperties 去啟用Car的配置綁定
+
+  - ```java
+    @Configuration(proxyBeanMethods=true) // 告訴springboot 這是一個配置類
+    @EnableConfigurationProperties(Car.class) // 開啟屬性配置功能 Car.class
+    // 1.開啟Car的屬性配置功能 則 Car 的 @ConfigurationProperties註解才會生效
+    // 2.把Car這個組件自動註冊到容器中
+    public class Myconfig { }
+    ```
+
+- @Component + @ConfigurationProperties
+
+  -  @Component
+     - 使用@Component 先將類導入容器中變成組件
+  -  @ConfigurationProperties 表示這個類是與配置文件綁定的
+     - 而且是與前綴是 prefix = "xxx" 的字串綁定
+
+```java
+// 只有在容器中的組件 才會擁有springboot提供的功能 (配置綁定)
+@Component
+@ConfigurationProperties(prefix = "mycar")
+public class Car {}
+```
+
+Controller中設定
+
+```java
+@RestController
+public class HelloController {
+
+    @Autowired
+    Car car;
+
+    @RequestMapping("/car")
+    public Car car(){
+        return car;
+    }
+}
+```
+
+
+
+## 自動配置原理入門
+
+主要註解
+
+```
+@SpringBootApplication
+包含了
+@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan
+```
+
+#### 引導載入自動配置類
+
+```java
+@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan(
+    excludeFilters = {@Filter(
+    type = FilterType.CUSTOM,
+    classes = {TypeExcludeFilter.class}
+), @Filter(
+    type = FilterType.CUSTOM,
+    classes = {AutoConfigurationExcludeFilter.class}
+)}
+)
+public @interface SpringBootApplication
+    
+=============================    
+```
+
+##### @SpringBootConfiguration
+
+- @Configuration 代表當前是一個配置類
+
+##### @ComponentScan
+
+- 指定掃描哪些 Spring註解
+
+##### @EnableAutoConfiguration
+
+```java
+@AutoConfigurationPackage
+@Import({AutoConfigurationImportSelector.class})
+public @interface EnableAutoConfiguration {}
+```
+
+- @AutoConfigurationPackage
+
+  - 自動配置包
+
+    ```java
+    @Import({Registrar.class}) // 給容器導入一個組件
+    public @interface AutoConfigurationPackage {
+        
+    // 利用Registrar為容器導入一系列的組件
+    // 將指定的一個包下的所有組件導入 mainApplication所在包下
+    ```
+
+- @Import({AutoConfigurationImportSelector.class})
+
+```
+1. 利用 selectImports 方法中
+   getAutoConfigurationEntry(annotationMetadata);
+   為容器中批量導入一些組件
+2. 調用 List<String> configurations = 		 
+   this.getCandidateConfigurations(annotationMetadata, attributes); 獲取到所    有的需要導入到容器中的配置類   
+3. 利用工廠載入 private static Map<String, List<String>> 
+   loadSpringFactories(ClassLoader classLoader) 最終得到所有的組件
+4. 從META-INF/spring.factories位置載入一個文件
+	 預設掃描我們目前系統當前所有META-INF/spring.factories位置的文件
+	 spring-boot-autoconfigure-2.6.2.jar包裡面也有META-INF/spring.factories
+```
+
+- 需要導入到容器中的配置類
+
+![擷取_2022_01_15_15_15_55_392](https://i.imgur.com/RiPZHX2.png)
+
+- spring-boot-autoconfigure-2.6.2 下的 spring.factories
+
+  - Auto Configure中總共有 158-26 +1 個需要導入的配置
+
+  ```
+  # Auto Configure
+  org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  org.springframework.boot.autoconfigure.admin.SpringApplicationAdminJmxAutoConfiguration,\
+  ```
+
+
+
+#### 按需開啟自動配置類
+
+```
+雖然有100多個場景的所有自動配置啟動時預設全部載入
+按照條件裝配規則 最終會按需配置
+```
+
+由於@Conditional註解需要滿足特定條件才會生效
+
+所以條件不成立的配置就不會載入
+
+#### 定制化修改自動配置
+
+
+
+#### 實踐
+
+- 引入場景依賴
+- 查看自動配置了那些
+  - 自己分析 引入場景對應的自動配置一般都生效了
+  - 配置文件中debug=true開啟自動配置報告,  Negative(不生效)  /Positive(生效)
+- 是否需要修改
+  - 參照文檔修改配置項
+    - 
+  - 自定義加入或替換組件
+    - @Bean  @Component
+  - 自定義器 xxxxCustomizer
+
+
+
+## 開發技巧
+
+
+
+#### Lombok
+
+- 簡化JavaBean開發
+
+```xml
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+</dependency>
+```
+
+- 日誌功能
+  - @Slf4j
+
+```java
+@RestController
+@Slf4j
+public class HelloController {
+
+    @GetMapping("/hello")
+    public String hello(){
+        log.info("請求進來了");
+        return "hello";
+    }
+}
+```
+
+#### dev-tools
+
+- Ctrl + F9 實現更新
+
+```xml
+<dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-devtools</artifactId>
+        <optional>true</optional>
+</dependency>
+```
+
+
+
+#### Spring Initailizer
+
+項目初始化工具
+
+- resources
+  - static
+    - 靜態資源 
+  - templates
+    - web頁面
+  - application.properties 
+    - 配置文件
+
+
+
+# 核心功能
+
+
+
+## 配置文件
+
+#### properties
+
+
+
+#### yaml
+
+- 屬於標記語言又非標記語言(Markup Language)
+- 適合做以數據為中心的配置文件
+
+
+
+##### 基本語法
+
+- key: value  kv之間有空格
+- 大小寫敏感
+- 使用縮進表示層級關係
+- 縮進不允許使用tab 只允許空格
+- 縮進的空格數不重要 只要相同層級的元素左對齊即可
+- '#' 表示註釋
+- 字串無須加引號  如果要加入的話   ' '  " " 表示字串內容  會被 轉譯 / 不轉譯
+
+```yaml
+#  單引號會將 \n 作為字串輸出  雙引號會將 \n 作為換行輸出
+#  雙引號不會轉譯 (不會轉換意思 使\n正常換行) 單引號會轉譯 (使\n變成字串)
+```
+
+ctrl alt L 格式化
+
+##### 配置提示
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-configuration-processor</artifactId>
+    <optional>true</optional>
+</dependency>
+```
+
+- pom.xml加入屬性
+  - 在後續打包時不會將這個配置打包出去
+
+```xml
+<configuration>
+    <excludes>
+        <exclude>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configurationprocessor</artifactId>
+        </exclude>
+    </excludes>
+</configuration>
+```
+
+
+
+##### 數據類型
+
+- 字面量 : 單個 不可再分的值 date boolean string number null
+
+```yaml
+k: v
+```
+
+- 對象 : 鍵值對的集合 map hash set object
+
+```yaml
+行內寫法:  k: {k1:v1,k2:v2,k3:v3}
+# 或
+k:
+   k1: v1
+   k2: v2
+   k3: v3
+```
+
+- 陣列: 一組按次序排列的值 array , list , queue
+
+```yaml
+行內寫法:  k:{v1,v2,v3}
+# 或
+k:
+  - v1
+  - v2
+  - v3
+
+```
+
+
+
+##### 例子
+
+- class
+
+```java
+@ConfigurationProperties(prefix = "person")
+@Component
+@Data
+public class Person {
+    private String userName;
+    private Boolean boss;
+    private Date birth;
+    private Integer age;
+    private Pet pet;
+    private String[] interests;
+    private List<String> animal;
+    private Map<String,Object> score;
+    private Set<Double> salarys;
+    private Map<String,List<Pet>> allPets;
+}
+```
+
+- yaml
+
+```yaml
+person:
+  userName: ABC
+#  單引號會將 \n 作為字串輸出  雙引號會將 \n 作為換行輸出
+#  雙引號不會轉譯 (不會轉換意思 使\n正常換行) 單引號會轉譯 (使\n變成字串)
+  boss: false
+  birth: 2000/01/01
+  age: 20
+#  interests: [x,y,z]
+  interests:
+    - x
+    - y
+    - z
+  animal: [cat,dog]
+#  score:
+#    english: 80
+#    math: 80
+  score: {english:80,math:90}
+  salarys:
+    - 9999.98
+    - 9999.99
+  Pet:
+    name: PetName
+    weight: 20
+  allPets:
+    sick:
+      - {name: AAA,weight: 80}
+      - {name: BBB,weight: 70}
+      - name: CCC
+        weight: 60
+      - name: DDD
+        weight: 50
+    health:
+      - {name: EEE,weight: 123}
+      - {name: GGG,weight: 234}
+```
+
+
+
+
+
+# Web開發
+
+
+
+## SpringMVC自動配置概述
+
+- 大部分的場景配置都由springboot完成 幾乎不用我們手動配置
+
+
+
+The auto-configuration adds the following features on top of Spring’s defaults:
+
+- Inclusion of `ContentNegotiatingViewResolver` and `BeanNameViewResolver` beans.
+  - 內容協商視圖解析器和BeanName視圖解析器
+- Support for serving static resources, including support for WebJars (covered [later in this document](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#web.servlet.spring-mvc.static-content)).
+  - 靜態資源的自動配置 (包括webjars)
+- Automatic registration of `Converter`, `GenericConverter`, and `Formatter` beans.
+  - 自動註冊了 converter GenericConverter Formatter
+- Support for `HttpMessageConverters` (covered [later in this document](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#web.servlet.spring-mvc.message-converters)).
+  - 支持HttpMessageConverters  
+- Automatic registration of `MessageCodesResolver` (covered [later in this document](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#web.servlet.spring-mvc.message-codes)).
+  - 自動註冊了MessageCodesResolver (國際化用)
+- Static `index.html` support.
+  - 靜態index.html頁支持
+- Automatic use of a `ConfigurableWebBindingInitializer` bean (covered [later in this document](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#web.servlet.spring-mvc.binding-initializer)).
+  - 自動使用 ConfigurableWebBindingInitializer (DataBinder負責將請求數據綁定到JavaBean上)
+
+
+
+## 簡單功能分析
+
+#### 靜態資源訪問
+
+- 靜態資源目錄
+
+類路徑下 :  called  /static   (or   /public   or   /resources  or   /META-INF/resources)
+
+- 只要靜態資源放在這些目錄 就可以進行訪問
+  - 訪問 : 當前項目根路徑 / + 靜態資源名
+
+![擷取_2022_01_16_14_33_03_241](https://i.imgur.com/LMs2ZZr.png)
+
+- 原理 : 靜態映射/**
+- 請求進來 先去尋找Controller處理  
+  - Controller不能處理的所有請求會交給靜態資源處理器  如果靜態資源也找不到 404
+
+- 也就是訪問了下方的路徑
+  - 因為由controller先處理 會返回 aaa 字串
+  - 如果controller沒有對應的路徑 則會尋找靜態資源中同名的靜態資源
+
+```java
+@RestController
+public class HelloController {
+
+    @RequestMapping("/30bb15adbe3cdcef31e33e3182fe08de.jpg")
+    public String hello(){
+        return "aaa";
+    }
+}
+```
+
+
+
+- 靜態資源訪問前綴
+  - 預設無前綴
+
+```yaml
+spring:
+  mvc:
+    static-path-pattern: "/resources/**"
+```
+
+- 當前項目 + static-path-pattern + 靜態資源名 = 靜態資源文件夾下找
+- 也就是  http ://localhost:8080/resources/靜態資源名
+
+
+
+- webjar
+
+預設路徑 /webjars/**
+
+```
+// 訪問jquery的jars包
+"/webjars/jquery/jquery.min.js"
+```
+
+
+
+#### 歡迎頁
+
+- 靜態資源路徑下 index.html
+  - 可以配置靜態資源路徑
+  - 但是不可以配置靜態資源的訪問前綴 導致index.html不能被預設訪問
+
+```
+spring:
+#  mvc:
+#    static-path-pattern: "/res/**"  // 導致welcome page功能失效
+
+  web:
+    resources:
+      static-locations: [classpath:/abc/]
+```
+
+- controller能處理/index
+
+
+
+#### 自定義Favicon
+
+- 在靜態資料路徑下 設置 favicon.ico 名的圖片
+
+```yaml
+spring:
+  mvc:
+    static-path-pattern: "/res/**"  會導致Favicon失效
+```
+
+
+
+#### 靜態資源配置原理
+
+- SpringBoot啟動會預設載入 xxxxAutoConfiguration類 (自動配置類)
+- SpringMVC功能的自動配置類 WebMvcAutoConfiguration 生效
+
+```java
+@Configuration(
+    proxyBeanMethods = false
+)
+@ConditionalOnWebApplication(
+    type = Type.SERVLET
+)
+@ConditionalOnClass({Servlet.class, DispatcherServlet.class, WebMvcConfigurer.class})
+@ConditionalOnMissingBean({WebMvcConfigurationSupport.class})
+@AutoConfigureOrder(-2147483638)
+@AutoConfigureAfter({DispatcherServletAutoConfiguration.class, TaskExecutionAutoConfiguration.class, ValidationAutoConfiguration.class})
+public class WebMvcAutoConfiguration { }
+```
+
+- 為容器中配置了什麼
+
+```java
+@Import({WebMvcAutoConfiguration.EnableWebMvcConfiguration.class})
+@EnableConfigurationProperties({WebMvcProperties.class, WebProperties.class})
+@Order(0)
+public static class WebMvcAutoConfigurationAdapter implements WebMvcConfigurer, ServletContextAware {}
+```
+
+- 配置文件和相關屬性和xxx進行了綁定 
+  - WebMvcProperties == MVC
+  - WebProperties
+- 每一個配置類(可以是內部類)只存在一個有參建構子
+
+```java
+// 有參建構子所有參數的值都會從容器中確定
+public WebMvcAutoConfigurationAdapter(WebProperties webProperties, WebMvcProperties mvcProperties, ListableBeanFactory beanFactory, ObjectProvider<HttpMessageConverters> messageConvertersProvider, ObjectProvider<WebMvcAutoConfiguration.ResourceHandlerRegistrationCustomizer> resourceHandlerRegistrationCustomizerProvider, ObjectProvider<DispatcherServletPath> dispatcherServletPath, ObjectProvider<ServletRegistrationBean<?>> servletRegistrations) {
+    this.resourceProperties = webProperties.getResources();
+    this.mvcProperties = mvcProperties;
+    this.beanFactory = beanFactory;
+    this.messageConvertersProvider = messageConvertersProvider;
+    this.resourceHandlerRegistrationCustomizer = (WebMvcAutoConfiguration.ResourceHandlerRegistrationCustomizer)resourceHandlerRegistrationCustomizerProvider.getIfAvailable();
+    this.dispatcherServletPath = dispatcherServletPath;
+    this.servletRegistrations = servletRegistrations;
+    this.mvcProperties.checkConfiguration();
+}
+```
+
+
+
+## 請求參數處理
+
+
+
+## 響應數據與內容協商
+
+
+
+## 視圖解析與模板引擎
+
+
+
+
+
+## 普通參數與基本註解
+
+- 註解 
+  - @PathVariable
+    - 路徑變量
+  - @RequestHeader
+    - 獲取請求頭
+  - @ModelAttribute
+  - @RequestParam
+    - 獲取請求參數
+  - @MatrixVariable
+    - 矩陣變量
+  - @CookieValue
+    - 獲取Cookie值
+  - @RequestBody
+    - 獲取請求體 (Post)
+  - @RequestAttribute
+    - 獲取request域屬性
+
+
+
+- 註解測試
+  - @PathVariable  @RequestHeader  @RequestParam
+  - @CookieValue ("瀏覽器中的cookie名") 
+
+```java
+@RestController
+public class HelloController {
+
+    @RequestMapping("/img.jpg")
+    public String hello(){
+        return "aaa";
+    }
+
+    @GetMapping("/car/{id}/owner/{username}")
+    public Map<String,Object> getCar(@PathVariable("id") Integer id,
+                                     @PathVariable("username") String name,
+                                     @PathVariable Map<String,String> pv,
+                                     @RequestHeader("User-Agent") String userAgent,
+                                     @RequestHeader Map<String,String> header,
+                                     @RequestParam("age") Integer age,
+                                     @RequestParam("inters") List<String> inters,
+                                     @RequestParam Map<String,String> Params
+                                     @CookieValue("CookiesName") Cookie cookie){
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("id",id);
+        map.put("name",name);
+        map.put("pv",pv);
+        map.put("userAgent",userAgent);
+        map.put("headers",header);
+        map.put("age",age);
+        map.put("inters",inters);
+        map.put("params",Params);
+        map.put("CookiesName",cookie);
+        return map;
+
+    }
+}
+```
+
+- 取得測試
+  - href 跳轉的頁面 增加參數
+
+```html
+<h1>  靜態歡迎頁  </h1>
+測試基本註解
+<ul>
+    <a href="car/3/owner/lisi?age=18&inters=ball&inters=game"> car/{id}/owner/{username}</a>
+    <li> @PathVariable 路徑變量 </li>
+    <li> @RequestHeader 獲取請求頭 </li>
+    <li> @RequestParam 獲取請求參數 </li>
+    <li> @CookieValue 獲取cookie值 </li>
+    <li> @RequestBody 獲取請求體 [post] </li>
+
+    <li> @RequestAttribute 獲取request域屬性 </li>
+    <li> @MatrixVariable 矩陣變量 </li>
+</ul>
+```
+
+
+
+- @RequestAttribute  獲取request域屬性
+  - 測試設置 取得設置資料
+  - msg 由註解的方式取得
+  - msg 由 HttpServletRequest 的 request 的 getAttribute 方式取得
+
+```java
+@Controller
+public class RequestController {
+
+    @GetMapping("/goto")
+    public String goToPage(HttpServletRequest request){
+
+        request.setAttribute("msg","成功..");
+        request.setAttribute("code","200..");
+
+        return "forward:/success"; // 轉發到 /success請求
+    }
+
+    @ResponseBody
+    @GetMapping("/success")
+    public Map success(@RequestAttribute("msg") String msg,
+                       @RequestAttribute("code") String code,
+                       HttpServletRequest request){
+        Object msg1 = request.getAttribute("msg");
+        Map<String,Object> map = new HashMap<>();
+        map.put("reqMethod_msg",msg1);
+        map.put("annotation_msg",msg);
+
+        return map;
+    }
+
+}
+```
+
+
+
+- @MatrixVariable 矩陣變量
+
+
+
+通過url重寫 解決cookie禁用的問題
+
+- 發送請求攜帶時 尋找cookie 尋找裡面的jsessionid 可以找到對應的session.set(a,b)
+- cookie禁用時 連帶禁用jsessionid  所以找不到對應的session.set(a,b)
+- 通過url重寫
+  - /abc;jsessionid=xxxx 把 cookie的值使用矩陣變量的方式進行傳遞
+
+
+
+
+
+- Servlet API
+
+  - WebRequest ServletRequest MultipartRequest HttpSession ..
+
+- 複雜參數 
+
+  - Map Errors/BindingResult RedirectAttributes ServletResponse .. 
+  - Model 
+    - 會放在Request的請求域中 可以通過model獲得數據
+
+- 自定義對象參數
+
+  
+
+
+
+# 視圖解析與模板引擎
+
+- 視圖解析 : SpringBoot預設不支持JSP 需要引入第三方模板引擎技術實現頁面渲染
+
+
+
+## 視圖解析
+
+
+
+- 視圖處理方式
+  - 轉發
+  - 重定向
+  - 自定義視圖
+
+
+
+## 模板引擎 Thymeleaf
+
+
+
+#### thymeleaf
+
+- 現代化 伺服端java模板引擎
+
+
+
+#### 基本語法
+
+- 表達式
+
+| 表達式     | 語法   | 用途                             |
+| ---------- | ------ | -------------------------------- |
+| 變量取值   | ${...} | 獲取請求域 session域 對象等值    |
+| 選擇變量   | *{...} | 獲取上下文對象值                 |
+| 消息       | #{...} | 獲取國際化等值                   |
+| 鏈結       | @{...} | 生成鏈結                         |
+| 片段表達式 | ~{...} | jsp:include作用 引入公共頁面片段 |
+
+
+
+- #### 字面量
+
+文本值 : 'one text' , 'Another one!' ,...
+
+數字 : 0 , 34 , 3.0 , 12.3 ...
+
+布林值 : true false
+
+空 : null
+
+變量 : one , two , 變量不能有空格
+
+
+
+- #### 文本操作
+
+字串拼接 : + 
+
+變量替換 : |The name is $(name)|
+
+
+
+- #### 數學運算
+
+運算符 : + - * / %
+
+
+
+- #### 布林值運算
+
+運算符 : and or 
+
+一元運算 : ! not
+
+
+
+- #### 比較運算
+
+比較 : >  <   >=  <=  (gt lt  ge  le)
+
+等式 : == , != (eq ,ne)
+
+
+
+- #### 條件運算
+
+if-then : (if) ? (then)
+
+if-then-else : (if) ? (then) : (else)
+
+Default : (value) ?: (defaultvalue)
+
+
+
+- #### 特殊操作
+
+無操作 : _
+
+
+
+#### 設置屬性值-th:attr
+
+- th:attr
+  - 賦予值
+
+```html
+<form action="subscribe.html" th:attr="action=@{/subscribe}">
+  <fieldset>
+    <input type="text" name="email" />
+    <input type="submit" value="Subscribe!" th:attr="value=#{subscribe.submit}"/>
+  </fieldset>
+</form>
+```
+
+- 賦予多個值
+
+```html
+<img src="../../images/gtvglogo.png"  th:attr="src=@{/images/gtvglogo.png},title=#{logo},alt=#{logo}" />
+```
+
+- th:xxxx寫法
+
+```html
+<input type="submit" value="Subscribe!" th:value="#{subscribe.submit}"/>
+<form action="subscribe.html" th:action="@{/subscribe}">
+```
+
+
+
+#### 疊代
+
+
+
+#### 條件運算
+
+
+
+
+
+## thymeleaf使用
+
+- 引用Starter
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+</dependency>
+```
+
+- 自動配置好了thymeleaf
+
+
+
+自動配好的策略
+
+- 所有thymeleaf的配置都在ThymeleafProperties
+- 配置好了Spring TemplateEngine
+- 配好了 ThymeleafViewResolver
+- 我們只需要直接開發頁面
+
+
+
+#### 頁面開發
+
+- Controller
+
+```java
+@GetMapping("/aa")
+public String aa(Model model){
+
+    // model中的數據會被放在請求域中 request.setAttribute("a",aa)
+    model.addAttribute("msg","歡迎");
+    model.addAttribute("link","https://www.youtube.com/");
+    return "success";
+}
+```
+
+- success.html
+
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1 th:text="${msg}"> hh </h1>
+<h2>
+    <a href="www.aaa.com" th:href="${link}"> goto </a> </br>
+    <a href="www.aaa.com" th:href="@{link}"> goto2 </a> </br>
+
+</h2>
+</body>
+</html>
+```
+
+- 頁面的原始碼
+  - @{link}的作用
+
+```html
+ <a href="https://www.youtube.com/"> goto </a> </br>
+ <a href="link"> goto2 </a> </br>
+```
+
+
+
+
+
+# web實作
+
+
+
+- 項目創建
+- 靜態資源處理
+- 路徑構建
+- 模板抽取
+- 頁面跳轉
+- 數據渲染
+
+
+
+## 後台管理系統
+
+- 登入頁面 login.html
+  - 簡單製作基本登入功能
+    - thymeleaf  使用th:text得到後端設置的 model.addAttribute("msg","message");
+  - th:action="@{/login}"  會將資料送到此路徑 /login
+
+```html
+<h1>登入頁面</h1>
+<label style="color: crimson" th:text="${msg}"></label>
+<form action="main.html" method="post" th:action="@{/login}">
+    <p> 帳號 <input id="username" name="userName" type="text"> </p>
+    <p> 密碼 <input id="password" name="password" type="password">  </p>
+    <button type="submit"> 送出 </button>
+</form>
+```
+
+- main.html 登入後介面
+  - 使用thymeleaf 從session中獲取loginUser.userName 用戶帳號名
+
+```html
+<p> 歡迎 :  [[${session.loginUser.userName}]] </p>
+```
+
+
+
+- indexcontroller
+  - 防止表單重複提交 
+    - 轉發時攜帶的數據
+    - 且轉發時不會更改網址的名稱
+  - 使用重定向
+
+```java
+@Controller
+public class IndexController {
+    // 設置首頁
+    @GetMapping(value = {"/","/login"})
+    public String loginPage(){
+        return "login";
+    }
+    
+    // 接收前端發送的路徑 判斷
+    @PostMapping("/login")
+    public String main(User user, HttpSession session, Model model){
+
+        if(!StringUtils.isEmpty(user.getUserName()) && "123456".equals(user.getPassword())){
+            // 把登入成功的用戶保存起來
+            session.setAttribute("loginUser",user);
+
+            // 過去的提交表單是轉發 不會更改網址 重新整理會提交一樣的post
+            // 登入成功 重定向到main.html 會更改網址
+            return "redirect:/main.html";
+
+        }else{
+            model.addAttribute("msg","帳號密碼錯誤");
+            return "login";
+        }
+    }
+    
+    @GetMapping("/main.html")
+    // 專門寫一個請求讓他跳轉到main頁面
+    // 發送了這個請求 還是回到這個頁面  不會重新轉發 (發送post)
+    public String mainPage(HttpSession session,Model model){
+
+        // 是否登入  攔截器 過濾器
+        Object loginUser = session.getAttribute("loginUser");
+         // 如果得不到session內的Attribute 表示沒有登入
+        if(loginUser != null){
+            return "main";
+        }else{
+            // 回到登入頁面
+            model.addAttribute("msg","請重新登入");
+        }
+        return "main";
+    }
+}
+```
+
+
+
+## 攔截器
+
+攔截器使用
+    1. 編寫一個攔截器 實現HandlerInterceptor介面
+        2. 攔截器註冊到容器中 (實現 WebMvcConfigurer 的 addInterceptors)
+        3. 我們要指定攔截規則 (如果是攔截全部 靜態資源也會被攔截)
+
+- 編寫攔截器 
+  - implements HandlerInterceptor
+  - override  
+    - preHandle   
+    - postHandle   
+    - afterCompletion
+
+```java
+/*
+    登入檢查
+    1. 配置好攔截器要攔截哪些請求
+    2. 把這些配置放在容器中
+
+ */
+@Slf4j
+public class LoginInterceptor implements HandlerInterceptor {
+
+    // 目標方法執行之前
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        String requestURI = request.getRequestURI();
+        log.info("攔截的請求路徑是 {}",requestURI);
+        // 登入檢查邏輯
+        HttpSession session = request.getSession();
+        Object loginUser = session.getAttribute("loginUser");
+        if(loginUser!=null){
+            // 放行
+            return true;
+        }
+        // 攔截住 == 未登入
+        request.setAttribute("msg","請先登入");
+        // 轉發到登入頁面  將原生的request response一起轉發
+        // 只要請求域中有msg就可以獲取到
+        request.getRequestDispatcher("/").forward(request,response);
+        return false;
+   }
+
+    // 目標方法執行完成以後
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        log.info("postHandler 執行",modelAndView);
+    }
+
+    // 頁面渲染以後
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        log.info("afterCompletion 執行的異常",ex);}
+    }
+```
+
+  
+
+- 將攔截器註冊到容器
+  - 使用 @Configuration 註冊到容器
+  - 添加攔截器 registry.addInterceptor(new LoginInterceptor())
+  - 指定攔截的路徑  例外的路徑
+
+```java
+@Configuration
+public class AdminWebConfig implements WebMvcConfigurer {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 添加一個攔截器 LoginInterceptor
+        InterceptorRegistration interceptorRegistration = registry.addInterceptor(new LoginInterceptor());
+        // 調用方法 要攔截哪些路徑     "/**" 所有請求包含靜態資源
+        interceptorRegistration.addPathPatterns("/**")
+                // 例外放行 登入前可以訪問的地方 css樣式等等影響網頁瀏覽的路徑
+                .excludePathPatterns("/","/login","/css/**","/fonts/**","/images/**","/js/**");
+    }
+}
+```
+
+
+
+## 文件上傳
+
+
+
+#### 文件上傳實現
+
+```java
+@Controller
+@Slf4j
+public class FormController {
+    @GetMapping("/form")
+    public String formlayouts(){
+
+        return "form/formlogout";
+    }
+    // 處理上傳請求   @RequestParam 從請求中得到參數
+    // RequestParam  RequestPart 分別得到參數 文件
+    @PostMapping("/upload")
+    public String upload(@RequestParam("email") String email,
+                         @RequestParam("username") String username,
+                         @RequestPart("headerImg") MultipartFile headerImg,
+                         @RequestPart("photos") MultipartFile[] photos) throws IOException {
+        // 得到提交表單的訊息  表單中的name必須與其對應
+        log.info("上傳的訊息 : email={}, userename={}, headerImg={}, photos={}",
+                email,username,headerImg.getSize(),photos.length);
+        // 判斷如果上傳的圖片存在  ! isEmpty()
+        if(!headerImg.isEmpty()){
+            // 保存到伺服器
+            // 得到文件名
+            String originalFilename = headerImg.getOriginalFilename();
+            // 存到硬碟位置
+            headerImg.transferTo(new File("A:\\Environment variable\\img\\" + originalFilename));
+        }
+        if(photos.length > 0){
+            for (MultipartFile photo : photos) {
+                if(!photo.isEmpty()){
+                    String originalFilename = photo.getOriginalFilename();
+                    photo.transferTo(new File("A:\\Environment variable\\img\\" + originalFilename));
+                }
+            }
+        }
+        return "main";
+    }
+}
+```
+
+#### 自動配置原理
+
+- 文件上傳規則在 MultipartAutoConfiguration中定義
+- 改變定義 application.properties 
+
+```properties
+# 改變上傳大小上限
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=100MB
+```
+
+
+
+## 異常處理機制
+
+
+
+#### 錯誤處理
+
+- 預設規則
+
+  - 預設情況下 SpringBoot提供 /error 處理所有錯誤的映射
+
+  - 對於非瀏覽器客戶端 他將生成JSON響應 其中包含錯誤 HTTP狀態和異常消息的詳細訊息
+
+  - 對於瀏覽器客戶端 響應一個 whitelabel 錯誤視圖 以HTML格式呈現相同的數據
+
+    
+
+- 要對其進行自定義 添加view解析為error
+
+- 要完全替換預設行為 可以實現 ErrorController 並註冊該類型的Bean定義 或添加 ErrorAttributes類型的組件 以使用現有機制但替換其內容
+
+- error/下的4xx 5xx頁面會被自動解析
+
+![擷取_2022_01_20_15_20_35_99](https://i.imgur.com/G4ywEPo.png)
+
+#### 定制錯誤處理邏輯
+
+- 自定義錯誤頁
+  - error/404.html  error/5xx.html
+- @ControllerAdvice+@ExceptionHandler處理異常
+- 實現HandlerExceptionResolver 處理異常
+
+#### 異常處理自動配置原理
+
+
+
+
+
+## Web原生組件注入 
+
+- Servlet , Filter , Listener
+
+
+
+#### 使用Servlet API
+
+- 必須要主程式使用註解
+  - 指定原生servlet組件都放在哪裡 進行掃描
+
+```java
+@ServletComponentScan(basePackages = "com.example")
+```
+
+- Servlet
+  - @WebServlet(urlPatterns = "/my") 
+  - 直接響應 忽略Spring的攔截器
+
+```java
+@WebServlet(urlPatterns = "/my")
+public class MyServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.getWriter().write("6789");
+    }
+}
+```
+
+- Filter
+  - @WebFilter(urlPatterns = {"/css/*","/images/*"})
+
+```java
+@Slf4j
+@WebFilter(urlPatterns = {"/css/*","/images/*"})
+public class MyFilter implements Filter {
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        log.info("MyFilter初始化完成");
+    }
+
+    @Override
+    public void destroy() {
+        log.info("MyFilter銷毀了");
+    }
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        log.info("MyFilter工作");
+        filterChain.doFilter(servletRequest,servletResponse);
+    }
+}
+```
+
+- Listener
+
+```java
+@Slf4j
+@WebListener
+public class MyServletContextListener implements ServletContextListener {
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        log.info("MyServletContextListener監聽項目初始化完成");
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        log.info("MyServletContextListener監聽項目銷毀");
+    }
+}
+```
+
+
+
+#### RegisterationBean
+
+- 集合成一個類 創立各個功能 使用Bean放入容器
+
+```java
+// (proxyBeanMethods = true) : 保證依賴的組件始終是單實例的
+@Configuration(proxyBeanMethods = true)
+public class MyRegistConfig {
+
+    @Bean
+    public ServletRegistrationBean myServlet(){
+        MyServlet myServlet = new MyServlet();
+        return new ServletRegistrationBean(myServlet,"/my","/my02");
+    }
+    @Bean
+    public FilterRegistrationBean myFilter(){
+
+        MyFilter myFilter = new MyFilter();
+//        return new FilterRegistrationBean(myFilter,myServlet());
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(myFilter);
+        //　攔截的路徑
+        filterRegistrationBean.setUrlPatterns(Arrays.asList("/my","/css/*"));
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public ServletListenerRegistrationBean myListener(){
+        MyServletContextListener myServletContextListener = new MyServletContextListener();
+        return new ServletListenerRegistrationBean(myServletContextListener);
+    }
+}
+```
+
+
+
+
+
+## 定制化原理
+
+#### 定製化的常見方式
+
+- @Bean替換 增加容器中預設組件 : 視圖解析器
+- 修改配置文件
+- xxxxxCustomizer
+- 編寫自定義的配置類 xxxConfiguration
+- **web應用 編寫一個配置類實現 WebMvcConfigurer 即可定制化web功能** + @Bean為容器中再擴展一些組件
+
+```java
+@Configuration
+public class AdminWebConfig implements WebMvcConfigurer
+```
+
+- @EnableWebMvc + WebMvcConfigurer ------ @Bean  可以全面接管SpringMVC 所有規劃全部自己重新配置 實現定制和擴展功能
+  - 原理
+  - WebMvcAutoConfiguration預設的SpringMVC的自動配置功能類 靜態資源 歡迎頁
+  - 一旦使用@EnableWebMvc 會@Import (DelegatingWebMvcConfiguration.class)
+  - DelegatingWebMvcConfiguration的作用 ,  只保證SpringMVC最基本的使用
+    - 把所有系統中的WebMvcConfigurer拿過來 所有功能的定置都是這些WebMvcConfigurer合起來一起生效
+    - 自動配置了一些非常底層的組件 RequestMappingHandlerMapping 這些組件依賴的組件都是從容器中獲取
+  - WebMvcAutoConfiguration裡面的配置要能生效 必須要判斷@ConditionalOnMissingBean(WebMvcConfigurationSupport.class)
+
+#### 原理分析
+
+場景starter --> xxxxAutoConfiguration - 導入xxx組件 - 綁定xxxProperties --> 綁定配置文件項
+
+
+
+
+
+## 數據訪問
+
+#### SQL
+
+- 自動配置的數據源-HikariDataSource
+- 導入Jbdc場景
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jdbc</artifactId>
+</dependency>
+```
+
+- org.springframework:spring-jdbc:5.3.14 Jdbc 
+- com.zaxxer:HikariCP:4.0.3 數據源
+- org.springframework:spring-tx:5.3.14 事務
+
+
+
+數據庫驅動
+
+為什麼導入jdbc場景 沒有導入驅動  --> 官方不知道我們要操作哪一個數據庫
+
+
+
+##### 分析自動配置
+
+自動配置的類
+
+- DataSourceAutoConfiguration : 數據源的自動配置
+- DataSourceTransactionManagerAutoConfiguration : 事務管理器的自動配置 
+- JdbcTemplateAutoConfiguration : jdbcTemplate的自動配置 可以來對數據庫進行CRUD
+  - 可以修改這個配置項@ConfigurationProperties(prefix="spring.jdbc")來修改jdbcTemplate
+  - @Bean@Primary jdbcTemplate 容器中有這個組件
+- JndiDataSourceAutoConfiguration : jndi的自動配置
+- XADataSourceAutoConfiguration : 分布式事務相關的
+
+
+
+##### 修改配置項
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_account?useSSL=true&useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+  jdbc:
+    template:
+      query-timeout: 3
+```
+
+
+
+#### 數據源的自動配置
+
+
+
+#### 使用Druid數據源
+
+
+
+#### 整合MyBatis操作
+
+```xml
+<dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+    <version>2.2.0</version>
+</dependency>
+```
+
+![擷取_2022_01_21_13_17_16_716](https://i.imgur.com/XTnatmI.png)
+
+##### 配置模式
+
+- 全局配置文件
+- SqlSessionFactory : 自動配置好了
+- SqlSession : 自動配置了SqlSessionTemplate組合了SqlSession
+- @Import({MybatisAutoConfiguration.AutoConfiguredMapperScannerRegistrar.class})
+- Mapper : 只要我們寫的操作MyBatis的接口標註了 @Mapper就會被自動掃描進來
+
+```java
+@EnableConfigurationProperties({MybatisProperties.class}) // Mybatis配置項綁定類
+@AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisLanguageDriverAutoConfiguration.class}) 
+public class MybatisAutoConfiguration
+    
+@ConfigurationProperties(
+    prefix = "mybatis"
+)
+public class MybatisProperties
+```
+
+可以修改配置文件中 mybatis開始的所有
+
+
+
+- 指定配置文件位置
+
+```yaml
+# 配置myvatis規則  指定了Mybatis全局配置文件  SQL映射文件
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml # 全局配置文件
+  mapper-locations: classpath:mybatis/*.xml # SQL映射文件
+  
+  
+Mapper接口 --> 綁定xml  
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.Mapper.AccountMapper">
+<!--        public Account getAcct(Long id);    -->
+    <select id="getAcct" resultType="com.example.bean.Account">
+        select *
+        from account_tb1 where id=#{id}
+    </select>
+
+<!--    -->
+</mapper>
+```
+
+配置private Configuration configuration; mybatis.configuration下面的所有 就是相當於改配置文件中的值
+
+```yaml
+mybatis:
+#  config-location: mybatis/mybatis-config.xml
+  mapper-locations: mybatis/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+可以不寫全局配置文件 所有全局配置文件的配置都放在configuration配置項中即可
+```
+
+
+
+##### 流程
+
+- 導入mybatis的官方starter
+- 編寫mapper接口 標註@Mapper註解
+
+```java
+@Mapper
+public interface AccountMapper {
+    public Account getAcct(Long id);
+}
+```
+
+- 編寫sql映射文件並綁定mapper接口
+
+```xml
+<mapper namespace="com.example.Mapper.AccountMapper">
+<!--        public Account getAcct(Long id);    -->
+    <select id="getAcct" resultType="com.example.bean.Account">
+        select * from account_tb1 where id=#{id};
+    </select>
+</mapper>
+```
+
+- 編寫service實現類
+
+```java
+@Service
+public class AccountService {
+
+    @Autowired
+    AccountMapper accountMapper;
+    public Account getAcctById(Long id){
+        return accountMapper.getAcct(id);
+    }
+}
+```
+
+- Controller中對應url 返回數據
+
+```java
+@Controller
+public class IndexController {
+    @Autowired
+    AccountService accountService;
+
+    @ResponseBody
+    @GetMapping("/acct")
+    public Account getById(@RequestParam("id") Long id){
+
+        return accountService.getAcctById(id);
+    }
+```
+
+- 在application.yaml中指定Mapper配置文件的位置 以及指定全局配置文件的訊息 (建議直接配置在mybatis.configuration標籤下)
+
+```yaml
+# 配置mybatis規則  指定了Mybatis全局配置文件  SQL映射文件
+mybatis:
+#  config-location: mybatis/mybatis-config.xml
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  configuration: # 指定mybatis全局配置文件中的相關配置項
+    map-underscore-to-camel-case: true
+```
+
+
+
+##### 註解模式
+
+- SQL語句不會太複雜時 使用註解的效率較好
+- 使用註解無須配置 接口對應的Mapper.xml文件
+
+- 接口設置方法
+
+```java
+@Mapper
+public interface CityMapper {
+
+    @Select("select * from city where id = #{id}")
+    public City getById(Long id);
+
+    @Insert("insert into city(`name`,`state`,`country`) values (#{name},#{state},#{country});")
+    @Options(useGeneratedKeys = true,keyProperty = "id")
+    public void insert(City city);
+
+}
+```
+
+
+
+##### 混合模式
+
+- 註解模式與一般模式相互搭配使用
+- 一般情況 過於複雜的SQL語句 會使用配置文件設定
+
+- 接口設置方法
+
+```java
+@Mapper
+public interface CityMapper {
+
+    @Select("select * from city where id = #{id}")
+    public City getById(Long id);
+
+    public void insert(City city);
+}
+```
+
+- Service實現類
+
+```java
+@Service
+public class CityService {
+
+    @Autowired
+    CityMapper cityMapper;
+
+    public City getById(Long id){
+        return cityMapper.getById(id);
+    }
+
+
+    public void saveCity(City city) {
+        cityMapper.insert(city);
+    }
+}
+```
+
+- 配置文件 AccountMapper.xml
+
+```xml
+<!--       public void insert(City city); -->
+    <insert id="insert">
+        insert into city(`name`,`state`,`country`)
+        values (#{name},#{state},#{country});
+    </insert>
+```
+
+- Controller
+
+```java
+@ResponseBody
+@GetMapping("/city")
+public City getCiryById(@RequestParam("id")Long id){
+    return cityService.getById(id);
+}
+
+@ResponseBody
+@PostMapping("/city")
+public City saveCity(City city){
+    cityService.saveCity(city);
+    return city;
+}
+```
+
+
+
+##### 最佳實戰
+
+- 引入mybatis-starter
+- 配置application.yaml中 指定mapper-location位置即可
+- 編寫Mapper接口並標註@Mapper註解
+  - 或是可以在主程式上設置掃描Mapper @MapperScan("com.example.Mapper")
+- 簡單的方法建議使用註解
+- 複雜的方法編寫mapper.xml進行綁定映射
+
+
+
+#### 整合MyBatis-Plus完成CRUD
+
+- 什麼是MyBatis-Plus 
+  - MyBatis的增強工具 在MyBatis的基礎上只做增強不做改變 為簡化開發 提高效率而生
+  - 建議安裝MybatisX插件
+
+- 引入依賴
+
+```xml
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatis-plus-boot-starter</artifactId>
+    <version>3.5.0</version>
+</dependency>
+```
+
+- 自動配置
+
+  - MybatisPlusAutoConfiguration配置類 MybatisPlusProperties配置項綁定 mybatis-plus: xxx就是對mybatis-plus的定制
+
+  - SqlSessionFactory 自動配置好 , 底層是容器中預設的數據源
+
+  - mapperLocations自動配置好的 有預設值 ,
+
+    ```
+    classpath*:/mapper/**/*.xml;
+    ```
+
+    任意包的類路徑下的所有mapper文件夾下任意路徑下的所有xml都是sql映射文件 建議以後sql映射文件 放在mapper下
+
+  - 容器中也自動配置好了SqlSessionTemplate
+
+  - @Mapper標註的接口也會被自動掃描 , 建議使用 @MapperScan("com.example.Mapper") 批量掃描
+
+優點:
+
+- 只需要我們的Mapper繼承BaseMapper就可以擁有crud能力
+
+
+
+##### 查詢 刪除
+
+- Controller
+
+```java
+// 查詢
+@GetMapping("/dynamic_table")
+    public String dynamic_table_table(@RequestParam(value = "pn",defaultValue = "1") Integer pn, Model model){
+        // 表格內容的遍歷
+//        List<User> users = Arrays.asList(new User("AAA", "1234"),
+//                new User("BBB", "12345"),
+//                new User("CCC", "1234567"),
+//                new User("DDD", "12345678"));
+//        model.addAttribute("users",users);
+        // 從數據庫中查出user表中的用戶進行展示
+
+//        List<User> list = userService.list();
+//        model.addAttribute("users",list);
+
+        // 分頁查詢數據
+        Page<User> userPage = new Page<>(pn, 5);
+        // 分頁查詢結果
+        Page<User> page = userService.page(userPage, null);
+        long current = page.getCurrent();
+        long pages = page.getPages();
+        long total = page.getTotal();
+        List<User> records = page.getRecords();
+
+        model.addAttribute("page",page);
+
+        return "table/dynamic_table";
+    }
+
+// 刪除
+    @GetMapping("/user/delete/{id}")
+    public String deleteUser(@PathVariable("id") Long id,
+                             @RequestParam(value = "pn",defaultValue ="1")Integer pn,
+                             RedirectAttributes ra){
+        userService.removeById(id);
+
+        ra.addAttribute("pn",pn);
+        return "redirect:/dynamic_table";
+    }
+```
+
+- 對應顯示的dynamic_table
+
+```html
+<thead>
+<tr>
+    <th>  #  </th>
+    <th>  id   </th>
+    <th>  name </th>
+    <th>  age </th>
+    <th>  email </th>
+    <th>  操作  </th>
+    <br/>
+</tr>
+</thead>
+<tbody>
+<tr class="gradex" th:each="user,stat:${page.records}">
+    <td th:text="${stat.count}"> Trident </td>
+    <td th:text="${user.id}"> id </td>
+    <td th:text="${user.userName}"> Internet </td>
+    <td> [[${user.password}]]</td>
+    <td th:text="${user.age}"> age </td>
+    <td> [[${user.email}]] </td>
+    <td>
+        <a th:href="@{/user/delete/{id}(id=${user.id},pn=${page.current})}" class="btn" type="button">刪除</a>
+    </td>
+    <br/>
+</tr>
+<div>
+    <div>
+        <p>當前第[[${page.current}]]頁</p>
+        <p>總計[[${page.pages}]]頁 共[[${page.total}]]條紀錄</p>
+    </div>
+</div>
+```
+
+
+
+## NoSQL
+
+- Redis是一個開源的 記憶體中數據結構儲存系統 他可以當作數據庫 暫存 消息的中間鍵
+- 他支持多種類型的數據結構  字串(Strings) 散列(hashes) 列表(lists) 集合(sets) 有序集合 (sorted sets) ...
+
+
+
+#### Redis自動配置
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+
+![擷取_2022_01_22_15_48_35_456](https://i.imgur.com/tmATC6g.png)
+
+
+
+
+
+#### RedisTemplate與Lettuce
+
+#### 切換至jedis
+
+
+
+
+
+## 單元測試
+
+- 綜合測試 詳細報告
+  - 使用Maven中的 clean  test 
+
+#### JUnit5
+
+- 與之前版本的Junit框架不同 由三個不同的子項目的幾個不同模塊組成
+- JUnit5 = JUnit Platform + JUnit Jupiter + JUnit Vintage
+- JUnit Platform
+  - 是在JVM上啟動測是框架的基礎 不僅支持Junit自製的測試引擎 其他測試引擎也都可以接入
+- JUnit Jupiter
+  - 提供了JUnit5的新的編程模型 是Junit5新特性的核心 內部包含了一個測試引擎 用於Junit Platform上運行
+- JUnit Vintage
+  - 由於JUnit已經發展多年 為了照顧老的項目 JUnit Vintage提供了兼容JUnit4.x , JUnit3.x的測試引擎
+
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-test</artifactId>
+  <scope>test</scope>
+</dependency>
+```
+
+- 過去用法
+  - @SpringBootTest + @RunWith(SpringTest.class)
+- 現在用法
+  - 編寫測試方法 @Test包住
+  - Junit類具有Spring的功能  @Autowired 例如 @Transactional標註冊是方法 測試完成後自動回滾
+
+
+
+
+
+#### JUnit5常用註解
+
+JUnit5的註解與JUnit4的註解有所變化
+
+https://junit.org/junit5/docs/current/user-guide/#writing-tests-annotations
+
+- **@Test :**表示方法是測試方法 但是與JUnit4的@Test不同 他的職責非常單一不能聲明任何屬性 拓展的測試將會由Jupiter提供額外測試
+- **@ParameterizedTest :** 表示方法是參數化測試
+
+- **@RepeatedTest :** 表示方法可重複執行
+- **@DisplayName : ** 為測試類或者測試方法設置展示名稱
+
+- **@BeforeEach :** 表示在每個單元測試之前執行 
+- **@AfterEach :**表示在每個單元測試之後執行 
+
+- **@BeforeAll :**表示在所有單元測試之前執行 
+- **@AfterAll :**表示在所有單元測試之後執行 
+
+- **@Tag :** 表示單元測試類型 類似於JUnit4的@Categories
+- **@Disabled :** 表示測試類或測試方法不執行 類似於JUnit4中的@Ignore 
+
+- **@Timeout : ** 表示測試方法運行如果超過了指定時間將會返回錯誤
+- **@ExtendWith :** 為測試類或測試方法提供擴展類使用
+
+
+
+- 測試使用
+  - @SpringBootTest 導入SpringBoot 可以使用裡面的容器
+  - @RepeatedTest(5) 重複執行測試
+
+```java
+@SpringBootTest
+@DisplayName("╯°□°）╯")
+public class Junit5Test {
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    @Test
+    @DisplayName("ヾ(•ω•`)o")
+    void testDisplayName(){
+        System.out.println(11);
+        System.out.println(jdbcTemplate);
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("ヾ(^▽^*)))")
+    void test2(){
+        System.out.println(22);
+    }
+
+    // 超時  拋出異常
+    @Timeout(value = 500,unit = TimeUnit.MILLISECONDS)
+    @Test
+    void testTimeout() throws InterruptedException {
+        Thread.sleep(400);
+    }
+
+    @RepeatedTest(5)
+    @Test
+    void testRepeatedTest(){
+        System.out.println(55);
+    }
+
+    @BeforeEach
+    void testBeforeEach(){
+        System.out.println("測試開始前...");
+    }
+
+    @AfterEach
+    void testAfterEach(){
+        System.out.println("測試結束了...");
+    }
+
+    @BeforeAll
+    static void testBeforeAll(){
+        System.out.println("所有測試開始前...");
+    }
+
+    @AfterAll
+    static void testAfterAll(){
+        System.out.println("所有測試結束了...");
+    }
+}
+```
+
+
+
+#### 斷言 (assertions)
+
+- 為測試方法中的核心部分 用來對策是需要滿足的條件進行驗證
+- 這些斷言方法都是org.junit.jupiter.api.Assertions的靜態方法
+- 檢查業務邏輯返回的數據是否合理
+- 所有測試運行結束後 會有一個詳細的測試報告
+
+
+
+##### 簡單斷言
+
+- 用來對單個值進行簡單的驗證
+
+| 方法            | 說明                                 |
+| --------------- | ------------------------------------ |
+| assertEquals    | 判斷兩個對象或兩個原始類型是否相等   |
+| assertNotEquals | 判斷兩個對象或兩個原始類型是否不相等 |
+| assertSame      | 判斷兩個對象引用是否指向同一個對象   |
+| assertNotSame   | 判斷兩個對象引用是否指向不同的對象   |
+| assertTrue      | 判斷給定的布林值是否為true           |
+| assertFalse     | 判斷給定的布林值是否為false          |
+| assertNull      | 判斷給定的對象引用是否為null         |
+| assertNotNull   | 判斷給定的對象引用是否不為null       |
+
+
+
+- 簡單斷言測試
+  - assertEquals
+  - assertSame
+
+```java
+@DisplayName("╯°□°）╯")
+public class Junit5Test {
+
+    // 斷言的情況下 : 前面的斷言判斷有錯 後面的程式碼都不會執行
+    @DisplayName("測試簡單斷言")
+    @Test
+    void testSimpleAssertions(){
+        int cal = cal(3,2);
+        // 期望值,實際值 判斷
+        assertEquals(5,cal,"業務邏輯計算失敗");
+
+        Object obj1 = new Object();
+        Object obj2 = new Object();
+        assertSame(obj1,obj2,"兩個對象不一致");
+    }
+
+    int cal(int i,int j){
+        return i+j;
+    }
+}
+```
+
+
+
+##### 陣列斷言
+
+- 通過assertArrayEquals方法判斷兩個對象或原始類型的陣列是否相等
+
+- 陣列斷言測試
+
+```java
+@Test
+@DisplayName("array assertion")
+void array(){
+    assertArrayEquals(new int[]{2,2},new int[]{1,2},"陣列內容不相等");
+}
+```
+
+
+
+##### 組合斷言
+
+- assertAll方法接受多個 org.junit.jupiter.api.Executable函數式接口的實例做為要驗證的斷言 可以通過lambda表達式很容易地提供這些斷言
+- 組合斷言測試
+
+```java
+// 所有斷言全部都要成功
+@Test
+@DisplayName("組合斷言")
+void all(){
+    assertAll("test",
+            ()-> assertTrue(true&&true,"結果不為true"),
+            ()-> assertEquals(1,2,"結果不是1"));
+    // 當前面的組合斷言有誤 後面的程式不會執行
+    System.out.println("=======");
+}
+```
+
+
+
+##### 異常斷言
+
+- 異常斷言的斷言方式Assertions.assertThrows()配合函數式編程可以進行使用
+- 異常斷言測試
+
+```java
+@DisplayName("異常斷言")
+@Test
+void  testException(){
+    // 斷定業務邏輯一定會出現異常
+    assertThrows(ArithmeticException.class,
+            ()->{int i=10/0;
+        },"業務邏輯意外正常運行");
+}
+```
+
+
+
+##### 快速失敗
+
+- 通過fail方法直接使得測試失敗
+- 快速失敗測試
+
+```java
+// 所有斷言全部都要成功
+@Test
+@DisplayName("組合斷言")
+void all(){
+    assertAll("test",
+            ()-> assertTrue(true&&true,"結果不為true"),
+            ()-> assertEquals(1,2,"結果不是1"));
+    // 當前面的組合斷言有誤 後面的程式不會執行
+    System.out.println("=======");
+}
+```
+
+
+
+#### 前置條件(assumptions)
+
+- JUnit5中的前置條件(assumptions 假設) 類似於斷言 
+- 不同之處在於不滿足的斷言會使得測試方法失敗 
+- 而不滿足的前置條件只會使得測試方法的執行終止
+- 前置條件可以看成是測試方法執行的前提 當該前提不滿足時 就沒有繼續執行的必要
+- 前置條件測試
+  - 前置條件失敗時會跳過 (Skipped) 執行
+
+```java
+@DisplayName("測試前置條件")
+@Test
+void testassumptions(){
+    Assumptions.assumeTrue(false,"結果不是true");
+    System.out.println("11111");
+}
+```
+
+
+
+#### 嵌套測試
+
+- JUnit5可以通過Java中的內部類和@Nested註解實現嵌套測試 從而可以更好的把相關的測試方法組織在一起 
+- 在內部類可以使用@BeforeEach和@AfterEach註解 而且嵌套的層次沒有限制
+
+
+
+- 外層的Before(After)Each/ALL會驅動內層的Class
+- 也就是會先執行外層的方法
+
+```java
+@DisplayName("嵌套測試")
+class TestingAStackDemo {
+
+    Stack<Object> stack;
+
+    @Test
+    @DisplayName("new Stack()")
+    void isInstantiatedWithNew() {
+        new Stack<>();
+        // 嵌套測試情況下 外層的Test不能驅動內層的 Before(After)Each/ALL 等的方法提前/之後運行
+        assertNull(stack);
+    }
+
+    @Nested
+    @DisplayName("when new")
+    class WhenNew {
+
+        @BeforeEach
+        void createNewStack() {
+            stack = new Stack<>();
+            System.out.println("外層BeforeEach");
+        }
+
+        // 內層的Test執行前 外層會先驅動 Before(After)Each/ALL 等的方法提前/之後運行
+        @Test
+        @DisplayName("is empty")
+        void isEmpty() {
+            assertTrue(stack.isEmpty());
+        }
+
+        @Test
+        @DisplayName("throws EmptyStackException when popped")
+        void throwsExceptionWhenPopped() {
+            assertThrows(EmptyStackException.class, stack::pop);
+        }
+
+        @Test
+        @DisplayName("throws EmptyStackException when peeked")
+        void throwsExceptionWhenPeeked() {
+            assertThrows(EmptyStackException.class, stack::peek);
+        }
+
+        @Nested
+        @DisplayName("after pushing an element")
+        class AfterPushing {
+
+            String anElement = "an element";
+
+            @BeforeEach
+            void pushAnElement() {
+                stack.push(anElement);
+            }
+
+            @Test
+            @DisplayName("it is no longer empty")
+            void isNotEmpty() {
+                assertFalse(stack.isEmpty());
+            }
+
+            @Test
+            @DisplayName("returns the element when popped and is empty")
+            void returnElementWhenPopped() {
+                assertEquals(anElement, stack.pop());
+                assertTrue(stack.isEmpty());
+            }
+
+            @Test
+            @DisplayName("returns the element when peeked but remains not empty")
+            void returnElementWhenPeeked() {
+                assertEquals(anElement, stack.peek());
+                assertFalse(stack.isEmpty());
+            }
+        }
+    }
+}
+```
+
+
+
+#### 參數化測試
+
+- JUnit5的新特性 他使得用不同的參數多次運行測試成為了可能 也為單元測試帶來許多便利
+- 利用@ValueSource等註解 指定入參 我們將可以使用不同的參數進行多次單元測試 而不需要每新增一個參數就新增一個單元測試省去了很多冗於的程式碼
+- **@ValueSource**: 為參數化測試指定入參來源 支持八大基本類以為String類型 Class類型
+- **@NullSource**: 表示為參數化測試提供一個null的入參
+- **@EnumSource**: 表示為參數化測試提供一個枚舉入參
+- **@CsvFileSource**: 表示讀取指定CSV文件內容作為參數化測試入參
+- @**MethodSource**: 表示讀取指定方法的返回值作為參數化測試入參 (注意方法返回需要是一個流)
+
+ 
+
+- int參數
+
+```java
+@ParameterizedTest
+@DisplayName("參數化測試")
+@ValueSource(ints = {1,2,3,4,5})
+void testParameterized(int i){
+    System.out.println(i);
+}
+```
+
+- String參數 由方法傳入
+
+```java
+@ParameterizedTest
+@DisplayName("參數化測試")
+@MethodSource("stringProvider")
+void testParameterized2(String i){
+    System.out.println(i);
+}
+
+static Stream<String> stringProvider(){
+    return Stream.of("apple","banana","orange");
+}
+```
+
+
+
+
+
+## 指標監控
+
+
+
+#### SpringBoot Actuator
+
+- 未來的每一個微服務的部屬  我們都需要對其進行監控 追蹤 審計 控制等
+- SpringBoot抽取了Actuator場景 使得我們每個微服務快速引用即可獲得生產級別的應用監控 審計等功能
+
+
+
+#### 如何使用
+
+- 引入場景
+- 訪問 http ://localhost:8080/actuator/**
+- 暴露所有監控訊息為HTTP
+
+
+
+
+
+#### 暴露Endpoints
+
+支持的暴露方式
+
+- HTTP: 預設只暴露health和info Endpoint
+- JMX: 預設暴露所有Endpoint
+- 除了health和info 剩下的Endpoint都應該進行保護訪問 如果引入SpringSecurity 則會預設配置安全訪問機制
+
+```yaml
+# management 是所有actuator的配置
+management:
+  endpoints:
+    enabled-by-default: true # 預設開啟所有監控端點
+
+    web:
+      exposure:
+        include: '*' # 以web方式暴露所有端點
+```
+
+- 測試 
+  - http ://localhost:8080/actuator/beans
+  - http ://localhost:8080/actuator/configprops
+  - http ://localhost:8080/actuator/metrics
+
+
+
+#### Actuator Endpoint
+
+##### 常使用的端點
+
+| `auditevents`      |      |
+| ------------------ | ---- |
+| `beans`            |      |
+| `caches`           |      |
+| `conditions`       |      |
+| `configprops`      |      |
+| `env`              |      |
+| `flyway`           |      |
+| `health`           |      |
+| `httptrace`        |      |
+| `info`             |      |
+| `integrationgraph` |      |
+| `loggers`          |      |
+| `liquibase`        |      |
+| `metrics`          |      |
+| `mappings`         |      |
+| `scheduledtasks`   |      |
+| `sessions`         |      |
+| `shutdown`         |      |
+| `startup`          |      |
+| `threaddump`       |      |
+
+
+
+##### web應用程式
+
+如果應用程式是Web應用程式 (SpringMVC,Spring WebFlux Jersey) 則可以使用以下附加端點 
+
+| ID           | 描述                |
+| ------------ | ------------------- |
+| `heapdump`   | 返回hprof堆轉儲文件 |
+| `jolokia`    |                     |
+| `logfile`    |                     |
+| `prometheus` |                     |
+
+
+
+最常用的Endpoint
+
+- Health : 健康狀況
+  - 如果當前的狀況不健康 可能需要先下架 在重新整理上線
+- Metrics : 運行時指標
+- Loggers : 日誌記錄
+
+
+
+#### Health Endpoint
+
+健康檢查端點 一般用於雲平台 平台會定時的檢查應用的健康狀況
+
+我們就需要Health Endpoint 可以為平台返回當前應用的一系列組件健康狀況的集合
+
+重要的幾點
+
+- health endpoint返回的結果 應該是一系列健康檢查後的一個彙總報告
+- 很多的健康檢查預設已經自動配置好了 ex 資料庫 redis
+- 可以很容易的添加自定義的健康檢查機制
+
+
+
+- 健康檢查狀態 down
+  - 可能要從主程式的關閉一些無法使用的功能
+
+```java
+@SpringBootApplication(exclude = RedisAutoConfiguration.class)
+public class Boot05WebAdminApplication { }
+```
+
+
+
+- 開啟health狀態的詳細說明
+
+```yaml
+management:
+  endpoint:
+    health:
+      show-details: always
+```
+
+
+
+#### Metrics Endpoint
+
+提供詳細的 層級的 空間指標訊息 這些訊息可以被pull (主動推送) 或者 push(被動獲取) 方式得到
+
+- 通過Metrics對接多種監控系統
+- 簡化核心Metrics開發
+- 添加自定義Metrics或者擴展已有Metrics
+
+
+
+
+
+#### 管理Endpoints
+
+- 自定義選擇開啟監控端點
+
+```yaml
+management:
+  endpoints:
+    enabled-by-default: false 
+
+  endpoint:
+    health:
+      show-details: always
+      enabled: true
+    info:
+      enabled: true
+    beans:
+      enabled: true
+    metrics:
+      enabled: true
+```
+
+
+
+
+
+#### 定制Endpoint
+
+##### 定制Health訊息
+
+- class名以 HealthIndicator 結尾
+- 繼承 AbstractHealthIndicator 類
+- 重寫類中的 doHealthCheck 方法
+
+```java
+@Component
+// 名字為 MyCom
+public class MyComHealthIndicator extends AbstractHealthIndicator {
+//    真實的檢查方法
+    @Override
+    protected void doHealthCheck(Health.Builder builder) throws Exception {
+        // mongodb 獲取連接 進行測試
+        Map<String,Object> map = new HashMap<>();
+        //　檢查完成
+        if(1 == 2){
+//            builder.up(); // 健康
+            builder.status(Status.UP);
+            map.put("count",1);
+            map.put("ms",100);
+        }else{
+//            builder.down(); // 不健康
+            builder.status(Status.OUT_OF_SERVICE);
+            map.put("err","連線超時");
+            map.put("ms",3000);
+        }
+        builder.withDetail("code",100).withDetails(map);
+
+    }
+}
+```
+
+- application.yaml
+
+```yaml
+management:
+  endpoint:
+    health:
+      show-details: always # 總是顯示詳細訊息 可顯示每個欄位的狀態訊息
+      enabled: true
+```
+
+http ://localhost:8080/actuator/health
+
+
+
+##### 定制info訊息
+
+常用兩個方式
+
+- 編寫配置文件
+
+```xml
+info:
+  appName: boot-admin
+  appVersion: 1.0.0
+#  獲取pom.xml文件的訊息
+  mavenProjectName: @project.artifactId@
+  mavenProjectVersion: @project.version@
+```
+
+- 編寫infoContributor
+
+```java
+@Component
+public class AppInfoContributor implements InfoContributor {
+    @Override
+    public void contribute(Info.Builder builder) {
+        builder.withDetail("msg","你好")
+                .withDetail("hello","AAA")
+                .withDetails(Collections.singletonMap("world","666600"));
+    }
+}
+```
+
+http ://localhost:8080/actuator/info 輸出以上方式返回的所有info訊息
+
+
+
+##### 定制Metrics訊息
+
+- SpringBoot支持自動適配的Metrics
+
+- JVM metrics, report utilization of:
+
+- - Various memory and buffer pools
+  - Statistics related to garbage collection
+
+- - Threads utilization
+  - Number of classes loaded/unloaded
+
+- CPU metrics
+- File descriptor metrics
+
+- Kafka consumer and producer metrics
+- Log4j2 metrics: record the number of events logged to Log4j2 at each level
+
+- Logback metrics: record the number of events logged to Logback at each level
+- Uptime metrics: report a gauge for uptime and a fixed gauge representing the application’s absolute start time
+
+- Tomcat metrics (`server.tomcat.mbeanregistry.enabled` must be set to `true` for all Tomcat metrics to be registered)
+- [Spring Integration](https://docs.spring.io/spring-integration/docs/5.4.1/reference/html/system-management.html#micrometer-integration) metrics
+
+
+
+- 增加定制Metrics
+  - 取得CityServiceImpl被調用的次數
+  - public CityServiceImpl(MeterRegistry meterRegistry) 註冊  調用方法
+
+```java
+@Service
+public class CityServiceImpl implements CityService {
+
+    @Autowired
+    CityMapper cityMapper;
+
+    Counter counter;
+    // 拿到指標的註冊中心
+    public CityServiceImpl(MeterRegistry meterRegistry){
+        counter = meterRegistry.counter("cityService.saveCity.count");
+    }
+
+
+    public City getById(Long id){
+        return cityMapper.getById(id);
+    }
+
+
+    public void saveCity(City city) {
+        counter.increment();
+        cityMapper.insert(city);
+    }
+}
+```
+
+
+
+##### 定制Endpoint
+
+```java
+// 自定義端點不用開啟 預設會被開啟
+@Component
+@Endpoint(id = "myservice") // 從URL中可以直接獲取的端點名
+public class MyServiceEndPoint {
+    // 端點的讀操作
+    @ReadOperation
+    public Map getDockerInfo(){
+        // 發送請求 http://localhost:8080/actuator/myservice 返回數據
+        return Collections.singletonMap("dockerInfo","docker started...");
+    }
+
+    // 端點的寫操作
+    @WriteOperation
+    public void stopDocker(){
+        System.out.println("docker stopped....");
+    }
+}
+```
+
+場景 : 開發ReadinessEndpoint來管理程式是否就緒 或者LivenessEndpoint來管理程式是否存活
+
+
+
+#### 可視化
+
+使用指標監控Boot Admin Server
+
+- 建立新的Project 設置他為監控的port
+  - 引入依賴
+  - 標註註解 @EnableAdminServer 啟用監控
+
+```xml
+<dependency>
+    <groupId>de.codecentric</groupId>
+    <artifactId>spring-boot-admin-starter-server</artifactId>
+    <version>2.5.1</version>
+</dependency>
+```
+
+- 要監控的對象 引入client依賴
+
+```j
+<dependency>
+    <groupId>de.codecentric</groupId>
+    <artifactId>spring-boot-admin-starter-client</artifactId>
+    <version>2.5.1</version>
+</dependency>
+```
+
+- 設置配置文件
+  - 指定監控端 8888
+  - 另外設定監控名稱 name
+
+```yaml
+spring:
+  boot:
+    admin:
+      client:
+        url: http://localhost:8888
+        instance:
+          prefer-ip: true # 使用ip註冊
+  application:
+    name: boot-05-web-admin
+```
+
+
+
+## 原理解析
+
+#### Profilte功能
+
+- 為了方便多環境適配 SpringBoot簡化了profile功能
+
+
+
+##### application-profile功能
+
+- 預設配置文件 application.yaml 任何時候都會載入
+- 指定環境配置文件 application-{env}.yaml
+  - 像是以下 需要由預設配置文件進行指定
+    - application-prod.yaml
+    - application-test.yaml
+- 啟用指定配置
+  - 配置文件啟用
+    - application.yaml 設置  spring.profiles.active=test
+  - 命令行啟用
+    - java -jar xxx.jar [文件名] --spring.profiles.active=prod --person.name=ABC
+- 預設配置與環境配置同時生效
+- 同名配置項 profile配置優先
+
+
+
+##### @Profile條件裝配功能
+
+```java
+// 指定prod環境時生效
+@Profile("prod")
+@Component
+@ConfigurationProperties("person")
+@Data
+public class Boss{
+```
+
+
+
+##### profile分組
+
+- 將多個環境整合到一個組裡 
+- 選擇一個組裡面所有的環境啟用
+
+```properties
+# 指定啟用的環境 預設配置文件和指定環境的配置文件都會生效
+spring.profiles.active=myprod
+
+spring.profiles.group.myprod[0]=ppd
+spring.profiles.group.myprod[1]=prod
+
+spring.profiles.group.mytest[0]=test
+```
+
+
+
+#### 外部化配置
+
+- 將所有訊息抽取成一個文件放在web集中管理
+
+1. Default properties (specified by setting `SpringApplication.setDefaultProperties`).
+2. [`@PropertySource`](https://docs.spring.io/spring-framework/docs/5.3.15/javadoc-api/org/springframework/context/annotation/PropertySource.html) annotations on your `@Configuration` classes. Please note that such property sources are not added to the `Environment` until the application context is being refreshed. This is too late to configure certain properties such as `logging.*` and `spring.main.*` which are read before refresh begins.
+3. Config data (such as `application.properties` files).
+4. A `RandomValuePropertySource` that has properties only in `random.*`.
+5. OS environment variables.
+6. Java System properties (`System.getProperties()`).
+7. JNDI attributes from `java:comp/env`.
+8. `ServletContext` init parameters.
+9. `ServletConfig` init parameters.
+10. Properties from `SPRING_APPLICATION_JSON` (inline JSON embedded in an environment variable or system property).
+11. Command line arguments.
+12. `properties` attribute on your tests. Available on [`@SpringBootTest`](https://docs.spring.io/spring-boot/docs/2.6.3/api/org/springframework/boot/test/context/SpringBootTest.html) and the [test annotations for testing a particular slice of your application](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing.spring-boot-applications.autoconfigured-tests).
+13. [`@TestPropertySource`](https://docs.spring.io/spring-framework/docs/5.3.15/javadoc-api/org/springframework/test/context/TestPropertySource.html) annotations on your tests.
+14. [Devtools global settings properties](https://docs.spring.io/spring-boot/docs/current/reference/html/using.html#using.devtools.globalsettings) in the `$HOME/.config/spring-boot` directory when devtools is active.
+
+##### 外部配置源
+
+常用 : Java屬性文件 YAML文件 環境變數 命令行參數
+
+
+
+##### 配置文件查找位置
+
+External Application Properties
+
+(1) classpath 根路徑
+
+(2) classpath 根路徑下config目錄
+
+(3) jar包當前目錄
+
+(4) jar包當前目錄的config目錄
+
+(5) /config子目錄的直接子目錄
+
+##### 配置文件載入順序
+
+1. 　當前jar包内部的application.properties和application.yml
+2. 　當前jar包内部的application-{profile}.properties 和 application-{profile}.yml
+3. 　​    引用的外部jar包的application.properties和application.yml
+4. 　​    引用的外部jar包的application-{profile}.properties 和 application-{profile}.yml
+
+後面的可以覆蓋前面同名配置項
+
+
+
+#### 自定義starter
+
+##### starter啟動原理
+
+- starter-pom引入 autoconfigurer包
+
+流程
+
+- 編寫starter 沒有任何程式碼 用來說明當前場景要引入的依賴
+- 同時引入當前場景真正的自動配置包 autoconfigure
+- 自動配置包引入最底層每一個模塊都要使用的springboot-starter
+
+執行流程
+
+- autoconfigure包中配置使用META-INF/spring.factories中EnableAutoConfiguration的值
+- 使得項目啟動載入指定的自動配置類
+- 編寫自動配置類 xxxAutoConfiguration --> xxxxProperties
+  - @Configuration
+  - @Conditional
+  - @EnableConfigurationProperties
+  - @Bean
+
+
+
+##### 自定義starter
+
+場景啟動器 :  exp-hello-spring-boot-starter
+
+自動配置包 :  exp-hello-spring-boot-starter-autocinfigure
+
+
+
+##### 實現
+
+- 創建實體類Bean 設置set get方法
+- 設置對應的Properties類中的值 example.hello
+  - 由之後的使用者自行設定裡面的值
+
+```java
+@ConfigurationProperties("example.hello")
+public class HelloProperties {
+    private String prefix;
+    private String suffix;
+
+    //set  get 
+}
+```
+
+- 創建serivce
+  - Autowired創建的Class
+
+```java
+// 預設不要放在容器中
+public class HelloService {
+
+    @Autowired
+    HelloProperties helloProperties;
+
+    public String sayHello(String userName){
+        return helloProperties.getPrefix() + ": "+ userName+" " + helloProperties.getSuffix();
+    }
+
+}
+```
+
+- 編寫自動配置類
+  - 開啟屬性文件綁定功能 EnableConfigurationProperties
+    - 綁定完後 預設會將 HelloProperties 放到容器中
+  - 當HelloService沒有放在容器時 導入我們配置的starter設定
+- 之後創建了HelloService對象 這個對象放在容器中 會因為配置的@Autowired將資料自動注入 就能得到Prefix 和 Suffix
+
+```java
+@Configuration
+// 開啟屬性文件綁定功能
+@EnableConfigurationProperties(HelloProperties.class) // 預設 HelloProperties 放在容器中
+public class HelloServiceAutoConfiguration {
+
+    // 只有HelloService沒有放在容器時 才導入
+	@ConditionalOnMissingBean(HelloService.class)
+    public HelloService helloService(){
+        HelloService helloService = new HelloService();
+        return helloService;
+    }
+}
+```
+
+ 
+
+#### SpringBoot原理
+
+spring原理 (spring註解)  springMVC原理  自動配置原理  SpringBoot原理
+
+
+
+##### SpringBoot啟動過程
+
+- 創建SpringApplication
+  - 保存一些訊息 
+  - 判定當前應用的類型 ClassUtils servlet
+  - bootstrappers : 初始啟動引導器 (List<Bootstrapper>) : 去spring.factories文件中找 org.springframework.boot.Bootstrapper
+  - 找ApplicationContextInitializer : 去spring.factories找ApplicationContextInitializer
+    - List<ApplicationContextInitializer<?>> initializers
+  - 找ApplicationListener
+- 運行SpringApplication  
+
+
+
+
+
+
+
+
+
+
+
+
+
