@@ -1,0 +1,281 @@
+# RestFul API
+
+-------
+
+#### 何為API
+
+API (Application Projramming Interface) 應用程式編程接口
+
+- 進行後端開發時 主要的工作就是為前端或是其他後端服務提供API 例如查詢用戶數據的API
+- 但是 API 不僅僅代表戶端系統暴露的接口 像是框架中提供的方法也屬於API
+
+例如
+
+- 通過某個電子商城網站搜尋 網站的前端就調用了後端提供的搜尋商品相關的API
+- 使用JDK開發Java程式 想要讀取用戶的輸入的話 就需要使用JDK提供的IO相關的API
+
+可以把API理解成程式間通訊的橋樑 本質就是一個函數 
+
+另外 API 的使用也不是沒有章法 他的規則由 (數據輸入和輸出格式) API提供方制定
+
+
+
+#### 何為RESTful API
+
+- RESTful API 經常被叫做 REST API  他是基於REST構建的API 
+- RESTful API 可以讓使用者看到 URL + Http Method 就可以理解URL的作用
+- 讓使用者看到HTTP狀態碼(status code) 就知道請求結果如何
+- 在開發過程中設計API時 應該至少要滿足RESTful API的最基本的要求 例如
+  - 接口中盡量使用名詞 
+  - 使用post請求創建資源 Delete 請求刪除資源等等 ex GET /notes/id : 獲取某個指定id的訊息
+
+
+
+- 一般的API
+
+```
+獲得資料GET    /getData
+新增資料POST   /createData
+刪除資料DELETE /deleteData/1
+```
+
+- 使用RESTful API風格
+
+```
+獲得資料GET     /data
+新增資料POST    /data
+刪除資料DELETE  /data/1
+```
+
+也就是使用唯一的URL定位資源 將動作藏在HTTP的method
+
+- 優點
+  - 有唯一的URL表示資源位置 統一的API接口 (Uniform Interface)
+  - 無狀態 (Stateless)
+
+
+
+#### 解讀REST
+
+REST是 Resource Representational State Transfer的縮寫 意思為 表現層狀態轉化
+
+也就是 **資源** 在網路傳輸中以某種 表現形式 進行 **狀態轉移**
+
+
+
+- 資源 (Resource)
+  - 我們可以把真實的對象數據稱為資源 一個資源可以是一個集合 也可以是單個個體
+  - 例如 班級classes代表集合  而特定的class代表單個個體資源 每一個資源都有特定的URL與之對應 如果我們需要獲取這個資源 訪問這個URL就可以了 
+    - 例如獲取特定的班級 /class/12
+  - 另外 資源也可以包含子資源  
+    - 例如  /classes/classId/teachers : 列出某個指定班級的所有老師的訊息
+- 表現形式(Representational)
+  - 資源 是一種訊息實體 它可以有多種外在表現形式 
+  - 我們把資源具體呈現出來的形式比如 Json xml image txt 等等稱為他的 表現層/表現形式
+- 狀態轉移(State Transfer)
+  - REST中的狀態轉移更多的描述伺服器端資源的狀態 
+    - 例如通過增刪改查 (通過HTTP實現) 引起資源狀態的改變
+  - 補充 : 網路的通訊協議HTTP協議 是一個無狀態協議 所有的資源狀態都保存在伺服器端
+
+
+
+####   RESTful API規範
+
+動作 類似CRUD
+
+- GET : 請求從伺服器獲取特定資源
+  - 例如 GET /classes 獲取所有班級
+- POST : 在伺服器上創建一個新的資源
+  - 例如 POST /classes 創建班級
+- PUT : 更新伺服器上的資源 (客戶端提供更新後的所有資源) 
+  - 例如 PUT /classes/12 更新編號為12的班級
+- DELETE : 從伺服器刪除特定的資源
+  - 例如 DELETE /classes/12 刪除編號為12的班級
+- PATCH : 更新伺服器上的資源 (客戶端提供更改的屬性 可以看作是部分更新)
+  - 使用的較少
+
+
+
+#### 路徑 (接口命名)
+
+路徑又稱終點(endpoint) 表示API的具體網址 實際開發中常見的規範如下
+
+- 網址中不能有動詞 只能有名詞 API中的名詞也應該使用複數
+  - 因為REST中的資源往往和數據庫中的表對應 而數據庫中的表都是同種記錄的集合(collection)
+  - 如果API調用並不涉及資源 (如計算 翻譯) 的話 可以用動詞 ex : GET /calculate? param1=11&param2=33
+- 不用大寫字母 建議用 = 而不用 _ : 例如邀請碼寫成 invitation-code 而不是 invitation_code
+- 善用版本化API : 當我們的API發生了重大改變而不兼容前期版本時 我們可以通過URL來實現版本化
+  - 例如 http ://api.example.com/v1   http ://apiv1.example.com
+- 接口盡量使用名詞 避免動詞 : RESTful API操作(HTTP Method) 的是資源(名詞) 而不是動作 (動詞)
+
+
+
+也就是使用Restful API的規範應該設計成
+
+```
+GET    /classes：列出所有班級
+POST   /classes：新建一個班級
+GET    /classes/{classId}：獲取某個指定班級的訊息
+PUT    /classes/{classId}：更新某個指定班級的訊息(一般傾向整體更新)
+PATCH  /classes/{classId}：更新某個指定班級的訊息(一般傾向部分更新)
+DELETE /classes/{classId}：刪除某個班級
+GET    /classes/{classId}/teachers：列出某個指定班級的所有老師的訊息
+GET    /classes/{classId}/students：列出某個指定班級的所有學生的訊息
+DELETE /classes/{classId}/teachers/{ID}：刪除某個指定班級下的指定的老師的訊息
+```
+
+而不應該設計成有多個名字 (一般API)
+
+```
+/getAllclasses
+/createNewclass
+/deleteAllActiveclasses
+```
+
+
+
+#### 過濾訊息(Filtering)
+
+如果我們再查詢的時候需要添加特定條件 建議使用url參數的形式
+
+例如我們要查詢state狀態為active並且name為guidegege的班級
+
+```
+GET    /classes?state=active&name=guidegege
+```
+
+實現分頁查詢
+
+```
+GET    /classes?page=1&size=10 // 指定第一頁 每頁有10個數據
+```
+
+
+
+#### 狀態碼 (Status Codes)
+
+| 2xx 成功 | 3xx 重定向     | 4xx 客戶端錯誤   | 5xx 伺服端錯誤 |
+| -------- | -------------- | ---------------- | -------------- |
+| 200 成功 | 301 永久重定向 | 400 錯誤請求     | 500 伺服器錯誤 |
+| 201 創建 | 304 資源未修改 | 401 未授權       | 502 網關錯誤   |
+|          |                | 403 禁止訪問     | 504 網關超時   |
+|          |                | 404 未找到       |                |
+|          |                | 405 請求方法不對 |                |
+
+
+
+#### RESTful的極致 HATEOAS
+
+目前 RESTful API最好做到 Hypermedia 即返回結果中提供鏈接 連向其他API方法 使得用戶不查文檔 也知道下一步該做什麼
+
+例如 當用戶向 api.example.com 的根項目錄發出請求 會得到一個返回結果
+
+```
+{"link": {
+  "rel":   "collection https://www.example.com/classes",
+  "href":  "https://api.example.com/classes",
+  "title": "List of classes",
+  "type":  "application/vnd.yourformat+json"
+}}
+```
+
+用戶可以根據 link 這個屬性 了解下一步該調用什麼API
+
+rel 表示這個API與目前網址有關係
+
+href 表示API的路徑
+
+title 表示API的標題
+
+type 表示返回類型 
+
+Hypermedia API的設置被稱為HATEOAS
+
+
+
+
+
+# RestFul Web
+
+#### 實作練習
+
+
+
+實體類 對應 SQL
+
+```java
+@Data
+public class Book {
+    private String name;
+    private String description;
+}
+```
+
+Controller
+
+- @RestController
+  - 將返回的對象數據直接以JSON或XML形式寫入HTTP響應(Response)中 大部分的情況都是直接以JSON形式返回給客戶端 
+- @RequestMapping 
+  - 沒有指定GET PUT POST  因為@RequestMapping預設映射所有HTTP Action** 
+  - 可以使用 @RequestMapping(method=ActionType)縮小這個映射
+- @PostMapping
+  - 等價於 @RequestMapping(method = RequestMethod.POST)
+  - 與@DeleteMapping @GetMapping 相同 常用的HTTP Action都有一個這種形式的註解所對應
+- @PathVariable 
+  - 取url地址中的參數 
+  - @RequestParam 為url的查詢參數值
+- @RequestBody
+  - 可以將HttpRequest body中的JSON類型數據反序列化為合適的Java類型
+- @ResponseEntity
+  - 表示整個HTTP Response 狀態碼 標頭 正文內容
+  - 我們可以使用他來自定義HTTP Response的內容
+
+```java
+@RestController
+@RequestMapping("/api")
+public class BookController {
+
+    private List<Book> books = new ArrayList<>();
+
+    @PostMapping("/book")
+    public ResponseEntity<List<Book>> addBook(@RequestBody Book book) {
+        books.add(book);
+        return ResponseEntity.ok(books);
+    }
+
+    @DeleteMapping("/book/{id}")
+    public ResponseEntity deleteBookById(@PathVariable("id") int id) {
+        books.remove(id);
+        return ResponseEntity.ok(books);
+    }
+
+    @GetMapping("/book")
+    public ResponseEntity getBookByName(@RequestParam("name") String name) {
+        List<Book> results = books.stream().filter(book -> book.getName().equals(name)).collect(Collectors.toList());
+        return ResponseEntity.ok(results);
+    }
+}
+```
+
+
+
+# SpringBoot 實現相關
+
+- 每一個URL代表一種資源
+- 客戶端使用GET POST PUT DELETE 四個表示操作方式的動詞對伺服器端的資源進行操作
+  - GET 用來獲取資源
+  - POST 用來新建資源 (也可以更新資源)
+  - PUT 用來更新資源
+  - DELETE 用來刪除資源
+- 通過操作資源的表現形式來操作資源
+- 資源的表現形式是XML 或 HTML
+- 客戶端與伺服端間的互動在請求之間是無狀態的 從客戶端到伺服端的每個請求都必須包含理解請求所必需的資訊
+  - 無狀態 : 協議對於事務處理沒有記憶能力 伺服器不知道客戶端是什麼狀態
+    - HTTP為無狀態 表示每一個請求都是獨立的 彼此不會互相影響
+
+
+
+
+
+
+
