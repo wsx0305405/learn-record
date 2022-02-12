@@ -792,7 +792,7 @@ git config --system --list
 git config --global --list
 ```
 
-![擷取_2022_01_18_11_43_56_167](A:\video\擷取_2022_01_18_11_43_56_167.png)
+![擷取_2022_01_18_11_43_56_167](https://i.imgur.com/UUAuFin.png)
 
 
 
@@ -860,7 +860,7 @@ $ git config --global user.email "name@email.com"
 - 如果加上遠端的git倉庫 (Remote Directory) 就可以分為四個工作區域 
 - 文件在四個區域間的轉換關係
 
-![e4656c7e3733ce82821f2a015333c30b](A:\video\e4656c7e3733ce82821f2a015333c30b.png)
+![e4656c7e3733ce82821f2a015333c30b](https://i.imgur.com/JLtXGxK.png)
 
 - Workspace : 工作區 就是平時存放項目程式碼的地方
 - Index/Stage : 暫存區 用於臨時存放改動 事實上它只是一個文件 保存即將提交到文件列表訊息
@@ -901,7 +901,7 @@ git的工作流程
 
 
 
-![1730228e83b542b9a7b7192afb6b8491_tplv-k3u1fbpfcp-zoom-1](A:\video\1730228e83b542b9a7b7192afb6b8491_tplv-k3u1fbpfcp-zoom-1.png)
+![1730228e83b542b9a7b7192afb6b8491_tplv-k3u1fbpfcp-zoom-1](https://i.imgur.com/N9t4FeJ.png)
 
 創建本地倉庫
 
