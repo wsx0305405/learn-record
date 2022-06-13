@@ -2,2730 +2,5407 @@
 
 
 
-## 資料庫
-
-- 資料庫 : DateBase
-- 概念 : 資料倉庫 軟體 安裝在作業系統上
-- 作用 : 存儲資料 管理資料
+## 資料庫概述
 
 
 
-## 資料庫分類
+常見的資料庫
 
-- 關聯型資料庫 (SQL)
-  - MySQL , oracle , Sql Server , DB2 , SQLlite
-  - 根據表與表之間 , 行與列之間的關係進行資料的儲存
-- 非關聯型資料庫 (NoSQL)  Not Only 
-  - Redis , MongoDB
-  - 非關聯性資料庫 , 對象儲存 , 通過對象自身的屬性決定操作
+- Oracle MySQL SQL Server DB2 PGSQL  Redis  MongoDB  ES
 
 
 
-#### DBMS (資料庫管理系統)
+MySQL的特點
 
-- 資料庫管理軟體 有效管理資料 維護與獲取資料
-- MySQL 數據庫管理系統
-
-
-
-## MySQL簡介
-
-#### 安裝測試
-
-![擷取_2021_12_03_21_00_27_956](https://i.imgur.com/vW6kLAa.png)
+- 開源 關係型的資料庫
+- 支持千萬級別數據量的儲存 大型的資料庫
 
 
 
+DB DBMS SQL的理解
+
+- DB : database 看作是資料庫文件 (類似於 : .doc  .txt  .mp3  .avi)
+- DBMS : 資料庫管理系統 (類似於 word工具 wps工具  記事本工具  影音播放器)
+- MySQL資料庫服務器中安裝了MySQL  DBMS  使用MySQL DBMS來管理和操作DB  使用的是SQL語言
 
 
-## 連接資料庫
 
-命令行連接
+非關係型資料庫的類型
 
-所有的語句都要使用 ; 結尾
+- 鍵值型資料庫 : Redis
+- 文檔型資料庫 : MongoDB
+- 搜索引擎資料庫 : ES Solr
+- 列式資料庫 : HBase
+- 圖形資料庫 : InfoGrid
+
+
+
+表與表的記錄之間存在那些關聯關係
+
+- ORM 思想
+- 表與表的記錄之間的關係 : 一對一關係 一對多關係 多對多關係 自關聯
+
+
+
+# SELECT語句
+
+
+
+#### SQL分類
+
+DDL (Data Definition Languages 數據定義語言)
+
+- 定義了不同的資料庫 表 視圖 索引等資料庫對象 還可以用來創建 刪除 修改資料庫和資料表的結構
+- 主要的語句關鍵字包括 CREATE  DROP  ALTER  RENAME  TRUNCATE
+
+DML (Data Manipulation Language 數據操作語言)
+
+- 用於添加 刪除 更新和查詢資料庫記錄 並檢查資料完整性
+- 主要的語句關鍵字包括 INSERT  DELETE  UPDATE  SELECT
+- SELECT是sql語言的基礎 最為重要
+
+DCL (Data Control Language 數據控制語言)
+
+- 用於定義資料庫 表 欄位 用戶的訪問權限和安全級別
+- 主要的語句關鍵字包括 GRANT REVOKE COMMIT ROLLBACK SAVEPOINT
+
+
+
+## SQL語言的規則與規範
+
+
+
+#### 基本規則
+
+- SQL可以寫在一行或者多行 為了提高可讀性 各子句分行寫 必要時使用縮進
+- 每條命令以 ; 或 \g 或 \G 結束
+- 關鍵字不能被所寫也不能分行
+- 關於標點符號
+  - 必須保證所有的() 單引號 雙引號是成對結束的
+  - 必須使用英文狀態下的輸入方式
+  - 字串型和日期時間類型的數據可以使用單引號 ' ' 表示
+  - 列的別名 盡量使用雙引號 " " 而且不建議省略as
+
+
+
+#### 大小寫規範
+
+- MySQL在windows環境下是大小寫不敏感的
+- MySQL在Linux環境下是大小寫敏感的
+  - 資料庫名 表名 表的別名 變數名是嚴格區分大小寫的
+  - 關鍵字 函數名 列名(或欄位名) 列的別名(欄位的別名)是忽略大小寫的
+- 建議採用統一的規範
+  - 資料庫名 表名 表的別名 欄位名 欄位別名都使用小寫
+  - SQL關鍵字 函數名 綁定變數等都使用大小
+
+
+
+#### 註解
+
+``````
+單行註解 : #註解文字 (MySQL特有的方式)
+單行註解 : -- 註解文字 (後面必須接空格)
+多行註解 : /* 註解文字 */
+``````
+
+
+
+#### 數據導入指令
+
+在命令行客戶端登入MySQL 使用source指令導入
+
+``````
+mysql> source d:\mysqldb.sql
+``````
+
+
+
+## 基本的SELECT語句
+
+
+
+#### 列的別名
+
+- as : 全稱 alias(別名) 可以省略
+- 列的別名可以使用一對""引起來
+
+``````mysql
+SELECT 
+employee emp,
+last_name AS lname,
+department_id "部門id"
+FROM employees;
+``````
+
+
+
+#### 去除重複行
+
+``````
+SELECT DISTINCT department_id
+FROM employees;
+``````
+
+
+
+#### 空值參與運算
+
+- 空值 : null
+- null不等於0 , ' ' , 'null'
+- 空值參與運算
+  - 只要null參與了運算 結果都為null
+
+``````mysql
+SELECT salary * (1 + commision_pct) * 12
+FROM employees;
+``````
+
+
+
+#### 著重號 ``
+
+- 如果表名和關鍵字 保留字 名字相同  使用``區分
+
+``````mysql
+SELECT * FROM `order`;
+``````
+
+
+
+#### 查詢常數
+
+``````mysql
+SELECT 123,employee_id,last_name
+FROM employees;
+``````
+
+
+
+#### 顯示表結構
+
+- DESCRIBE , DESC : 顯示表中欄位的詳細訊息
+
+``````mysql
+DESCRIBE employees;
+DESC employees;
+``````
+
+
+
+#### 過濾數據 where
+
+``````mysql
+SELECT * 
+FROM employees
+WHERE department_id = 90;
+``````
+
+
+
+## 運算符
+
+
+
+#### 算術運算符
+
+``````mysql
+# 在SQL中 +沒有連接的作用 就表示加法運算 此時 會將字串轉換為數值 (隱式轉換)
+SELECT 100 + '1' # 在Java語言中 結果是 1001
+FROM DUAL;
+
+SELECT 100 + 'a' # 此時將'a'看作0處理
+FROM DUAL;
+
+SELECT 100 + NULL # null值參與運算 結果為null
+FROM DUAL;
+
+SELECT 100/1.0 , 100/2.0 , 100 DIV 0 # 分母如果為0 則結果為null
+FROM DUAL;
+
+# 取模運算 %mod
+SELECT 12 % 5,12 MOD -5 ,-12 % 5,-12 % -5    #  2  2  -2  -2 
+FROM DUAL;
+``````
+
+
+
+#### 比較運算符
+
+=  <=>  <>  !=  <  <=  >  >=
+
+``````mysql
+## 字串存在隱式轉換 如果轉換數值不成功 則看做0
+SELECT 1 = 2, 1 != 2, 1 = '1', 1 = 'a', 0 = 'a'  # 0  1  1  0  1   
+FROM DUAL
+
+## 如果等號兩邊的值都為字串時 則會依照字串進行比較 比較的是每個字串中每個字元的ANSI編碼
+SELECT 'a' = 'a', 'ab' = 'ab', 'a' = 'b'  # 1  1  0
+FROM DUAL
+
+## 只要有NULL參與判斷 結果就為NULL
+SELECT 1 = NULL, NULL = NULL # NULL NULL 
+FROM DUAL;
+
+# 此時執行 不會有任何的結果
+SELECT last_name,salary,commission_pct
+FROM employees
+WHERE commission_pct = NULL;  # NULL --> 無資料
+
+## <=> : 安全等於   為運算NULL而使用
+SELECT 1 <=> 2, 1 <=> '1', 1 <=> 'a', 0 <=> 'a'  # 0 1 0 1
+FROM DUAL;
+
+SELECT 1 <=> NULL, NULL <=> NULL # 0 1
+FROM DUAL;
+
+## IS NULL \ IS NOT NULL \ ISNULL   查詢為NULL的數據有哪些
+SELECT last_name,salary,commission_pct
+FROM employees
+WHERE commission_pct IS NULL;
+# 或是
+WHERE ISNULL(commission_pct);
+# 或是
+WHERE NOT COMMISSION_PCT <=> NULL;  # 取完 <=> null 後 取not 得到不等於null
+
+
+## LEAST() \ GREATEST
+SELECT LEAST('g','b','t','m') , GREATEST('g','b','t','m')  # b  t 
+FROM DUAL;
+
+## BETWEEN 條件1 AND 條件2 (查詢條件1和條件2範圍內的數據 包含邊界)
+SELECT employee_id,last_name,salary
+FROM employees
+WHERE salary between 6000 and 8000;
+# 或是
+WHERE salary >= 6000 && salary <= 8000;
+# 或是不在此範圍中
+WHERE salary NOT BETWEEN 6000 AND 8000;
+# 或是
+WHERE salary < 6000 or salary > 8000;
+
+## in(set) \ not in(set)
+# 查詢對應部門的訊息
+SELECT last_name,salary,department_id
+FROM employees
+WHERE department_id = 10 or department_id = 20 or department_id = 30;
+# 或是
+WHERE department_id in (10,20,30);
+
+# 查詢不是對應薪資的訊息
+SELECT last_name,salary,department_id
+FROM employees
+WHERE salary NOT IN (6000,7000,8000);
+
+## LIKE : 模糊查詢
+# 查詢last_name中包含 'a' 的訊息
+SELECT last_name
+FROM employees
+# % : 代表不確定個數的字元
+WHERE last_name LIKE '%a%';
+# 查詢 'a' 開頭的訊息
+WHERE last_name LIKE 'a%';
+# 查詢 包含 'a' 且 包含 'e' 的訊息
+WHERE last_name LIKE '%a%' AND last_name LIKE '%e%';
+# 或是
+WHERE last_name LIKE '%a%e%' OR last_name LiKE '%e%a%';
+# 查詢第2個字元是'a'的員工訊息
+# _ : 代表一個不確定的字元
+WHERE last_name LIKE '_a%';
+# 查詢第2個字元是_且第3個字元是'a'的員工訊息
+# 需要使用轉譯字元 : \
+WHERE last_name LIKE '_\_a%';
+
+## REGEXP \ RLIKE : 正則表達式
+# ^ 表開頭  $ 表結尾
+SELECT 'shkstart' REGEXP '^shk', 'shkstart' REGEXP 't$', 'shkstart' REGEXP 'hk'  # 1  1  1 
+FROM DUAL; 
+
+SELECT 'raseasr' REGEXP 'as.as','raseasr' REGEXP '[ab]' # 1  1 
+FROM DUAL;
+
+``````
+
+
+
+#### 邏輯運算符
+
+OR  ||  AND  &&  NOT  !  XOR
+
+``````mysql
+## or and
+SELECT last_name,salary,department_id
+FROM employees
+WHERE department_id = 10 or department_id = 20;
+WHERE department_id = 10 and department_id = 2-0;
+WHERE department_id = 50 AND salary > 6000;
+
+## not
+SELECT last_name,salary,department_id
+FROM employees
+WHERE salary not between 6000 and 8000;
+WHERE commission_pct is not null;
+WHERE NOT commission_pct <=> NULL;
+
+## XOR
+SELECT last_name,salary,department_id
+FROM employees
+WHERE department_id = 50 XOR salary > 6000;  #  id = 50 但薪資不大於 6000 
+``````
+
+
+
+## 排序與分頁
+
+
+
+#### 排序
+
+``````mysql
+## 如果沒有使用排序操作 預設情況查詢返回按照添加數據的順序顯示
+
+## 使用order by 對查詢到的數據進行排序操作
+# 升序 : ASC (ascend)
+# 降序 : DESC (descend)
+SELECT employee_id,last_name,salary
+FROM employees
+ORDER BY salary DESC;
+
+# 使用列的別名進行排序
+# 列的別名只能在ORDER BY中使用 不能在WHERE中使用
+# WHERE需要聲明在FROM後 ORDER BY之前
+SELECT employee_id,salary,salary * 12 annual_sal
+FROM employees
+ORDER BY annual_sal;
+# WHERE annual_sal > 8000  錯誤
+
+## 二級排序
+# 依照department_id的降序排列 salary的升序排列
+SELECT employee_id,salary,department_id
+FROM employees
+ORDER BY department_id DESC,salary ASC; # 先依照department_id 再依照salary
+``````
+
+
+
+#### Limit分頁操作
+
+- 分頁公式 : (當前頁數-1) * 每頁條數,每頁條數
+
+``````mysql
+## LIMIT
+# 每頁顯示20條記錄 此時顯示第1頁
+SELECT employee_id,last_name
+FROM employees
+LIMIT 0,20;
+
+# 每頁顯示20條記錄 此時顯示第2頁
+SELECT employee_id,last_name
+FROM employees
+LIMIT 20,20
+
+# 需求 : 每頁顯示pageSize條記錄 此時顯示第pageNo頁
+# 公式 : LIMIT(pageNo-1) * pageSize,pageSize;
+
+## WHERE...ORDER BY...LIMIT 聲明順序
+# LIMIT的格式 : 位置偏移量 條目數
+# LIMIT 0,條目數 等價於 LIMIT 條目數
+SELECT employee_id,last_name,salary
+FROM employees
+WHERE salary > 6000
+ORDER BY salary DESC
+LIMIT 10;
+
+# 表中的107條數據 顯示第32 33條數據
+SELECT employee_id,last_name
+FROM employees  
+LIMIT 31,2;
+
+## MySQL8.0新特性 : LIMIT...OFFSET...  顯示幾條紀錄 offset 偏移量
+LIMIT 2 OFFSET 31;
+
+``````
+
+
+
+
+
+## 多表查詢
+
+
+
+#### 笛卡爾積問題
+
+- 原因 : 缺少了多個表的連接條件
+
+``````
+SELECT employee_id,department_name
+FROM employees,departments; # 出現 employees * department 所有欄位的乘積
+``````
+
+- 修正 : 加上兩個表的連接條件
+
+``````mysql
+SELECT employee_id,department_name
+FROM employees.departments
+WHERE employees.department_id = departments.department_id;
+``````
+
+- 如果查詢語句中出現了多個表中都存在的欄位 則必須指明此欄位所在的表
+
+``````mysql
+SELECT emp.employee_id,dapt.department_name,emp.department_id
+FROM employees emp,departments dapt
+WHERE emp.department_id = dapt.department_id;
+``````
+
+- 如果有n個表實現多表的查詢 則需要至少n-1個連接條件
+
+``````mysql
+SELECT e.employee_id,e.last_name,d.department_name,l.city,e.department_id,l.location_id
+FROM employees e,departments d,location l
+WHERE e.department_id = d.department_id
+AND d.location_id = l.location_id;
+``````
+
+
+
+#### 多表查詢的分類
+
+
+
+##### 等值連接--非等值連接
+
+- 非等值連接 : 明確數值的條件
+
+``````mysql
+# 非等值連接
+SELECT e.last_name,e.salary,j.grade_level
+FROM employee e,job_grades j
+WHERE e.salary BETWEEN j.lowest_sal AND j.highest_sal;
+# 或
+WHERE e.salary >= j.lowest_sal AND e.salary <= j.highest_sal;
+``````
+
+
+
+##### 自連接--非自連接
+
+- 自連接 : 單個表的連接條件
+
+``````mysql
+# 自連接  連接條件 emp的manager_id 與 manager的employee_id相同
+SELECT emp.employee_id,emp.last_name,mgr.employee_id,mgr.last_name
+FROM employees emp,employess mgr
+WHERE emp.manager_id = mgr.employee_id;
+``````
+
+
+
+##### 內連接--外連接
+
+- 內連接 : 合併具有同一列的兩個以上的表的行  結果集中不包含一個表與另一個表不匹配的行
+- 外連接 : 兩個表在連接過程中除了返回滿足連接條件的行以外還返回左(或右)裡中不滿足條件的行  稱為左(右)外連接 沒有匹配的行時 結果表中相應的列為空(NULL)
+- 如果是左外連接 則連接條件中左邊的表也稱為主表 右邊的表稱為從表
+- 如果是右外連接 則連接條件中右邊的表也稱為主表 左邊的表稱為從表
+
+``````mysql
+# 內連接 : 合併具有同一列的兩個以上的表的行 結果集中不包含一個表與另一個表不匹配的行
+SELECT employee_id,department_name 
+FROM employees e,departments d
+WHERE e.department_id = d.department_id;
+
+# 查詢員工的last_name,department_name訊息
+# SQL99 內連接
+SELECT last_name,department_name
+FROM employees e 
+INNER JOIN departments d
+ON e.department_id = d.department_id;
+
+SELECT last_name,department_name,city
+FROM employees emp
+JOIN departments dept
+ON emp.department_name = dept.department_name
+JOIN location l
+ON d.location_id = l.location_id;
+``````
 
 ```mysql
--- 連接數據庫mysql
--uroot -p123456  
--- 建立新的資料庫
-create database dataname;
--- 查看所有的資料庫
-show databases;
--- 切換資料庫 use 資料庫名
-use databasesname
--- 查看資料庫中所有的表格
-show tables;
--- 顯示資料庫中 表格的結構 describe 表格名
-describe student;
--- 顯示資料庫 表格中的數據  
-select * from `student`;
--- 退出連接
-exit;
+# 外連接 : 合併具有同一個列的兩個以上的表的行 結果集中除了包含表與另一個表匹配的行之外
+# 還查詢到了左表 或 右表中不匹配的行
 
--- 單行註解
-/*
-多行註解
-*/
+# 查詢所有的員工的last_name,department_name訊息
+# 左外連接
+SELECT last_name,department_name
+FROM employees e 
+LEFT OUTER JOIN departments d
+ON e.departmemt_id = d.department_id;
+# 右外連接
+SELECT last_name,department_name
+FROM departments d
+RIGHT OUTER JOIN employees e 
+ON e.departmemt_id = d.department_id;
 ```
 
 
 
-資料庫語言 CRUD 增刪改查
+##### 滿外連接
 
-DDL 定義
-
-DML 操作
-
-DQL 查詢
-
-DCL 控制
-
-
-
-## 資料庫的列類型
-
-```
-數值
-```
-
-- tinyint	   	十分小的數據     一個字元
-- smallint        較小的數據         兩個字元
-- mediumint  中等大小的數據  三個字元
-- **int                 標準的數據          四個字元  常用**
-- bigint            較大的數據          八個字元
-- float              浮點數                  四個字元
-- double         浮點數                  八個字元
-- decimal        字串形式的浮點數   金融計算時 一般使用此類型
+``````mysql
+# 滿外連接 mysql不支持
+SELECT last_name,department_name
+FROM employees e 
+FULL OUTER JOIN departments d
+ON e.departmemt_id = d.department_id;
+``````
 
 
 
-```
-字串
-```
+## UNION
 
-- char			字串固定大小的  0~255
-- **varchar      可辨字串    0 ~ 65535  常用的變數   對應String**
-- tinytext      微型文本    2^8 - 1
-- text             文本串       2^16 - 1      保存大文本
+合併查詢結果
 
+- 利用UNION關鍵字 可以給出多條SELECT語句 並將他們的結果組合成單個結果集 合併時 兩個表對應的列數和數據類型必須相同 並且相互對應 各個SELECT語句之間使用UNION或UNION ALL關鍵字分隔
 
+語法格式
 
-```
-時間日期
-```
-
-java.util.Date
+``````
+SELECT column,... FROM table1
+UNION [ALL]
+SELECT cloumn,... FROM table2
+``````
 
 
 
-- data    YYYY-MM-DD 日期格式
-- time    HH: mm: ss 時間格式
-- **datatime   YYYY-MM-DD HH: mm: ss 最常用的時間格式**
-- **timestamp  時間章  1970.1.1到現在的毫秒數   較常用**
-- year    年份表示
+#### UNION
+
+- 返回兩個查詢的結果集的並集 去除重複記錄
+
+#### UNION ALL
+
+- 返回兩個查詢的結果集的並集 對於兩個結果集的重複部分 不去重
+- UNION ALL語句需要的資源比UNION語句少 如果明確的合併數據後的結果數據不存在重複數據 或是不需要去除重複數據 則盡量使用UNION ALL語句 以提高效率
 
 
 
-```
-null
-```
-
-- 沒有值 未知
-- 盡量不要使用NULL進行運算 , 結果為NULL
+## 七種JOIN操作
 
 
 
-## 資料庫的欄位屬性
-
-- Unsigned : 
-  - 無號數  不能聲明為負數
-  - 聲明該列不能宣告為負數
-- zerofill : 
-  - 0填充
-  - 不足的位數 使用0填充  int(3) , 5 --> 005
-- selfadd : 
-  - 自動在上一條的記錄的數值+1
-  - 通常用來設計唯一的 PRIMARY KEY   index 必須是整數類型
-  - 可以自定義設計 PRIMARY KEY 的起始值和步進
-- not null
-  - 假設設置為 not null  如果不賦予值 就會出現錯誤
-  - NULL 如果不填寫值 預設為null
-- 預設值 : 
-  - 設置預設的值
-  - 如果不指定該列的值 則會有預設的值
+![https://i.imgur.com/sPvkfc1.png](https://i.imgur.com/sPvkfc1.png)
 
 
 
-```
-/* 每一個表格都必須存在五個欄位 表示一個紀錄存在意義*/
+``````mysql
+# 中間  內連接
+SELECT e employee_id,department_name
+FROM employees e
+JOIN departments d
+ON e.department_id = d.department_id;
 
-id primary key
-`version`  樂觀鎖
-is_delete  偽刪除
-gmt_create 創建時間
-gmt_update 修改時間
-```
+# 左上  左連接
+SELECT e employee_id,department_name
+FROM employees e
+LEFT JOIN departments d
+ON e.department_id = d.department_id;
+
+# 右上  右連接
+SELECT e employee_id,department_name
+FROM employees e
+RIGHT JOIN departments d
+ON e.department_id = d.department_id;
+
+# 左邊
+SELECT e employee_id,department_name
+FROM employees e
+LEFT JOIN departments d
+ON e.department_id = d.department_id
+WHERE d.department_id IS NULL; # 在左連接的狀態 d.department_id 為中間的部分(非NULL) 取NULL 則可以得到結果
+
+# 右邊
+SELECT e employee_id,department_name
+FROM employees e
+RIGHT JOIN departments d
+ON e.department_id = d.department_id
+WHERE e.department_id IS NULL;
+
+# 左下
+# 方式一 : 左上圖 UNION ALL 右中圖
+SELECT e employee_id,department_name
+FROM employees e
+LEFT JOIN departments d
+ON e.department_id = d.department_id
+UNION ALL
+SELECT e employee_id,department_name
+FROM employees e
+RIGHT JOIN departments d
+ON e.department_id = d.department_id
+WHERE e.department_id IS NULL;
+
+# 方式二 : 右上圖 UNION ALL 左中圖
+SELECT e employee_id,department_name
+FROM employees e
+RIGHT JOIN departments d
+ON e.department_id = d.department_id
+UNION ALL
+SELECT e employee_id,department_name
+FROM employees e
+RIGHT JOIN departments d
+ON e.department_id = d.department_id
+WHERE e.department_id IS NULL;
+
+# 右下 : 左中圖 UNION ALL 右中圖
+SELECT e employee_id,department_name
+FROM employees e
+LEFT JOIN departments d
+ON e.department_id = d.department_id
+WHERE d.department_id IS NULL
+UNION ALL
+SELECT e employee_id,department_name
+FROM employees e
+RIGHT JOIN departments d
+ON e.department_id = d.department_id
+WHERE e.department_id IS NULL;
+``````
 
 
 
-## 建立資料庫表格
+## SQL99語法新特性
+
+
+
+#### 自然連接
+
+- NATURAL JOIN : 會自動將查詢的兩張連接表中 所有相同的欄位 然後進行 等值連接
+
+``````mysql
+SELECT employee_id,last_name,department_name
+FROM employees e 
+NATURAL JOIN departments d;
+``````
+
+
+
+#### USING連接
+
+- USING指定了具體的相同的欄位名稱  需要在USING的()中填入要指定的同名欄位
+  - 同時使用 JOIN...USING 可以簡化JOIN ON的等值連接 
+
+``````mysql
+SELECT employee_id,last_name,department_name
+FROM employees e JOIN departments d 
+USING (department_id);
+``````
+
+與下面相同
+
+``````mysql
+SELECT employee_id,last_name,department_name
+FROM employees e,departments d
+WHERE e.department_id = d.department_id;
+``````
+
+
+
+## 小結
+
+表連接的約束條件有三種方式 : WHERE ON USING
+
+- WHERE : 適用於所有關聯查詢
+- ON : 只能和 JOIN 一起使用  只能寫關聯條件 雖然關聯條件可以併到WHERE中和其他條件一起寫 但分開寫可讀性更好
+- USING : 只能和 JOIN 一起使用 而以要求兩個關聯欄位在關聯表名稱一致 而且只能表示關聯欄位值相等
+
+``````mysql
+# 拓展  不建議使用
+SELECT last_name,job_title,department_name
+FROM employees
+INNER JOIN departments
+INNER JOIN jobs
+ON employees.department_id = departments.department_id
+AND employees.job_id = jobs.job_id;
+``````
+
+
+
+#### 注意點
+
+- 盡量控制連接表的數量 多表連接就相當於嵌套for循環 非常消耗資源  會讓SQL查詢性能下降得很嚴重 因此不要連接不必要的表 在許多DBMS中 也都會有最大連接表的限制
+- 強制 : 超過三個表禁止join 需要join的欄位 數據類型保持決定一致
+  多個關聯查詢時 保證被關聯的欄位需要有索引
+- 說明 : 即使雙表join也要注意表索引 SQL性能
+
+
+
+#### 多表查詢練習
+
+``````mysql
+# 顯示所有員工的姓名 部門號 部門名稱
+SELECT emp.last_name,emp.department_id,dept.department_name
+FROM employees emp
+LEFT JOIN departments dept
+ON emp.department_id = dept.department_id;
+
+# 查詢90號部門員工的job_id和90號部門的location_id
+SELECT e.job_id,d.location_id
+FROM employees e
+JOIN departments d 
+ON e.department_id = d.department_id
+WHERE e.department_id = 90;
+
+# 選擇所有有獎金的員工的last_name,department_name,location_id,city
+SELECT e.last_name,e.commission_pct,d.department_name,d.location_id,l.city
+FROM employees e
+LEFT JOIN departments d
+ON e.department_id = d.department_id
+LEFT JOIN locations l 
+ON l.location_id = d.location_id
+WHERE e.commission_pct IS NOT NULL;
+
+# 選擇city在Toronto工作的員工的 last_name,job_id,department_id,department_name
+SELECT e.last_name,e.job_id,e.department_id,d.department_name
+FROM employees e
+JOIN departments d
+ON e.department_id = d.department_id
+JOIN loations l
+ON d.location_id = l.location_id
+WHERE l.ciry = 'Toronto';
+
+# 查詢員工所在的部門名稱 部門地址 姓名 工作 工資 其中員工所在部門的部門名稱為'Executive'
+SELECT e.department_name,l.street_addressl,e.last_name,e.job_id,e.salary
+FROM departments d
+LEFT JOIN employee e
+ON e.department_id = d.department_id
+LEFT JOIN location l
+ON d.location_id = l.location_id
+WHERE d.department_name = 'Executive';
+
+# 查詢那些部門沒有員工 或使用子查詢
+SELECT d.department_id
+LEFT FROM departments d
+JOIN employees e
+ON d.department_id = e.department_id
+WHERE e.department_id IS NULL;
+
+# 查詢哪個城市沒有部門
+SELECT location_id,city
+FROM location l
+LEFT JOIN departments d 
+ON l.location_id = d.location_id
+WHERE d.location_id IS NULL;
+
+# 查詢部門名為Sales或IT的員工訊息
+SELECT e.employee_id,e.last_name,e.department_id
+FROM employees e
+JOIN department d
+ON e.department_id = d.department_id
+WHERE d.department_name IN ('Sales','IT');
+``````
+
+
+
+# 單行函數
+
+
+
+## 數值函數
+
+``````mysql
+SELECT
+ABS(-123)   # 123
+ABS(32)		# 32
+SIGN(-23)	# -1
+SIGN(43)	# 1
+PI()		# 3.141593
+CEIL(32.32)		# 33 天花板函數
+CEILING(-43.23)	# -43
+FLOOR(32.32)	# 32 地板函數
+FLOOR(-43.23)	# -44
+MOD(12,5)		# 2
+# 取隨機數
+RAND()			# 每次運行時都返回0~1的隨機數
+RAND(10)		# 得到的隨機數根據因子而固定
+# 四捨五入 截斷操作
+ROUND(123.456) 		# 123  四捨五入 預設捨棄小數
+ROUND(123.456,0) 	# 123
+ROUND(123.456,1)	# 123,5 保留小數第一位 四捨五入
+ROUND(123.456,1)	# 123,46 保留小數第二位 四捨五入
+ROUND(123.456,-1)	# 120 依照個位數的值 四捨五入
+ROUND(123.456,-2)	# 100 依照十位數的值 四捨五入
+TRUNCATE(123.456,0)		# 123
+TRUNCATE(123.456,1)		# 123.4
+TRUNCATE(123.456,-1)	# 120
+# 單行還數可以嵌套
+TRUNCATE(ROUND(123.456,2),0)	# TRUNCATE(123.46,0) --> 123
+FROM DUAL;		
+``````
+
+
+
+#### 角度與弧度的互換函數
+
+- DEGREES(弧度) : 轉換為角度
+- RADIANS(角度) : 轉換為弧度
 
 ```mysql
-create table if not exists `member`(
-	`id` int not null auto_increment comment '學號',
-	`name` varchar(30) not null  default '空' comment '姓名',
-    `pwd` varchar(20) not null default '12345' comment'密碼',
-    `gender` varchar(6) not null  default 'male' comment'性別',
-    `birthday` datetime default null comment '出生日期',
-    `address` varchar(100) default null comment'住址',
-    `email` varchar(50) default null comment'信箱',
-    Primary key (`id`)
-)engine=INNODB default char set=utf8;
-```
-
-#### 格式
-
-```mysql
-create table [if not exists] `表格名稱`(
-	`欄位名稱` 類型[屬性] [索引] [註解], 
-	`欄位名稱` 類型[屬性] [索引] [註解],
-	`欄位名稱` 類型[屬性] [索引] [註解]
-)[表格類型][字元設置][註解];
+RADIANS(30),RADIANS(45),RADIANS(60),RADIANS(90)
+DEGREES(2*PI())			# 360
+DEGREES(RADIANS(60))	# 60
 ```
 
 
 
-#### 顯示資料庫 表格的原始碼
+#### 三角函數
 
-```mysql
--- 查看創建資料庫的程式碼
-show create database name;
--- 查看創建表格的程式碼
-show create table name; 
--- 查看表格的結構
-desc student;
-```
+``````mysql
+SIN(RADIANS(30))	# 0.5
+DEFREES(ASON(1))	# 90
+TAN(RANIANS(45))	# 1
+DEGREES(ATAN(1))	# 45
+``````
 
 
 
-## 資料表的類型
+#### 指數和對數
 
-```mysql
--- 資料庫的引擎
-INNODB 預設使用
-MYISAM 過去使用
-```
-
-
-
-|            | MYISAM | INNODB        |
-| ---------- | ------ | ------------- |
-| 事務支持   | 不支持 | 支持          |
-| 數據行鎖定 | 不支持 | 支持          |
-| 外鍵約束   | 不支持 | 支持          |
-| 全文索引   | 支持   | 不支持        |
-| 表空間大小 | 較小   | 較大 約為兩倍 |
-
-常規的使用操作 :
-
-- MYISAM 節約空間 速度較快
-- INNODB 安全性較高 事務的處理 多表多用戶操作
+``````mysql
+POW(2,5)	# 32
+POWER(2,4)	# 16
+EXP(2)		# e*2
+LN(EXP(2))	# 2
+LOG(EXP(2))	# 2
+LOG10(10)	# 1
+LOG2(4)		# 2
+``````
 
 
 
-```
-物理空間存在的位置
-```
+#### 進制間的轉換
 
-所有的資料庫文件都存在data目錄下
-
-本質還是文件的形式
-
-MySQL引擎在物理文件上的區別
-
-- InnoDB 在資料庫表中只有一個 *.frm文件, 以及上級目錄下的ibdata1文件
-- MYISAM對應文件
-  - *.frm -   表結構的定義文件
-  - *.MYD - 數據文件 (data)
-  - *.MYI -   索引文件 (index)
+``````mysql
+BIN(10)			# 1010
+HEX(10)			# A
+OCT(10)			# 12
+# CONV(x,f1,f2)  將f1進制轉換成f2進制
+CONV(10,2,8)	# 2
+``````
 
 
 
-```
-設置資料庫表格的字元集編碼
-```
+## 字串函數
 
-```mysql
-char set=utf8 
-```
+``````mysql
+ASCII('Abcd')			# 65  返回第一個字母的ASCLL
+CHAR_LENGTH('hello')	# 5	  占用的字元數
+CHAR_LENGTH('一二')      # 2	  
+LENGTH('hello')			# 5	  
+LENGTH('一二')		   # 6	  
+# xxx worked for yyy
+SELECT CONCAT(emp.last_name,' worked for ',mgr.last_name) 
+FROM employees emp JOIN employees mgr
+WHERE emp.manager_id = mgr.employee_id;  # 結果顯示為 AAA worked for BBB
 
-不設置的話 會是MySQL默認的字元集編碼 (不支持中文)
+# CONCAT_WS('分隔線','s1','s2'...)
+SELECT CONCAT_WS('-','hello','world','hello')
+FROM DUAL; # hello-world-hello
 
-在my.ini 中配置的預設編碼
+# 字串的索引是從1開始的
+INSERT('helloworld',2,3,'aaaaa') # 從第2個 e 開始往下3個字元 ell 替換成aaaaa  --> haaaaaoworld
 
-```mysql
-Character-set-server=utf8
-```
+# 替換字串
+REPLACE('hello','ll',;mmm) # hemmmo
+REPLACE('hello','lle',;mmm) # 找不到對應的字串 --> hello
 
+# 大小寫轉換
+UPPER('HelLo')
+LOWER('HelLo')
 
+# 取左右字串
+LEFT('hello',2)		# he
+RIGHT('hello',3)	# llo
+RIGHT('hello',10)	# hello
 
-## 修改刪除表格
+# 左右對齊 
+LPAD(salary,10,'*') # 補足10位 向左補滿 ***8000.00
+LPAD(salary,10,' ') # 通常使用' '對齊
+RPAD(salary,10,'*') # 補足10位 向右補滿 8000.00***
 
-```
-修改
-```
+# 去除空格
+LTRIM(s)	# 去除左側的空格
+RTRIM(s)	# 去除右側的空格
+TRIM(s)		# 去除字串開始與結尾的空格
+CONCAT('---',TRIM('  he  ll  o   '),'***')  # ---he  ll  o***
+# TRIM(s1 FROM s)  去除s字串 首尾的s1
+TRIM('o' FROM 'ooheollo')  # heoll
+# TRIM(LEADING s1 FROM s)  去除s開始處的s1
+# TRIM(TRAILING s1 FROM s) 去除s結尾處的s1
 
-```mysql
--- 修改表格名  alter table 舊名 rename as 新名
-alter table `member` rename as member22;
--- 增加表格的欄位 alter table 表格名 add 欄位名稱 屬性
-alter table `member` add age int;
--- 修改表格的欄位 (重命名, 修改約束)
--- alter table 表格名 modify 欄位名 屬性
-alter table `member` modify age varchar(11); -- 修改約束
--- alter table 表格名 change 舊名 新名 屬性
-alter table `member` change age age1 int(11); -- 欄位重命名 也可以重新設定約束
--- 刪除表格的欄位
--- alter table 表格名 drop 欄位名;
- alter table `member` drop age;
-```
+REPEAT('hello',4)	# 返回重複4次的結果
 
+SPACE(5)	# 返回5個空格
 
+# STRCMP(s1,s2) 比較字串s1和s2的ASCLL碼的大小  s1較大 --> 1   s2較大 --> -1
 
-```
-刪除
-```
+SUBSTR('hello',2,2)	# 返回第2個位置數2的子字串  el
 
-```mysql
--- 刪除表格 (如果表格存在)
-drop table if exists `member`;
-```
+# LOCATE(substr,str) 返回substr在字串str中首次出現的位置 如果字串不存在 返回0
 
-所有的創建和刪除盡量加上判斷
+# ELT(m,s1,s2,..,sn) 返回指定位置的字串  如果m=1返回s1  m=n則返回sn
 
-注意點 : 
+# FIELD(s,s1,s2,...,sn) 返回字串s在字串列表中第一次出現的位置
 
-- 所有的欄位名使用 ` 引用
-- 註解 /*  */  --
-- sql關鍵字無關大小寫
-- 所有的符號全部用英文
+# FIND_IN_SET(s1,s2) 返回s1在s2中出現的位置 其中s2是以,分隔的字串
+FIND_IN_SET('aa','bb,cc,dd,aa,ee')	# 4
 
-
-
-## MySQL 數據管理
-
-#### 外鍵
-
-- 一般不得使用外鍵與級聯 外鍵的概念須在應用層解決
-- 因為每次刪除或是更新時都必須考慮外鍵 導致開發困難 測試數據時麻煩
-
-```
-方式一 創建表格時 增加約束 (麻煩 複雜)
-```
-
-```mysql
-create table `grade`(
-	`gradeid` int(10) not null auto_increment comment'年級id',
-      `gradename` varchar(50) not null comment '年級名稱',
-      primary key (`gradeid`)
-)engine = InnoDB default char set=utf8;
-
--- 學生表的 gradeid 欄位 要去引用年級表的gradeid
--- 定義外鍵 key
--- 給這個外鍵添加約束 (執行引用)  references 引用
- create table if not exists `student`(
-	`id` int not null auto_increment comment '學號',
-	`name` varchar(30) not null  default '空' comment '姓名',
-    `gradeid` int(10) not null comment '學生年級',
-    Primary key (`id`),
-    -- 綁定
-    key `FK_gradeid` (`gradeid`),
-    -- 約束
-    constraint `FK_gradeid` foreign key (`gradeid`) references `grade`(`gradeid`)
-)engine=INNODB default char set=utf8;
-```
+# NULLIF(value1,value2) 比較字串 如果value1和value2相等 返回NULL 否則返回value1
+``````
 
 
 
-```
+## 日期和時間函數
+
+
+
+#### 獲取日期.時間
+
+``````
+CURDATE()		# 獲得目前 年 月 日
+CURRENT_DATE()	# 獲得目前 年 月 日
+CURTIME()		# 獲得目前 時 分 秒
+NOW()			# 獲得目前 年月日 時分秒
+SYSDATE()		# 獲得目前 年月日 時分秒
+UTC_DATE()		# 獲得世界標準時間 年 月 日 
+UTC_TIME		# 獲得世界標準時間 時 分 秒
+``````
+
+
+
+#### 日期與時間戳的轉換
+
+``````mysql
+UNIX_TIMESTAMP()	# 返回當前時間的時間戳
+UNIX_TIMESTAMP('2020-01-01 12:12:12')	# 將date以UNIX時間戳的形式返回
+FROM_UNIXTIME(1111111111)	# 將UNIX時間戳的時間轉換為普通格式的時間
+``````
+
+
+
+#### 獲取月份 星期等函數
+
+``````mysql
+YEAR(CURDATE())		# 2000
+MONTH(CURDATE())	# 01
+DAY(CURDATE())		# 01
+HOUR(CURTIME())		# 01
+MINUTE(NOW())		# 1
+SECOND(SYSDATE())	# 20
+``````
+
+
+
+#### 日期的操作函數
+
+``````mysql
+# EXTRACT(type FROM date)	返回指定日其中特定的部分 type指定返回的值
+EXTRACT(SECOND FROM NOW())		# 返回秒
+EXTRACT(DAY FROM NOW())			# 返回天數
+EXTRACT(HOUR_MINUTE FROM NOW())	# 返回 時 分 
+EXTRACT(QUARTER FROM NOW())		# 返回一年中的第幾個季度
+
+
+
+``````
+
+
+
+#### 時間和秒轉換函數
+
+``````mysql
+TIME_TO_SEC(CURTIME())	# 80000
+SEC_TO_TIME(80000)		# 22:13:20  <--> 22*3600+13*60+20
+``````
+
+
+
+#### 計算日期時間的函數
+
+``````mysql
+## 返回與給定日期時間相差INTERVAL時間段的日期時間
+# DATE_ADD(datetime,INTERVAL exprtype)
+# ADDDATE(date,INTERVAL exprtype)
+
+DATE_ADD(NOW(),INTERVAL 1 YEAR)	# 讓NOW()的結果增加1年
+DATE_ADD(NOW(),INTERVAL '1_1' MINUTE SECOND) # 分鐘 秒數 + 1 	
+
+## 返回與date相差INTERVAL時間間隔的日期
+# DATE_SUB(date,INTERVAL exprtype)
+# SUBDATE(date,INTERVAL exprtype)
+
+# ADDTIME(time1,time2)	# 在time1中加上time2(秒)
+ADDTIME(NOW(),'1:1:1')	# 在NOW()中加上 1小時 1分 1秒
+
+# DATEDIFF(date1,date2)	返回date1 - date2的日期的間隔天數
+
+# TIMEDIFF(time1,time2)	返回time1-time2的時間間隔
+
+# FROM_DAYS(N)	返回從0000年1月1日起 N年後的日期
+
+# TO_DAYS(date)	返回日期date距離0000年1月1日的天數
+``````
+
+
+
+#### 日期的格式化與解析
+
+- 格式化 : 日期 --> 字串
+- 解析 : 字串 --> 日期
+
+``````mysql
+### 格式化
+# DATE_FORMAT(date,fmt)	依照字串fmt格式化日期date值
+DATE_FORMAT(CURDATE(),'%Y-%M-%D')	# 2021-JANUARY-1st
+DATE_FORMAT(NOW(),'%Y-%m-%d')		# 2000-01-01
+# TIME_FORMAT(time,fmt) 依照字串fmt格式化時間time值
+TIME_FORMAT(CURTIME(),'%h:%i:%s')	# 10:12:12
+
+### 解析
+# GET_FORMAT(date_type,format_type) 返回日期字串的顯示格式
+GET_FORMAT(DATE,'USA')	# %m.%d.%Y  獲得USA的日期格式
+DATE_FORMAT(CURDATE(),GET_FORMAT(DATE,'USA'))	# 12,20,2000
+
+# STR_TO_DATE(str,fmt) 依照字串fmt對str進行解析 解析為一個日期
+``````
+
+
+
+## 流程控制函數
+
+``````mysql
+# IF(value,value1,value2) 如果value = true 返回value1 否則返回value2
+IF(salary >= 6000 , 'AAA','BBB') as details 
+
+# ISNULL(values,value1,value2) 如果values不為NULL 返回value1 否則返回value2
+IF(commission_pct IS NOT NULL,commission_pct,0) as details # 不為null 輸出commission_pct  為null的話輸出0
+
+# IFNULL(value1,value2) 看作IF(value,value1,value2)
+IFNULL(commission_pct,0) "detail"	# 非NULL 輸出commission_pct  為null 輸出0
+
+
+# CASE WHEN ... THEN ... WHEN ... THEN ... ELSE ... END
+CASE WHEN salary >= 10000 THEN 'AAA'
+	 WHEN salary >= 8000  THEN 'BBB'
+	 WHEN salary >= 6000  THEN 'CCC'
+	 ELSE 'DDD' END "details"
+# 或 END "details"  顯示NULL
+
+
+# 查詢部門號為10 20 30的員工訊息 若部門號為10 印出工資的1.1倍 --> 20 1.2  30 1.3 others 1.4
+SELECT employee_id,last_name,department_id,salary,
+CASE department_id WHEN 10 THEN salary * 1.1
+				   WHEN 20 THEN salary * 1.2
+				   WHEN 30 THEN salary * 1.3
+				   ELSE salary * 1.4 END "details"
+FROM employees;				  
+``````
+
+
+
+
+
+## 加密與解密函數
+
+
+
+``````
+## 加密
+# MD5(str)
+# SHA(str)
+``````
+
+
+
+## MySQL訊息函數
+
+``````
+VERSION()
+CONNECTION_ID()
+DATABASE()
+SCHEMA()
+USER()
+CURRENT_USER()
+CHARSET(str)
+COLLATION(str)
+``````
+
+
+
+## 其他函數
+
+``````mysql
+# FORMAT(value,n)	將value格式化後 n表示四捨五入後保留到小數點後n位
+FORMAT(123.123,2)	# 123.12
+# CONV(value,from,to) 將value值進行不同進制之間的轉換
+CONV(16,10,2)	# 10000
+# INET_ATON(ipvalue) 將以點分隔的IP地址轉換為一個數字
+INET_ATON('192.168.1.100')	# 類似加密得到數字
+# INET_NTOA(value) 將數字形式的IP地址轉換為以點分隔的IP地址
+INET_NTOA(...)
+# BENCHMARK() 用於測試表達式的執行效率
+BENCHMARK(100000,MD5('mysql'))
+# CONVENT(value USING char_code)
+CONVERT('hello' USING 'utf8mb4')
+
+``````
+
+
+
+## 單行函數練習
+
+``````mysql
+# 顯示系統時間 (日期+時間)
+SELECT NOW(),SYSDATE(),CURRENT_TIMESTAMP(),LOCALTIME(),LOCALTIMESTAMP()
+FROM DUAL;
+
+# 查詢員工號 姓名 工資 以及工資提高20%後的結果(new salary)
+SELECT employee_id,last_name,salary,salary * 1.2 "new salary"
+FROM employees;
+
+# 將員工的姓名按照首字母排序 並寫出姓名的長度(length)
+SELECT last_name,LENGTH(last_name) "name_length"
+FROM employees
+ORDER BY last_name ASC;
+# ORDER BY name_length ASC; 依照長度升序排序
+
+# 查詢員工id,last_name,salary 並做為一個列輸出 別名為OUT_PUT
+SELECT CONCAT(employee_id,',',last_name,',',salary) "OUT_PUT"
+FROM employees;
+
+# 查詢公司各員工工作的年數 工作的天數 按照工作年數的降序排列
+SELECT employee_id,
+DATEDIFF(CURDATE(),hire_date)/365, "worked_years",DATEDIFF(CURDATE(),hire_date) "worked_days"
+TO_DAYS(CURDATE()) - TO_DAYS(hire_date) "worked_days2"
+FROM employees
+
+# 查詢員工姓名 hire_date department_id 
+# 滿足時間在1997年後 department_id為80或90或110  commission_pct不為空 
+SELECT last_name,hire_date,department_id
+FROM employees
+WHERE department_id IN (80,90,110)
+AND commission_pct IS NOT NULL
+# AND hire_date >= '1997-01-01'; # 存在隱式轉換
+# AND DATE_FORMAT(hire_date,'%Y-%m-%d') >= '1997-01-01'# 顯式轉換 格式化 : 日期 --> 字串
+# AND DATE_FORMAT(hire_date,'%Y') >= '1997'; # 顯式轉換
+AND hire_date >= STR_TO_DATE('1997-01-01','%Y-%m-%d'); # 顯示轉換 字串 --> 日期
+
+# 查詢公司中入職超過10000天的員工姓名 入職時間
+SELECT last_name,hire_date
+FROM employees
+WHERE DATEDIFF(CURDATE(),hire_date) > 10000
+
+# 產生以下結果 <last_name> earns <salary> monthly but wants <salary*3>
+SELECT CONCAT(last_neme,'earns',TRUNCATE(salary,0),'monthly but wants ', TRUNCATE(salary * 3,0)) "Dream Salary"
+FROM employees;
+
+# 使用case-when 依照以下的條件
+SELECT last_name "Last_name",job_id "Job_id", 
+CASE job_id WHEN 'AD_PRES' THEN 'A'
+			WHEN 'ST_MAN' THEN 'B'
+			WHEN 'IT_PROG' THEN 'C'
+			WHEN 'SA_REP' THEN 'D'
+			WHEN 'ST_CLERK' THEN 'E'
+			END "Grade"
+FROM employees;
+
+``````
+
+
+
+# 聚合函數
+
+
+
+## 常見的聚合函數
+
+``````mysql
+# AVG / SUM 適用於數值類型的欄位 或 變數
+AVG(salary)
+SUM(salary)
+
+# MAX / MIN 適用 數值 字串 日期時間 類型的欄位
+MAX(salary)
+MIN(salary)
+MAX(last_name)	# 字串可以比較大小
+
+# COUNT : 計算指定欄位在查詢結構中出現的個數
+COUNT(employee_id)	# 有多少個行出現
+COUNT(1)	# 將所有的行當作一個單位計算總數 (全部行的數量)
+
+## 計算表中有多少條記錄
+# 方式一 : COUNT(*)
+# 方式二 : COUNT(1)
+# 方式三 : COUNT(具體欄位) : 不一定正確 null會忽略
+## 計算指定欄位出現的個數時 不計算null
+
+## AVG = SUM / COUNT
+AVG(salary) == SUM(salary) / COUNT(salary)
+# commission_pct 有null值
+AVG(commission_pct)	# AVG過濾null
+SUM(commission_pct) / COUNT(commission_pct)	# SUM過濾null
+##　AVG SUM過濾null後 與 COUNT(1)的數量不同
+SUM(commission_pct) / COUNT(1)
+
+## 查詢公司中平均獎金率 
+# 錯誤 : 忽略了null的數量平均
+SELECT AVG(commission_pct)
+FROM employees;
+# 正確 : COUNT不包含NULL  需要加入null使其為0進行計算
+SELECT SUM(commission_pct) / COUNT(IFNULL(commission_pct,0))
+# 或
+# AVG(IFNULL(commission_pct,0))
+FROM employees;
+
+``````
+
+
+
+#### COUNT效率比較
+
+如果需要統計表中的紀錄數 COUNT(*) COUNT(1) COUNT(具體欄位) 效率比較
+
+- 如果使用MyISAM儲存引擎 則三者的效率相同 O(1)
+- 如果使用InnoDB儲存引擎 則三者效率 : COUNT(*) = COUNT(1) > COUNT(欄位)
+
+
+
+## GROUP BY
+
+``````mysql
+# 查詢各個部門的平均工資 最高工資
+SELECT department_id,AVG(salary),MAX(salary)
+FROM employees
+GROUP BY department_id
+
+# 查詢各個job_id的平均工資
+SELECT job_id,AVG(salary)
+FROM employees
+GROUP BY job_id;
+
+# 查詢各個department_id,job_id的平均工資
+SELECT department_id,job_id,AVG(salary)
+FROM employees
+GROUP BY department_id,job_id;
+# 方式二  先分後分的區別  
+SELECT job_id,department_id,AVG(salary)
+FROM employees
+GROUP BY job_id,department_id;
+
+# 錯誤的
+SELECT department_id,job_id,AVG(salary)
+FROM employees
+GROUP BY department_id;
+### 結論
+# SELECT中出現的非組函數的藍位必須聲明在GROUP BY中 
+# 反之 GROUP BY中聲明的欄位可以不出現在SELECT中
+### 結論二
+# GROUP BY聲明在FROM後面 WHERE後面  ORDER BY 前面  LIMIT 前面
+# FROM -> WHERE -> GROUP BY -> ORDER BY -> LIMIT
+### 結論三 MySQL中GROUP BY中使用WITH ROLLUP
+SELECT department_id,AVG(salary)
+FROM employees
+GROUP BY department_id WITH ROLLUP;
+# 最後會將AVG(salary)的結果顯示出來 因為分組的關係 分組條件顯示null
+
+# 需求 查詢各個部門的平均工資 依照平均工資升序排列
+SELECT department_id,AVG(salary) avg_sal
+FROM employees
+GROUP BY department_id
+ORDER BY avg_sal ASC;
+
+# 但是加上 WITH ROLLUP 無法正常的參與排序
+SELECT department_id,AVG(salary) avg_sal
+FROM employees
+GROUP BY department_id WITH ROLLUP
+ORDER BY avg_sal ASC;
+``````
+
+
+
+## HAVING
+
+- 如果過濾條件中使用了聚合函數 則必須使用HAVING來替換WHERE 
+- HAVING必須聲明在GROUP BY的後面
+
+過濾分組
+
+- 行已經被分組
+- 使用了聚合函數
+- 滿足HAVING子句中條件的分組將被顯示
+- HAVING不能單獨使用 必須要和GROUP BY一起使用
+
+``````mysql
+# 查詢部門id為10 20 30 40 最高工資比10000高的部門訊息
+SELECT department_id,MAX(salary)
+FROM employees
+WHERE department_id IN (10,20,30,40)
+GROUP BY department_id
+HAVING MAX(salary) > 10000;
+# 方式二
+SELECT department_id,MAX(salary)
+FROM employees
+GROUP BY department_id
+HAVING MAX(salary) > 10000 AND department_id IN (10,20,30,40);
+
+## 結論
+# 當過濾條件中有聚合函數時 則此過濾條件必須聲明在HAVING中
+# 當過濾條件沒有聚合函數時 則此過濾條件聲明在WHERE中或HAVING中都可以
+# 但是建議聲明在WHERE中
+``````
+
+
+
+#### WHERE HAVING 比較
+
+- 適用範圍 : HAVING的適用範圍更廣
+- 如果過濾條件中沒有聚合函數 : WHERE的執行效率要高於HAVING
+
+
+
+## SQL底層執行原理
+
+
+
+#### SELECT語句的完整結構
+
+``````
+# sql92語法
+SELECT ... , ... , ... (存在聚合函數)
+FROM ... , ... , ...
+WHERE 多表的連接條件 AND 不包含聚合函數的過濾條件
+GROUP BY ... , ...
+HAVING 包含聚合函數的過濾條件
+ORDER BY ... , ... (ASC / DESC)
+LIMIT ... , ...
+
+# sql99語法
+SELECT ... , ... , ... (存在聚合函數)
+FROM ... (LEFT / RIGHT) JOIN ... ON 多表的連接條件
+(LEFT / RIGHt) JOIN ... ON ...
+WHERE 不包含聚合函數的過濾條件
+GROUP BY ... , ...
+HAVING 包含聚合函數的過濾條件
+ORDER BY ... , ... (ASC / DESC)
+LIMIT ... , ...
+``````
+
+
+
+#### SELECT語句執行過程
+
+``````
+FROM : 選擇某些表進行操作
+ON : 進行表的篩選 
+(LEFT / RIGHT) JOIN : 左右連接加入表
+WHERE : 非聚合函數過濾條件
+GROUP BY : 進行欄位的分組
+HAVING : 進行分組後 聚合函數的過濾
+SELECT : 查詢出資料
+DISTINCT : 進行去重複動作
+ORDER BY : 進行排序
+LIMIT : 資料顯示數量
+``````
+
+
+
+## 聚合函數練習
+
+``````mysql
+# WHERE子句是否可以使用聚合函數進行過濾 ?  NO
+
+# 查詢員工工資的最大值 最小值 平均值 總和
+SELECT MAX(salary),MIN(salary),AVG(salary),SUM(salary)
+FROM employees;
+
+# 查詢各job_id的員工工資的最大值 最小值 平均值 總和
+SELECT job_id,MAX(salary),MIN(salary),AVG(salary),SUM(salary)
+FROM employees;
+GROUP BY job_id;
+
+# 選擇具有各個job_id的員工人數
+SELECT job_id,COUNT(*)
+FROM employees
+GROUP BY job_id;
+
+# 查詢員工最高工資和最低工資的差距(DIFFERENCE)
+SELECT MAX(salary) - MIN(salary) "DIFFERENCE"
+from employees;
+
+# 查詢各個管理者手下員工的最低工資 其他最低工資不能低於6000 沒有管理者的員工不計算在內
+SELECT manager_id,MIN(salary) min_salary
+FROM employees
+WHERE manager_id IS NOT NULL
+GROUP BY manager_id;
+HAVING min_salary >= 6000;
+
+# 查詢所有部門的名字 location_id 員工數量和平均工資 並按平均工資降序
+SELECT d.department_name,d.location_id,COUNT(employee_id),AVG(salary)
+FROM department d
+LEFT JOIN employees e
+On d.department_id = e.department_id
+GROUP BY department_name,location_id
+ORDER BY DESC;
+
+# 查詢每個工資 每個部門的部門名 工種名 最低工資
+SELECT d.department_name,e.job_id,MIN(salary)
+FROM department d
+LEFT JOIN employee e 
+ON d.department_id = e.department_id
+GROUP BY d.department_name,e.job_id
+
+
+``````
+
+
+
+# 子查詢
+
+- 子查詢指一個查詢語句嵌套在另一個查詢語句內部的查詢 
+- SQL中的子查詢使用增強了SELECT查詢的能力 很多時候查詢需要從結果集中獲取數據 或是需要從同一個表中先計算得出一個數據結果 (可能是某個標量 或是 集合) 進行比較
+
+
+
+``````mysql
+## 誰的工資高於Abel --> 先計算出Abel的工資
+# 方式一 兩次查詢
+SELECT salary
+FROM employees
+WHERE last_name = 'Abel'; # 得到 11000
+
+SELECT last_name,salary
+FROM employees
+WHERE salary > 11000;
+
+# 方式二 自連接
+SELECt e1.last_name,e1.salary
+FROM employees e1,employees e2
+WHERE e1.salary > e2.salary
+AND e2.last_name = 'Abel';
+
+# 方式三 子查詢
+SELECT last_name,salary
+FROM employees
+WHERE salary > (
+				SELECT salary
+				FROM employees
+				WHERE last_name = 'Abel'
+				);
+# 稱謂的規範 : 外查詢(主查詢)  內查詢(子查詢)
+``````
+
+
+
+## 子查詢規範
+
+- 子查詢(內查詢)在主查詢之前一次執行完成
+- 子查詢的結果被主查詢(外查詢)使用
+
+注意事項
+
+- 子查詢要包含在 () 內
+- 將子查詢放在比較條件的右側
+- 單行操作符對應單行子查詢  多行操作符對應多行子查詢
+
+
+
+## 子查詢的分類
+
+從內查詢返回的結果的條目數
+
+- 單行子查詢
+- 多行子查詢
+
+從內查詢是否被執行多次
+
+- 相關子查詢
+  - 如果子查詢需要執行多次 即採用循環的方式
+  - 先從外部查詢開始 每次都傳入子查詢進行查詢
+  - 然後再將結果反饋給外部
+  - 這種嵌套的執行方式稱為相關子查詢
+- 不相關子查詢
+  - 子查詢從數據表中查詢了結果
+  - 如果這個數據結果只執行一次
+  - 然後這個數據結果作為主查詢的條件進行執行
+  - 那麼這樣的子查詢稱為部相關子查詢
+
+
+
+## 單行子查詢
+
+
+
+#### 單行比較操作符
+
+| 操作符 | 含意                     |
+| ------ | ------------------------ |
+| =      | equals to                |
+| >      | greater than             |
+| >=     | greater than or equal to |
+| <      | less than                |
+| <=     | less than or equal to    |
+| <>     | not equal to             |
+
+
+
+子查詢編寫技巧
+
+- 從裡面往外寫
+- 從外往裡面寫
+
+``````mysql
+# 查詢工資大於149號員工工資的員工訊息
+SELECT employee_id,last_name,salary
+FROM employees
+WHERE salary > (
+    			SELECT salary
+				FROM employees
+				WHERE employee_id = 149
+				);
+
+# 返回job_id與141號員工相同 salary比143號員工多的員工姓名 job_id和salary
+
+SELECT job_id,salary
+FROM employees
+WHERE job_id = (
+    			SELECT job_id
+				FROM employees
+				WHERE employee_id = 141
+				)
+AND salary > (
+    			SELECT salary
+    			FROM employees
+    			WHERE employee_id = 143
+				);
+
+# 返回公司工資最少的員工的last_name,job_id,salary
+
+SELECt last_name,job_id,salary
+FROM employees
+WHERE salary = (
+    			SELECT MIN(salary)
+				FROM employees
+				);
+
+# 查詢與141或174號員工的manager_id和department_id相同的其他員工的employee_id,manager_id,department_id
+SELECT employee_id,manager_id,department_id
+FROM employees
+WHERE manager_id IN (
+					SELECT manager_id
+					FROM employees
+					WHERE employee_id IN (141,174)
+					)
+AND department_id IN (
+					SELECT department_id
+					FROM employees
+					WHERE employee_id IN (141,174)
+					)
+AND employee_id NOT IN (141,174);
+
+# 方式二
+SELECT employee_id,manager_id,department_id
+FROM employees
+WHERE (manager_id,department_id) = (
+    								SELECT manager_id,department_id
+    								FROM employees
+    								WHERE employee_id IN (141,174)
+									)
+AND employee_id NOT IN (141,174);
+``````
+
+
+
+#### HAVING中的子查詢
+
+``````mysql
+# 查詢最低工資大於50號部門最低工資的部門id和其最低工資
+SELECT department_id,MIN(salary)
+FROM employees
+WHERE department_id IS NOT NULL
+GROUP BY department_id
+HAVING MIN(salary) > (					
+						SELECt (MIN)salary
+						FROM employees
+						WHERE department_id = 50
+					 );
+``````
+
+
+
+#### CASE中的子查詢
+
+``````mysql
+# 顯示員工的employee_id,last_name,loction
+# 其中 若員工department_id與location 和 1800的department_id相同
+# 則location為'Canada' 其餘則為'USA'
+
+SELECT employee_id,last_name,CASE department_id WHEN 
+									(
+                                    SELECT department_id
+									 FROM departments
+									WHERE location_id = 1800
+                                    ) 
+                                    THEN 'Canada'
+									ELSE 'USA' END 'location'
+FROM employees
+
+
+
+``````
+
+
+
+#### 子查詢中的空值問題
+
+``````mysql
+# 查出的值為空
+SELECT last_name,job_id
+FROM employees
+WHERE job_id = 
+				(
+				SELECT job_id
+				FROM employees
+				WHERE last_name = '不存在'
+				);
+``````
+
+
+
+#### 非法使用子查詢
+
+``````mysql
+# 錯誤 = 無法對應多個數據
+SELECT employee_id,last_name
+FROM employees
+WHERE salary = 
+				(
+				SELECt MIN(salary)
+				FROM employees
+				GROUP BY department_id
+				);
+``````
+
+
+
+## 多行子查詢
+
+- 又稱為集合比較子查詢
+- 內查詢返回多行
+- 使用多行比較操作符
+
+#### 多行比較操作符
+
+| 操作符 | 含意                                                    |
+| ------ | ------------------------------------------------------- |
+| IN     | 等於列表中的任意一個                                    |
+| ANY    | 需要和單行比較操作符一起使用 和子查詢返回的某一個值比較 |
+| ALL    | 需要和單行比較操作符一起使用 和子查詢返回的所有值比較   |
+| SOME   | 實際上是ANY的別名 作用相同 一般常使用ANY                |
+
+
+
+#### 實際操作
+
+``````mysql
+## IN
+SELECt employee_id,last_name
+FROM employees
+WHERE salary IN
+				(
+                	SELECT MIN(salary)
+                    FROM employees
+                    GROUP BY department_id
+                );
+
+## ANY / ALL
+# 返回其他job_id中比job_id為'IT_PROG'部門任一工資低的員工的員工號 (任一 最大值以下即可)
+# 姓名 job_id 以及 salary
+SELECT employee_id,last_name,job_id,salary
+FROM employees
+WHERE job_id <> 'IT_PROG'
+AND salary < ANY
+			(
+             	SELECT salary
+				FROM employees
+				WHERE job_id = 'IT_PROG'   
+			);
+
+# 返回其他job_id中比job_id為'IT_PROG'部門所有工資低的員工的員工號 (所有 小於最小值)
+# 姓名 job_id 以及 salary
+SELECT employee_id,last_name,job_id,salary
+FROM employees
+WHERE job_id <> 'IT_PROG'
+AND salary < ALL
+			(
+             	SELECT salary
+				FROM employees
+				WHERE job_id = 'IT_PROG'   
+			);
+
+
+# 查詢平均工資最低的部門id
+# 聚合函數不能直接嵌套使用
+SELECT department_id
+FROM employees
+GROUP BY department_id
+HAVING AVG(salary) = (
+   					 SELECT MIN(avg_sal)
+					# 作為新表使用
+					 FROM 
+    				 (
+				   	 SELECT (AVG)salary avg_sal
+					 FROM employees
+					 GROUP BY department_id
+					 ) t_dept_avg_sal
+);
+
+# 方式二
+SELECT department_id
+FROM employees
+GROUP BY department_id
+HAVING AVG(salary) <= ALL(	 # <= 所有的資料
+				   	 SELECT (AVG)salary avg_sal
+					 FROM employees
+					 GROUP BY department_id				 
+);      
+``````
+
+
+
+#### 空值問題
+
+``````mysql
+SELECT last_name
+FROM employees
+WHERE employee_id NOT IN (		# 內查詢有null結果為空 導致資料無法正確查詢
+							SELECT manager_id
+							FROM employees
+    						# WHERE manager_id IS NOT NULL
+						 );
+``````
+
+
+
+## 相關子查詢
+
+
+
+#### 相關子查詢執行流程
+
+- 如果子查詢的執行依賴於外部查詢 通常情況下都是因為子查詢中的表用到了外部的表 並進行了條件關聯  
+- 因此每執行一次外部查詢 子查詢都要重新計算一次 這樣的子查詢稱為 關聯子查詢
+- 相關子查詢依照一行接一行的順序執行 主查詢的每一行都執行一次子查詢
+
+
+
+#### 實際操作
+
+``````mysql
+# 回顧 : 查詢員工中工資大於公司平均工資的員工的last_name,salary,department_id
+SELECT last_name,salary,department_id
+FROM employees
+WHERE salary > (
+				SELECT AVG(salary)
+				FROM employees
+				);
+
+
+# 相關子查詢
+# 查詢員工中工資大於本部門平均工資的員工的last_name,salary,department_id
+SELECT last_name,salary,department_id
+FROM employees e1
+WHERE salary > (
+				SELECT AVG(salary)
+    			FROM employees e2
+    			WHERE department_id = e1.department_id # 由外部取得對應的部門
+				);
+				
+# 方式二 : 在FROM中聲明子查詢
+SELECT e.last_name,e.salary,e.department_id
+FROM employees e,(  # 另外創建新的表
+                    SELECT department_id,AVG(salary) avg_sal
+                    FROM employees
+                    GROUP BY department_id) t_dept_avg_sal
+WHERE e.department_id = t_dept_avg_sal.department_id
+AND e.salary > t_dept_avg_sal.avg_sal
+
+
+# 查詢員工的id,salary 依照department_name排序
+SELECT employee_id,salary
+FROM employees e
+ORDER BY(  
+		SELECT department_name
+    	FROM departments d 
+    	WHERE e.department_id = d.department_id # 每次傳入對應的數據比對
+		) ASC
+		
+# 若employees表中employee_id與job_history表中employee_id相同的數目不小於2
+# 輸出這些相同id的員工的employee_id,last_name,job_id
+SELECT employee_id,last_name,job_id
+FROM employees e
+WHERE 2 <= (  # 每一次變動會有一條記錄 找尋變動兩次以上的對象
+    		SELECT COUNT(*)
+			FROM job_history j
+			WHERE e.department_id = j.department_id
+			);
+
+
+``````
+
+
+
+結論 : 在SELECT中 除了GROUP BY 和 LIMIT 之外 其他位置都可以聲明
+
+``````
+SELECT ... , ... , ... (存在聚合函數)
+FROM ... (LEFT / RIGHT) JOIN ... ON 多表的連接條件
+(LEFT / RIGHt) JOIN ... ON ...
+WHERE 不包含聚合函數的過濾條件
+GROUP BY ... , ...
+HAVING 包含聚合函數的過濾條件
+ORDER BY ... , ... (ASC / DESC)
+LIMIT ... , ...
+``````
+
+
+
+#### EXISTS 與 NOT EXISTS
+
+- 關聯子查詢通常也會和EXISTS操作符一起使用 用來檢查在子查詢中是否存在滿足條件的行
+- 如果在子查詢中不存在滿足條件的行
+  - 條件返回FALSE
+  - 繼續在子查詢中查找
+- 如果再子查詢中存在滿足條件的行
+  - 不在子查詢中繼續查找
+  - 條件返回TRUE
+- NOT EXISTS關鍵字表示如果不存在某種條件 則返回TRUE 否則返回FALSE
+
+
+
+``````mysql
+# 查詢公司管理者的employee_id,last_name,job_id,department_id
+# 方式一 : 自連接
+SELECT DISTINCT mgr.employee_id,mgr.last_name,job_id,mgr.department_id
+FROM employees emp
+JOIN employees mgr
+WHERE emp.maneger_id = mgr.employee_id;
+
+# 方式二 : 子查詢
+SELECT employee_id,last_name,job_id,department_id
+FROM employees
+WHERE employee_id IN 
+					(
+                     SELECT DISTINCT manager_id
+					 FROM employees   
+                    );
+
+# 方式三 : EXISTS
+SELECT employee_id,last_name,job_id,department_id
+FROM employees e1
+WHERE EXISTS
+			(
+                SELECT *
+                FROM employee e2
+                WHERE e1.employee_id = e2.manager_id
+            );
+
+
+## NOT EXISTS
+# 查詢department表中 不存在於employees表中的部門的department_id和department_name
+# 方式一 
+SELECT d.department_id,d.department_name
+FROM employees e 
+RIGHT JOIN departments d 
+ON e.department_id = d.department_id
+WHERE e.department_id IS NULL;
+
+# 方式二 NOT EXISTS
+SELECT department_id,department_name
+FROM departments
+WHERE NOT EXISTS (	# 找尋部門表中沒有對應員工的行  
+    			SELECT *
+                FROM employees e 
+                WHERE d.department_id = e.department_id
+    		 );
+
+
+
+``````
+
+
+
+#### 相關更新
+
+``````
+UPDATE table1 alias1
+SET	   column = (SELECT empression
+				 FROM	table1 alias2
+				 WHERE  alias1.column = alias2.column);
+``````
+
+使用相關子查詢依據一個表中的數據更新另一個表的數據
+
+
+
+#### 相關刪除
+
+``````
+DELETE FROM table1 alias1
+WHERE column operator(SELECT expression
+					  FROM	 table1 alias2
+					  WHERE  alias1.column = alias2.column
+					  );
+``````
+
+使用相關子查詢依據一個表中的數據刪除另一個表的數據
+
+
+
+## 子查詢練習
+
+``````mysql
+## 從裡往外寫  OR   從外往裡寫
+# 查詢和Zlotkey相同部門的員工姓名和工資
+SELECT last_name,salary
+FROM employees
+WHERE department_id IN (
+                        SELECT department_id
+                        FROM employees 
+                        WHERE last_name = 'lotkey'
+                      );
+
+# 查詢工資比公司平均工資高的員工的員工號 姓名 工資
+SELECT employee_id,last_name,salary
+FROM employees
+WHERE salary > (
+                SELECT (AVG)salary
+         	    FROM employees
+         	   );
+
+# 選擇工資大於所有JOB_ID = 'SA_MAN'的員工工資,員工的last_name,job_id,salary
+SELECT last_name,job_id,salary
+FROM employees
+WHERE salary > ALL(
+                    SELECT salary
+                    FROM employees
+                    WHERE job_id = 'SA_MAN'
+                  );
+
+# 查詢和姓名中包含字母u的員工在相同部門的員工的員工號和姓名
+SELECT employee_id,last_name
+FROM employees
+WHERE department_id IN (
+                        SELECT DISTINCT department_id
+                        FROM employees
+                        WHERE last_name like "%u%"
+                        );
+
+# 查詢在部門表的location_id為1700的部門 工作的員工的員工號
+SELECT last_name,employee_id
+FROM employees
+WHERE department_id IN (
+                        SELECT department_id
+                        FROM departments
+                        WHEER location_id = 1700
+                        );
+
+# 查詢管理者是King的員工姓名和工資
+SELECT last_name,salary
+FROM employees
+WHERE manager_id IN (
+                        SELECT employee_id
+                        FROM employees
+                        WHERE last_name = 'King'
+                     );
+
+# 查詢工資最低的員工訊息 : last_name,salary
+SELECT last_name,salary
+FROM employees
+WHERE salary = (
+                SELECT MIN(salary)
+                FROM employees
+                );
+
+
+# 查詢平均工資最低的部門訊息
+SELECT *
+FROM departments
+WHERE department_id = (  # 查詢出平均薪資最小的department_id
+                    SELECT department_id
+                    FROM employees
+                    GROUP BY department_id
+                    HAVING AVG(salary) = ( # 查詢最小平均薪資比對
+                                        SELECT (MIN)avg_sal
+                                        FROM ( # 創建平均薪資表使用
+                                              SELECT AVG(salary)  
+                                              FROM employee
+                                              GROUP BY departments
+                                             ) t_dept_avg_sal
+                                        )
+                    );
+# 方式二
+SELECT * 
+FROM departments
+WHERE department_id = ( # 選擇最小平均工資對應的department_id
+                    SELECT department_id
+                    FROM employees
+                    GROUP BY department_id
+                    HAVING AVG(salary) <= ALL (  # 比較出最小平均工資
+                                                SELECT AVG(salary)
+                                                FROM employees
+                                                GROUP BY department_id 
+                                              )
+					  );
+
+# 方式三 LIMIT
+SELECT * 
+FROM WHERE department_id = (
+                            SELECt department_id
+                            FROM employees
+                            GROUP BY department_id
+                            HAVING AVG(salary) = (
+                                                SELECT AVG(salary) avg_sal
+                                                FROM employees
+                                                GROUP BY department_id
+                                                ORDER BY ASC
+                                                LIMIT 1
+                                                )
+							);
+
+# 方式四
+SELECT d.*
+FROM departments d,(  # 得到部門最低的平均薪資
+                    SELECT department_id,AVG(salary) avg_sal
+                    FROM employees
+                    GROUP BY department_id
+                    ORDER BY avg_sal ASC
+                    LIMIT 1 
+                 ) t_dept_avg_sal
+WHERE d.department_id = t_dept_avg_sal.department_id
+
+# 查詢平均工資最低的部門訊息和該部門的平均工資 (相關子查詢)
+SELECT d.*,(SELECT AVG(salary) FROM employees WHERE department_id = d.department_id) avg_sal
+FROM departments d
+WHERE department_id = (  # 查詢出平均薪資最小的department_id
+                    SELECT department_id
+                    FROM employees
+                    GROUP BY department_id
+                    HAVING AVG(salary) = ( # 查詢最小平均薪資比對
+                                        SELECT (MIN)avg_sal
+                                        FROM ( # 創建平均薪資表使用
+                                              SELECT AVG(salary)  
+                                              FROM employee
+                                              GROUP BY departments
+                                             ) t_dept_avg_sal
+                                        )
+                    );
+``````
+
+
+
+``````mysql
+# 查詢平均工資最高的job訊息
+SELECT *
+FROM jobs
+WHERE job_id = (
+        SELECT job_id
+        FROM employees
+        GROUP BY job_id
+        HAVING AVG(salary) = (
+                                SELECT MAX(avg_sal)
+                                FROM(
+                                        SELECT AVG(salary) avg_sal
+                                        FROM employees
+                                        GROUP BY job_id
+                                        ) t_job_vg_sal
+                              )
+);
+
+# 方式二
+SELECT *
+FROM jobs
+WHERE job_id = (
+        SELECT job_id
+        FROM employees
+        GROUP BY job_id
+        HAVING AVG(salary) >= ALL (
+                                        SELECT AVG(salary)
+                                        FROM employees
+                                        GROUP BY job_id
+                             	  )
+);
+
+# 方式三
+SELECT *
+FROM jobs
+WHERE job_id = (
+        SELECT job_id
+        FROM employees
+        GROUP BY job_id
+        HAVING AVG(salary) =  (
+                                  SELECT AVG(salary) avg_sal
+                                  FROM employees
+                                  GROUP BY job_id
+            					  ORDER BY avg_sal DESC
+            					  LIMIT 1
+                              )
+);
+
+# 方式四
+SELECT j.* 
+FROM jobs j,(
+            SELECT job_id,AVG(salary) avg_sal
+            FROM employees
+            GROUP BY job_id
+            ORDER BY avg_sal DESC
+            LIMIT 1
+            ) t_job_avg_sal
+WHERE j.job_id = t_job_avg_sal.job_id;           
+
+# 查詢平均工資高於公司平均工資的部門有哪些
+SELECT department_id
+FROM employees
+WHERE department_id IS NOT NULL
+GROUP BY department_id
+HAVING AVG(salary) > (
+                    	SELECT AVG(salary)
+                   		FROM employees
+                	 );
+
+# 查詢出公司中所有manager的詳細訊息
+SELECT DISTINCT mgr.*
+FROM employees emp
+JOIN employees mgr
+ON emp.manager_id = mgr.employee_id;
+
+
+# 各個部門中 最高工資比較後最低的那個部門 的 最低工資是多少
+SELECT MIN(salary)  # 由對應的部門找出部門的最低工資
+FROM employees
+WHERE department_id = ( # 由最高工資比較出對應的部門
+                SELECT department_id
+                FROM employees
+                GROUP BY department_id
+                HAVING MAX(salary) = ( # 找到每個最高工資中 最低的那一個
+                                        SELECT MIN(max_sal)
+                                        FROM ( # 創建新表 存放部門最高工資
+                                            SELECT MAX(salary) max_sal
+                                            FROM employees
+                                            GROUP BY department_id
+                                        )
+                                     )
+                );
+
+# 方式2
+SELECT MIN(salary)  # 由對應的部門找出部門的最低工資
+FROM employees
+WHERE department_id = ( # 由最高工資比較出對應的部門
+                SELECT department_id
+                FROM employees
+                GROUP BY department_id
+                HAVING MAX(salary) <= ALL(  # 比較 找出小於的目標
+                                            SELECT MAX(salary) max_sal
+                                            FROM employees
+                                            GROUP BY department_id
+                                     	 )
+                );
+
+# 方式3
+SELECT MIN(salary)  # 由對應的部門找出部門的最低工資
+FROM employees
+WHERE department_id = ( # 由最高工資比較出對應的部門
+                SELECT department_id
+                FROM employees
+                GROUP BY department_id
+                HAVING MAX(salary) = (
+                                        SELECT MAX(salary) max_sal
+                                        FROM employees
+                                        GROUP BY department_id
+                    					ORDER BY max_sal ASC
+                    					LIMIT 1
+                                     )
+                );
+
+# 方式4
+SELECT MIN(salary)
+FROM employee e,(
+                SELECT department_id,MAX(salary) max_sal
+                FROM employees
+                GROUP BY department_id
+                ORDER BY max_sal ASC
+                LIMIT 1
+                ) t_dept_max_sal
+WHERE e.department_id = t_dept_max_sal.department_id;
+
+
+# 查詢平均工資最高的部門的manager的訊息 : last_name,department_id,email.salary
+SELECT last_name,department_id,email,salary
+FROM employees
+WHERE employee_id = ANY (
+    SELECT DISTINCT manager_id
+    FROM employees
+    WHERE department_id = (
+                        SELECT department_id
+                        FROM employees
+                        ORDER BY department_id
+                        HAVING AVG(salary) = (
+                                                 SELECT MAX(avg_sal)
+                                                 FROM (
+                                                 SELECT AVG(salary) avg_sal
+                                                 FROM employees
+                                                 GROUP BY department_id;
+                                                 ) t_dept_avg_sal    
+                                             )
+                        )
+)
+
+
+# 查詢部門的部門號 其中不包括job_id = 'ST_CLERK'的部門號
+SELECT department_id 
+FROM departments
+WHERE department_id NOT IN (
+                            SELECT DISTINCT department_id
+                            FROM employees
+                            WHERE job_id = 'ST_CLERK'
+                            );
+# 方式二
+SELECT department_id
+FROM departments d
+WHERE NOT EXISTS (
+                    SELECT *
+                    FROM employees e
+                    WHERE d.department_id = e.department_id
+                    AND e.job_id = 'ST_CLERK'
+                 );
+
+# 選擇所有沒有管理者的員工的last_name
+SELECT last_name
+FROM employees emp
+WHERE NOT EXISTS (
+                SELECT *
+                FROM employees mgr
+                WHERE emp.manager_id = mgr.employee_id    
+             );
+
+# 查詢員工號 姓名 雇用時間 工資 其中員工的管理者為'De Haan'
+SELECT employee_id,last_name,hire_date,salary
+FROM employees
+WHERE manager_id IN (
+                    SELECT employee_id
+                    FROM employees
+                    WHEHE last_name = 'De Haan'
+                    );
+# 方式2
+SELECT employee_id,last_name,hire_date,salary
+FROM employees e1
+WHERE EXISTS (
+                SELECT *
+                FROM employees e2
+                WHERE e1.manager_id = e2.employee_id
+                AND e2.last_name = 'De Haan'
+             );
+    
+
+# 查詢各部門中工資比本部門平均工資高的員工的員工號  姓名 工資 (相關子查詢)
+# 方式1 : 相關子查詢
+SELECT last_name,salary,department_id
+FROM employee e1
+WHERE salary > ( # 求出總工資平均
+                SELECT AVG(salary)
+                FROM employees e2
+                WHERE department_id = e1.department_id
+                )
+
+# 方式2 : 在FROM中聲名子查詢
+SELECT e.last_name,e.salary,e.department_id
+FROM employees e,(
+                SELECT department_id,AVG(salary) avg_sal
+                FROM employees
+                GROUP BY departmenet_id
+                ) t_dept_avg_sal
+WHERE e.salary > t_dept_avg_sal.avg_sal
+
+# 查詢每個部門下的部門人數大於5的部門名稱(相關子查詢)
+SELECT department_name
+FROM departments d
+WHERE 5 < (
+            SELECT COUNT(*)
+            FROM employees e
+            WHERE d.department_id = e.department_id 		
+            );
+
+# 查詢每個國家下的部門個數大於2的國家編號 (相關子查詢)
+SELECT *
+FROM locations
+
+SELECT country_id
+FROM locations l
+WHERE 2 < (
+            SELECT COUNT(*)
+            FROM departments d
+            WHERE l.location_id = d.location_id
+            );
+``````
+
+
+
+#### 子查詢編寫技巧
+
+``````mysql
+# 從裡往外寫  從外往裡寫
+
+# 如何選擇
+## 如果子查詢相對較簡單 則從外往裡寫
+
+## 一旦子查詢結構較複雜 則建議從裡往外寫
+
+## 如果是相關子查詢 通常從外往裡寫
+``````
+
+
+
+# 創建和管理表
+
+
+
+#### 標示符命名規則
+
+- 資料庫名 表名不得超過30個字元 變數名限制為29個
+- 必須只能包含 A-Z a-z 0-9 共63個字元
+- 資料庫名 表名 欄位名等對象名中間不能包含空格
+- 同一個MySQL軟體中 資料庫不能同名 
+- 同一個庫中 表不能重名
+- 同一個表中 欄位不能重名
+- 必須保證欄位沒有和保留字 資料庫系統或常用方法衝突 如果堅持使用 要在SQL語句中使用 ' ' 引起來
+- 保證欄位名和類型的一致性 在命名欄位並為其指定資料類型的時候一定要保證一致性 例如資料類型在一個表裡是整數 那在另一個表裡就不能變成其他類型
+
+
+
+## 創建和管理資料庫
+
+
+
+#### 創建資料庫 
+
+方式一
+
+``````mysql
+CREATE DATABASE mytest1; # 創建的此資料庫使用的是預設的字元集
+
+SHOW CREATE DATABASE mytest1  # 查看創建的資料庫的訊息
+``````
+
+方式二 : 顯式的指名了要創建的資料庫的字元集
+
+``````mysql
+CREATE DATEBASE mytest2 CHARACTER SET 'gbk';
+
+SHOW CREATE DATABASE mytest2;
+``````
+
+方式三 : 如果要創建的資料庫已經存在 則創建不成功
+
+``````mysql
+CREATE DATABASE IF NOT EXISTS mytest2 CHARACTER SET 'utf8';
+# 如果要創建的資料庫不存在 則創建成功
+CREATE DATABASE IF NOT EXISTS mytest3 CHARACTER SET 'utf8';
+``````
+
+
+
+#### 管理資料庫
+
+``````mysql
+# 查看當前連接中的資料庫有哪些
+SHOW DATABASES;
+
+# 切換資料庫
+USE mytest1;
+
+# 查看當前資料庫中保存的資料表
+SHOW TABLES;
+
+# 查看當前使用的資料庫
+SELECT DATABASE() FROM DUAL;
+
+# 查看指定資料庫下保存的資料表
+SHOW TABLES FROM　mytest1;
+``````
+
+
+
+#### 修改資料庫 
+
+- 更改資料庫字元集
+
+``````
+# ALTER DATABASE 資料庫名 CHARACTER SET 字元集(gbk,utf8)
+ALTER DATABASE mytest1 CHARACTER SET 'utf8';
+``````
+
+
+
+#### 刪除資料庫 
+
+方式一 : 如果要刪除的資料庫存在 則刪除成功 如果不存在 則報錯
+
+``````mysql
+DROP DATABASE mytest1;
+``````
+
+方式二 : 如果要刪除的資料庫存在 則刪除成功 如果不存在 就直接結束 不會報錯
+
+``````mysql
+DROP DATABASE IF EXISTS mytest1;
+``````
+
+
+
+## 如何創建資料表
+
+
+
+#### 創建表 CREATE
+
+``````mysql
+USE mytest1;
+
+# 方式一 
+CREATE TABLE IF NOT EXISTS myempl1(  # 需要具備創建表的權限
+id INT,
+emp_name VARCHAR(15), # 使用VARCHAR定義字串 需要指名其長度
+hire_date DATE
+);
+
+DESC myemp1;  # 查看表結構
+
+# 查看創建表的語句結構
+SHOW CREATE TABLE myemp1; # 如果創建表時沒有指明字元集 則預設使用表所在的資料庫的字元集
+
+
+# 方式二 : 基於現有的表 同時導入數據
+CREATE TABLE myemp2
+AS
+SELECT employee_id,last_name,salary
+FROM employees;
+
+
+## 查詢語句中欄位的別名 作為新創建的表的欄位的名稱
+## 此時的查詢語句的結構可以比較豐富 
+CREATE TABLE myemp3
+AS
+SELECT e.employee_id,e.last_name,d.department_name
+FROM employees e
+JOIN departments d
+ON e.department_id = d.department_id
+
+SELECT * FROM myemp3; # 查看表的數據
+
+DESC myemp3; # 查看表結構
+``````
+
+
+
+- 練習 : 創建一個表employees_copy,實現對employees表的複製 包括表數據
+
+``````mysql
+CREATE TABLE employees_copy
+AS
+SELECT *
+FROM employees;
+``````
+
+- 練習 : 創建一個表employees_blank,實現對employees表的複製 不包括表數據
+
+``````mysql
+CREATE TABLE employees_copy
+AS
+SELECT *
+FROM employees
+# 設定不存在的條件 保持數據為空
+# WHERE department_id > 10000;  
+WHERE 1 = 2;
+``````
+
+
+
+#### 修改表 ALTER 
+
+Alter table
+
+##### 添加一個欄位
+
+``````mysql
+# 預設添加到表中的最後一個欄位
+ALTER TABLE myemp1
+ADD salary DOUBLE(10,2); # 一共10位 小數2位  整數有 10-2=8位
+
+# 添加到表中的第一個欄位
+ALTER TABLE myemp1
+ADD phone_number VARCHAR(20) FIRST;
+
+# 添加到emp_name的後面
+ALTER TABLE myemp1
+ADD email VARCHAR(45) AFTER emp_name;
+``````
+
+##### 修改一個欄位 
+
+數據類型 長度 預設值
+
+``````mysql
+ALTER TABLE myemp1
+MODIFY emp_name VARCHAR(25);
+
+# 加入預設值
+ALTER TABLE myemp1
+MODIFY emp_name VARCHAR(25) DEFAULT 'aaa';
+``````
+
+##### 重命名一個欄位
+
+``````mysql
+# salary --> monthly_salary
+ALTER TABLE myemp1
+CHANGE salary monthly_salary DOUBLE(10,2);
+
+# 更改名稱的同時  同時更改類型 varchar(40) -> varchar(50)
+ALTER TABLE myemp1
+CHANGE email my_email VARCHAR(50)
+``````
+
+##### 刪除一個欄位
+
+``````mysql
+ALTER TABLE myemp1
+DROP COLUME my_email;
+``````
+
+
+
+#### 重命名表 RENAME
+
+- 方式一 
+
+``````mysql
+# 重命名 myemp1 --> myemp11
+RENAME TABLE myemp1
+TO myemp11;
+``````
+
+- 方式二
+
+``````mysql
+ALTER TABLE myemp2
+RENAME TO myemp12;
+``````
+
+#### 刪除表 DROP
+
+- 不光將表結構刪除  同時表中的數據也一併刪除 釋放表空間
+
+``````mysql
+DROP TABLE IF EXISTS myemp12;
+``````
+
+#### 清空表 TRUNCATE
+
+- 清空表中的所有數據 但是表結構保留
+
+TRUNCATE TABLE語句
+
+- 刪除表中所有的數據
+- 釋放表的儲存內容
+
+TRUNCATE語句不能回滾 而使用DELETE語句刪除數據 可以回滾
+
+``````mysql
+SELECT * FROM employees_copy;
+
+# 清空表
+TRUNCATE TABLE employees_copy;
+``````
+
+
+
+##### DCL -> COMMIT ROLLBACK
+
+- COMMIT : 提交資料 一旦執行COMMIT 則數據就被永久的保存在資料庫中 表示資料不可回滾
+- ROLLBACK : 回滾資料 : 一旦執行ROLLBACK 則可以實現資料的回滾 回滾到最近的一次COMMIT之後
+
+
+
+##### TRUNCATE 和 DELETE
+
+TRUNCATE TABLE 和 DELETE FROM
+
+- 相同點 : 都可以實現對表中所有數據的刪除 同時保留表結構
+- 不同點 
+  - TRUNCATE TABLE 
+    - 一旦執行此操作 表數據全部清除 同時 數據是不可以回滾的
+  - DELETE FROM 
+    - 一旦執行此操作 表數據可以全部清除 (不使用WHERE)
+    - 同時 數據是可以實現回滾的
+
+``````
+TRUNCATE 比 DELETE速度快
+且使用的系統和事務日誌資源少
+但TRUNCATE無事務且不觸發TRIGGER 有可能造成事故 故不建議在開發程式中使用此語句
+
+TRUNCATE TABLE在功能上與不帶WHERE子句的DELETE語句相同
+``````
+
+
+
+##### DDL 和 DML
+
+- DDL的操作一旦執行 就不可回滾
+  - 指令 SET autocommit = FALSE 對DDL操作失敗 (因為在執行完DDL操作後 一定會執行一次COMMIT) 而此COMMIT不受SET autocommit = FALSE的影響
+- DML的操作預設情況 一旦執行 也是不可回滾的 
+  - 如果執行DML之前執行了 SET autocommit = FALSE 則DML的操作就可以實現回滾
+
+``````mysql
+# DELETE FROM : DML
+COMMIT;
+SELECT * FROM myemp3;
+SET autocommit = FALSE;	# 開啟回滾功能
+DELETE FROM myemp3;		# 刪除數據
+SELECT * FROM myemp3;	# 查詢數據 此時為空
+ROLLBACK;	# 執行回滾 回復數據
+SELECT * FROM myemp3;	# 查詢數據
+
+# TRUNCATE TABLE : DDL ROLLBACK 無效
+COMMIT;
+SELECT * FROM myemp3;
+SET autocommit = FALSE;	# 開啟回滾功能
+TRUNCATE TABLE myemp3;		# 刪除數據
+SELECT * FROM myemp3;	# 查詢數據 此時為空
+ROLLBACK;	# 執行回滾 回復數據
+SELECT * FROM myemp3;	# 查詢數據
+``````
+
+
+
+#### 建議規範
+
+- (強制) 表名 欄位名必須使用小寫字母或數字 
+  - 禁止出現數字開頭 禁止兩個__中間只出現數字 
+  - 資料庫欄位名的修改代價很大 
+  - 因為無法進行預發布 所以欄位名稱需要慎重考慮
+- (強制) 禁用保留字
+  - 如 desc range match delayed等
+- (強制) 表必備三個欄位 id gmt_create gmt_modified
+  - id必為主鍵 類型為 BIGINT UNSIGNED 單表時自增 間距為 1 
+  - gmt_create gmt_modified的類型均為DATETIME類型 前者表示主動式創建 後者表示被動式更新
+- (推薦) 表的命名最好是遵循 業務名稱_表的作用
+- (推薦) 資料庫名與應用名稱盡量一致
+- (參考) 合適的字元儲存長度 可以節約資料庫的表空間 節約索引儲存 也可以提升搜尋速度
+  - 例如 : 無符號值可以避免儲存負數 擴大了表示範圍
+
+
+
+如何理解清空表 刪除表等操作需謹慎
+
+- 表刪除操作將把表的定義和表中的數據一起刪除 並且MySQL在執行刪除操作時 不會有任何的確認訊息提示
+- 因此執行刪除操作應當慎重 在刪除表前 最好對表中的數具進行備份 這樣當操作失誤時可以對數據進行恢復 以免造成無法挽回的後果
+- 同樣的 在使用ALTER TABLE進行表的基本修改操作時 在執行操作過程之前 也應該確保對數據進行完整的備份 因為數據庫的改變是無法撤銷的 
+- 如果添加了一個不需要的藍位 可以將其刪除 相同的 如果刪除了一個需要的列 則該列下面的所有數據都會丟失
+
+
+
+#### 創建管理表練習
+
+``````mysql
+# 創建數據庫test01_office 指名字元集為utf8 並在此數據庫下執行
+CREATE DATABASE IF NOT EXISTS test01_office CHARACTER SET 'utf8';
+USE test01_office;
+
+# 創建表dept01
+CREATE TABLE dept01(
+id INT(7)
+'name' VARCHAR(25)    
+);
+
+# 將表departments中的數據插入新表dept02中
+CREATE TABLE dept02
+AS
+SELECT *
+FROM data.departments; # 此表在別的數據庫中  要另外標記數據庫名稱
+
+# 創建表emp01
+CREATE TABLE emp01(
+id INT(7),
+first_name VARCHAR(25),
+last_name VARCHAR(25),
+dept_id INT(7)
+);
+
+# 將列last_name的長度增加到50
+DESC emp01;
+
+ALTER TABLE emp01
+MODIFY last_name VARCHAR(50);
+
+# 根據表employees創建emp02
+CREATE TABLE emp02
+AS
+SELECT *
+FROM data.employees;
+
+# 刪除表emp01
+DROP TABLE emp01; # 無法回滾
+
+# 將表emp02重命名為emp01
+# ALTER TABLE emp02 rename to emp01;
+RENAME TABLE emp02 TO emp01;
+
+# 在表dept02和emp01中添加新列test_column 並檢查所做的操作
+ALTER TABLE emp01 ADD test_column VARCHAR(10);
+DESC emp01;
+ALTER TABLE dept02 ADD test_column VARCHAR(10);
+DESC dept02;
+
+# 直接刪除表emp01中的列department_id
+ALTER TABLE emp01
+DROP COLUMN department_id;
+``````
+
+練習2
+
+``````mysql
+# 創建數據庫test02_market
+CREATE DATABASE IF NOT EXISTS test02_market CHARACTER SET 'utf8';
+USE test02_market
+SHOW CREATE DATABASE test02_market;
+
+# 創建數據表 customers
+CREATE TABLE IF NOT EXISTS customers(
+    c_num INT,
+    c_name VARCHAR(50),
+    c_contact VARCHAR(50),
+    c_ciry VARCHAR(50),
+    c_birth DATE
+);
+SHOW TABLES;
+
+# 將c_contact欄位移動到c_birth欄位後面
+DESC customers;
+
+ALTER TABLE customers
+MODIFY c_contact VARCHAR(50) AFTER c_birth;
+
+# 將c_name欄位數據類型改為varchar(70)
+ALTER TABLE customers
+MODIFY c_name varchar(70);
+
+# 將c_contact欄位改名為c_phone
+ALTER TABLE customers
+CHANGE c_contact c_phone varchar(50);
+
+# 增加c_gender欄位到c_name後面 數據類型為char(1)
+ALTER TABLE customers
+ADD c_gender CHAR(1) AFTER c_name;
+
+# 將表明改為customers_info
+RENAME TABLE customers
+TO customers_info
+
+DESC customers_info;
+
+# 刪除欄位c_city
+ALTER TABLE customers_info
+DROP COLUMN c_city;
+
+``````
+
+練習3
+
+``````mysql
+# 創建數據庫test03_company
+CREATE DATABASE IF NOT EXISTS test03_company CHARACTER SET 'utf8';
+USE test03_company;
+
+# 創建表offices
+CREATE TABLE IF NOT EXISTS offices(
+	officeCode INT,
+    city VARCHAR(30),
+    address VARCHAR(50),
+    country VARCHAR(50),
+    postalCode VARCHAR(25)    
+);
+SHOW TABLES;
+DESC offices
+
+# 創建表employees
+CREATE TABLE IF NOT EXISTS employees(
+    empNum INT,
+    lastName VARCHAR(50),
+    firstName VARCHAR(50),
+    mobile VARCHAR(25),
+    'code' INT,
+    jobTitie VARCHAR(50),
+    birth DATE,
+    note VARCHAR(255),
+    sex VARCHAR(5)
+);
+DESC employees;
+
+# 將表employees的mobile欄位修改到code欄位後面
+ALTER TABLE employees
+MODIFY mobile VARCHAR(20) AFTER 'code';
+
+# 將表employees的birth欄位改名為birthday
+ALTER TABLE employees
+CHANGE birth birthday DATE;
+
+# 修改sex欄位 數據類型為char(1)
+ALTER TABLE employees
+MODIFY sex char(1);
+
+# 刪除欄位note
+ALTER TABLE employees
+DROP COLUMN note;
+
+DESC employees;
+
+# 增加欄位名favoriate_activity 數據類型為varchar(100)
+ALTER TABLE employees
+ADD favoriate_activity varchar(100);
+
+# 將表employees的名稱修改為 employees_info
+RENAME TABLE employees TO employees_info
+
+``````
+
+
+
+# 數據處理之增刪改
+
+
+
+``````mysql
+CREATE TABLE IF NOT EXISTS emp1(
+id INT,
+'name' VARCHAR(15),
+hire_date DATE,
+salary DOUBLE(10,2)
+);
+``````
+
+
+
+## 添加數據
+
+``````mysql
+# 方式一 : 一條一條的添加數據
+
+# 1.沒有指明添加的欄位  一定要依照聲明的順序添加
+INSERT INTO emp1
+VALUES(1,'Tom','2000-01-01','3000');
+
+# 2.指名要添加的欄位 (推薦)
+INSERT INTO emp1(id,hire_date,salary,'name')
+VALUES(2,'1999-01-01',4000,'Jerry');
+
+# 3.同時插入多條記錄
+INSERT INTO emp1(id,NAME,salary)
+VALUES(4,'Jim',5000),(5,'aaa',3000);
+
+
+# 方式二 : 將查詢結果插入表中  	
+INSERT INTO emp1(id,NAME,salary,hire_date)
+# 查詢語句
+SELECT employee_id,last_name,salary,hire_date # 查詢的欄位要一一對應
+FROM employees
+WHERE department_id IN (60,70);
+
+## 說明
+# emp1表中藥添加數據的藍位的長度不能低於employees表中查詢的欄位的長度
+# 如果emp1表中要添加數據的欄位的長度低於employees表中查詢的欄位的長度的話 就有添加不成功的可能
+``````
+
+
+
+## 更新數據
+
+``````mysql
+# UPDATE .... SET .... WHERE ....
+# 可以實現批量修改數據
+UPDATE emp1
+SET hire_date = CURDATE()
+WHERE id = 5;
+
+# 同時修改一條數據的多個欄位
+UPDATE emp1
+SET hire_date = CURDATE(),salary = 6000
+WHERE id = 4;
+
+# 題目 : 將表中姓名中包含字元a的salary提薪20%
+UPDATE emp1
+SET salary = salary * 1.2
+WHERE NAME LIKE '%a%';
+
+# 修改數據時 是可能存在不成功的情況的 (可能是由於約束的影響)
+UPDATE employees
+SET department_id = 10000
+WHERE employee_id = 102;
+``````
+
+
+
+## 刪除數據
+
+``````mysql
+# DELETE FROM .... WHERE ....
+DELETE FROM emp1
+WHERE id = 1;
+
+# 在刪除數據時 也有可能因為約束而刪除失敗
+DELETE FROM departments
+WHERE department_id = 50;
+``````
+
+
+
+## 小結
+
+- DML操作預設情況下 執行完之後都會自動提交數據
+- 如果希望提交完後不自動提交數據 則需要使用 SET autocommit = FALSE
+
+
+
+## MySQL8特性 : 計算列
+
+``````mysql
+CREATE TABLE test1(
+a INT,
+b INT,
+c INT GENERATED ALWAYS AS (a+b) VIRTUAL # 欄位c即為計算列    
+);
+
+INSERT INTO test1(a,b)
+VALUES(10,20);	# a = 10 b = 20 , c 自動變成 10 + 20 = 30
+``````
+
+
+
+## 綜合案例DDL-DML
+
+``````mysql
+# 創建數據庫 test01_library
+CREATE DATE BASE IF NOT EXISTS test01_library CHARACTER SET 'utf8';
+
+# 創建books表
+CREATE TABLE IF NOT EXISTS books(
+	id INT,
+    'name' VARCHER(50),
+    AUTHORS VARCHAR(100),
+    price FLOAT,
+    pubdate YEAR,
+    note VARCHAR(100),
+    num INT
+);
+DESC books;
+SELECT * FROM books;
+
+# 向books表中插入記錄
+
+## 1.不指定欄位名稱 插入第一條記錄
+INSERT INTO books
+VALUES(1,'Tal of AAA','Dickes',23,'1995','novel',11);
+## 2.指定所有欄位名稱 插入第二條記錄
+INSERT INTO books (id,NAME,AUTHORS,price,pubdate,note,num)
+VALUES(2,'EmmaT','Jane lura',35,'1993','joke',22)
+## 3.同時插入多條記錄(剩下的所有記錄)
+INSERT INTO books(id,NAME,AUTHORS,price,pubdate,note,num)
+VALUES
+(),
+(),
+(), .... ;
+
+# 將小說類型(novel)的書的價格都增加5
+UPDATE books
+SET price = price + 5
+WHERE note = 'novel';
+
+# 將名稱為EmmaT的書的價格改為40 並將說明改為drama
+UPDATE books
+SET price = 40,note = 'drama'
+WHERE NAME = 'EmmaT';
+
+# 刪除庫存為0的記錄
+DELETE FROM books
+WHERE num = 0;
+
+# 統計書名中包含a字母的書
+SELECT NAME
+FROM books
+WHERE NAME LIKE '%a%';
+
+# 統計書名中包含a字母的書的數量和庫存總量
+SELECT COUNT(*),SUM(num)
+FROM books
+WHERE NAME like '%a%';
+
+# 找出'novel'類型的書 按照價格降序排列
+SELECT NAME,note
+FROM books
+WHERE note = 'novel'
+ORDER BY price DESC;
+
+# 查詢圖書訊息 按照庫存量降序排列 如果庫存量相同 按照note升序排列
+SELECT *
+FROM books
+ORDER BY num DESC,note ASC
+
+# 按照note分類統計書的數量
+SELECT note,COUNT(*)
+FROM books
+GROUP BY note
+
+# 按照note分類統計書的庫存量 顯示庫存量超過30本的
+SELECT note,SUM(num)
+FROM books
+GROUP BY note
+HAVING SUM(num) > 30
+
+# 查詢所有圖書 每頁顯示5本 顯示第二夜
+SELECT *
+FROM books
+LIMIT 5,5;
+
+# 按照note分類統計書的庫存量 顯示庫存量最多的
+SELECT note,SUM(num) sum_num
+FROM books
+GROUP BY note
+ORDER BY sum_num DESC
+LIMIT 1;
+
+# 查詢書名達到10個字元的書 不包括裡面的空格
+SELECT NAME
+FROM books
+WHERE CHAR_LENGTH(REPLACE(NAME,' ','')); # 計算長度
+
+# 查詢書名和類型 其他note值為novel顯示小說 law顯示法律 medicine顯示醫藥 cartoon顯示卡通 joke顯示笑話
+SELECT NAME "書名",note, CASE note  WHEN 'novel' THEN '小說'
+                                    WHEN 'law' THEN '法律'
+                                    WHEN 'medicine' THEN '法律'
+                                    WHEN 'cartoon' THEN '醫藥'
+                                    WHEN 'joke' THEN '笑話'
+                                    ELSE '其他' END "類型"                   
+FROM books;
+
+# 查詢書名 庫存 其他num值超過30本的 顯示滯銷 大於0並低於10的 顯示暢銷 為ˊ0的顯示無貨
+SELECT NAME "書名",num "庫存",CASE WHEN num > 30 THEN '滯銷'
+                                WHEN num > 0 AND num < 10 THEN '暢銷'
+                                WHEN num = 0 THEN '無貨'
+                                ELSE '正常'
+                                END "顯示狀態"
+FROM books;
+
+# 統計每一種note的庫存量 並合計總量
+SELECT IFNULL(note,'合計庫存總量') AS note,SUM(num)
+FROM books
+GROUP BY note WITH ROLLUP;  # WITH ROLLUP 另外新增一行計算總數 
+
+# 統計每一種note的數量 並合計總量
+SELECT IFNULL(note,'合計總量') AS note,COUNT(*)
+FROM books
+GROUP BY note WITH ROLLUP;
+
+# 統計庫存量前三名的圖書
+SELECT *
+FROM books
+ORDER BY num DESC
+LIMIT 0,3;
+
+# 找出最早出版的一本書
+SELECT *
+FROM books
+ORDER BY pubdate ASC
+LIMIT 0,1;
+
+# 找出novel中價格最高的一本書
+SELECT *
+FROM books
+WHERE note = 'novel'
+ORDER BY price DESC
+LIMIT 0,1;
+
+# 找出書名中字數最多的一本書 不含空格
+SELECT *
+FROM books
+ORDER BY CHAR_LENGTH(REPLACE(NAME,' ','')) DESC
+LIMIT 0,1;
+``````
+
+
+
+
+
+## 增刪改練習
+
+練習1
+
+``````mysql
+# 創建數據庫dbtest11
+CREATE DATABASE IF NOT EXISTS dbtest11;
+USE dbtest11;
+# 創建表my_employees
+CREATE TABLE my_employees(
+	id INT(10),
+    first_name VARCHAR(10),
+    last_name VARCHAR(10),
+    userid VARCHAR(10),
+    salary DOUBLE(10,2)
+);
+CREATE TABLE users(
+	id INT,
+    userid VARCHAR(10),
+    department_id INT
+);
+
+# 顯示表my_employees的結構
+DESC my_employees;
+DESC users;
+
+# 向my_employees表中插入數據
+
+# 向users表中插入數據
+## 方式一
+INSERT INTO users
+VALUES(1,.....),(),.....();
+## 方式二 UNION ALL 不去重複
+INSERT INTO users
+SELECT 1,'aa','bb','cc',100 UNION ALL
+SELECT 2,'dd','ee','ff',200 UNION ALL
+SELECT 3,'gg','hh','ii',300 UNION ALL
+SELECT 3,'jj','kk','ll',400;
+
+# 將3號員工的last_name修改為"drelxer"
+UPDATE my_employees
+SET last_name = 'drelxer'
+WHERE id = 3;
+
+# 將所有工資少於900的員工的工資修改為1000
+UPDATE my_employees
+SET salary = 1000
+WHERE salary < 900;
+
+# 將userid為Bbiri的user表和my_employees表的記錄全部刪除
+## 方式一 
+DELETE FROM my_employees
+WHERE userid = 'Bbiri';
+
+DELECT FROM users
+WHERE userid = 'Bbiri';
+## 方式二
+DELECT m,u
+FROM my_employees m
+JOIN users u
+ON m.userid = u.userid
+WHERE m.userid = 'Bbiri';
+
+# 刪除my_employees users表所有數據
+DELETE FROM my_employees;
+DELETE FROM users;
+
+# 清空表my_employees
+TRUNCATE TABLE my_employees;
+``````
+
+練習2
+
+``````mysql
+# 使用現有數據庫dbtest11
+use dbtest11
+
+# 創建表格pet
+CREATE TABLE IF NOT EXISTS pet(
+	NAME VERCHAR(20),
+    OWNER VARCHAR(20),
+    speices VARCHAR(20),
+    sex CHAR(1),
+    birth YEAR,
+    death YEAR
+);
+
+# 添加記錄
+
+# 添加欄位 : 主人的生日owner_birth DATE類型
+ALTER TABLE pet
+ADD owner_birth DATE;
+
+# 將名稱為Claws的貓的主人改為Kevin
+UPDATE pet
+SET OWNER = 'Kevin'
+WHERE NAME = 'Claws';
+
+# 將沒有死的狗的主人改為duck
+UPDATE pet
+SET OWNER = 'duck';
+WHERE death IS NULL speices = 'Dog';
+
+# 查詢沒有主人的寵物的名字
+SELECT NAME
+FROM pet
+WHERE OWNER IS NULL;
+
+# 查詢已經死了的cat的姓名 主人 以及去世時間
+SELECT NAME,OWNER,death
+FROM pet
+WHERE death IS NOT NULL speices = 'cat';
+
+# 刪除已經死亡的狗
+DELETE FROM pet
+WHERE death IS NOT NULL
+AND species = 'Dog';
+
+# 查詢所有寵物的訊息
+SELECT * FROM pet;
+``````
+
+練習3
+
+``````mysql
+# 使用已有的數據庫detest11
+use detest11
+
+# 創建表employee 並添加記錄
+CREATE TABLE IF NOT EXISTS employee(
+	id INT,
+    NAME VARCHAR(15),
+    sex CHAR(1),
+    addr VARCHAR(35),
+    salary DOUBLE(10,2)
+);
+
+# 查詢出薪資在1200~1300之間的員工訊息
+SELECT *
+FROM employee
+WHERE salary BETWEEN 1200 ON 1300;
+
+# 查詢出姓'a'的員工的員工號 姓名 地址
+SELECT id,NAME,addr
+FROM employee
+WHERE NAME LIKE 'a%';
+
+# 將'bb'的地址改為'CCCC'
+UPDATE employee
+SET addr = 'CCCC'
+WHERE NAME = 'bb';
+
+# 查詢出名字中帶'd'的員工
+SELECT *
+FROM employee
+WHERE NAME LIKE '%d%';
+``````
+
+
+
+# MySQL數據類型
+
+
+
+## 數據類型
+
+| 類型           | 類型舉例                                                     |
+| -------------- | ------------------------------------------------------------ |
+| 整數類型       | TINYINT SMALLINT MEDIUMINT INT或INTEGER BIGINT               |
+| 浮點類型       | FLOAT DOUBLE                                                 |
+| 定點數類型     | DECIMAL                                                      |
+| 位類型         | BIT                                                          |
+| 日期時間類型   | YEAR TIME DATE DATETIME TIMESTAMP                            |
+| 文本字串類型   | CHAR VARCHAR TIMYTEXT TEXT MEDIUMTEXT LONGTEXT               |
+| 枚舉類型       | ENUM                                                         |
+| 集合類型       | SET                                                          |
+| 二進制字串類型 | BINARY VARBINARY TINYBLOB BLOB MEDIUMBLOB LONGBLOB           |
+| JSON類型       | JSON對象 JSON陣列                                            |
+| 空間數據類型   | 單值類型 : GEOMETRY POINT LINESTRING POLYGON <br />集合類型 : MULTIPOINT MULTILINKSTRING MULTIPOLYGON GEOMETRYCOLLECTION |
+
+
+
+``````mysql
+# 關於屬性 : character set name
+
+# 創建數據庫時 指名字元集
+CREATE DATABASE IF NOT EXISTS dbtest12 CHARACTER SET 'utf8';
+
+SHOW CREATE DATABASE dbtest12; # 查詢數據庫訊息
+
+# 創建表時 指名表的字元集
+CREATE TABLE temp(
+	id INT
+)CHARACTER SET 'utf8';
+
+SHOW CREATE TABLE temp; # 查看表結構
+
+# 創建表 指名表中的欄位時 可以指定欄位的字元集
+CREATE TABLE temp1(
+	id INT,
+    NAME VARCHAR(15) CHARACTER SET 'gbk'
+);
+SHOW CREATE TABLE temp1; # 查看表結構
+``````
+
+
+
+## 整數類型-60
+
+
+
+
+
+
+
+## 小結
+
+在定義數據類型時 
+
+如果確定是整數 就使用 INT
+
+如果是小數 一定使用定點數類型 DECIMAL(M,D) 
+
+如果是日期與時間 就用 DATETIME
+
+這樣做的好處是 首先確保系統不會一位數據類型定義出錯 
+
+
+
+## 建議規範
+
+- 任何欄位如果為非負數 必須是UNSIGNED
+- (強制) 小數類型為DECIMAL 禁止使用 FLOAT 和 DOUBLE
+  - 在儲存的時候 FLOAT 和 DOUBLE 都存在經度損失的問題 很可能在比較值的時候 得到不正確的結果
+  - 如果儲存的數據範圍超過DECIMAL的範圍 建議將數據拆成整數和小數並分開儲存
+- (強制) 如果儲存的字串長度幾乎相等 使用CHAR定長字串類型
+- (強制) VARCHAR是可變長字串 不預先分配儲存空間 長度不要超過5000  如果儲存長度大於此值 定義欄位類型為TEXT 獨立出來一張表 用主鍵來對應 避免影響其他欄位索引效率
+
+
+
+
+
+# 約束
+
+
+
+## 約束(constraint)概述
+
+數據完整性(Data Integrity)是指數據的精確性(Accuracy)和可靠性(Reliability) 他是防止數據庫中存在不符合語義規定和數據和防止因錯誤訊息的輸入輸出造成無效操作或錯誤訊息而提出的
+
+為了保證數據完整性 SQL規範以約束的方式對表數據進行額外的條件限制 從以下方面考慮
+
+- 實體完整性 (Entity Integrity) : 同一個表中 不能存在兩條完全相同無法區分的記錄
+- 域完整性 (Domain Integrity) : 年齡範圍1~120 性別範圍 男/女
+- 引用完整性 (Referential Integrity) : 員工所在部門 在部門表中要能找到這個部門
+- 用戶自定義完整性 (User-defined Integrity) : 用戶名唯一 密碼不能為空等 本部門經理的工資不得高於本部門職員的平均工資的五倍
+
+
+
+#### 什麼是約束
+
+- 約束是表級別的強制規定 對表中欄位的限制
+- 可以在創建表時規定約束(通過 CREATE TABLE 語句)
+- 或是在表創建之後通過 ALTER TABLE 語句規定約束
+
+
+
+#### 約束的分類
+
+角度1 : 約束的欄位的個數
+
+- 單列約束 VS 多列約束
+
+角度2 : 約束的作用範圍
+
+- 列級約束 : 將此約束聲明在對應欄位的後面
+- 表級約束 : 在表中所有欄位都聲明完 在所有欄位的後面聲明的約束
+
+角度3 : 約束的作用 (功能)
+
+- not null : 非空約束
+- unique : 唯一性約束
+- primary key : 主鍵約束
+- foreign key : 外鍵約束
+- check : 檢查約束
+- default : 預設值約束
+
+
+
+#### 如何添加約束
+
+- CREATE TABLE 時添加約束
+- ALTER TABLE 時增加約束 刪除約束
+
+
+
+#### 如何查看表中的約束
+
+``````mysql
+# information_schema資料庫名(系統庫)
+# table_constraints表名稱(專門儲存各個表的約束)
+SELECT * FROM information_schema.table_constraints
+WHERE table_name = 'employees'; # table_name = '表名稱'
+``````
+
+
+
+## 非空約束NOT NULL
+
+作用 : 限制某個欄位 某列的值不允許為空
+
+關鍵字 : NOT NULL
+
+
+
+#### 特點
+
+- 預設 所有的類型的值都可以是NULL 包括INT FLOAT等數據類型
+- 非空約束只能出現在表對象的列上 只能某個列單獨限定非空 不能組合非空
+- 一個表可以有很多列都分別限定了非空
+- 空字串"" 不等於NULL 0也不等於NULL
+
+
+
+#### 添加非空約束
+
+在CREATE TABLE時 添加約束
+
+``````mysql
+# NOT NULL
+CREATE TABLE test1(
+	id INT NOT NULL,
+	last_name VARCHAR(15) NOT NULL,
+	email VARCHAR(25),
+	salary DECIMAL(10,2)
+);
+DESC test1;
+``````
+
+在ALTER TABLE時添加約束
+
+``````mysql
+ALTER TABLE test1
+MODIFY email VARCHAR(25) NOT NULL;
+``````
+
+在ALTER TABLE時刪除約束
+
+``````mysql
+ALTER TABLE test1
+MODIFY email VARCHAR(25);
+``````
+
+
+
+## 唯一性約束 UNIQUE
+
+作用 : 用來限制某個欄位 某個列的值不能重複
+
+關鍵字 : UNIQUE
+
+
+
+#### 特點
+
+- 同一個表可以有多個唯一約束
+- 唯一約束可以是某一個列的值唯一 也可以是多個列組合的值唯一
+- 唯一性約束允許列值為空
+- 在創建唯一約束時 如果不給唯一約束命名 就預設和列名相同
+- **MySQL會給唯一性約束的列上預設創建一個唯一索引**
+
+
+
+#### 添加唯一約束
+
+在CREATE TABLE時添加約束
+
+``````mysql
+CREATE TABLE test2(
+	id INT UNIQUE, 	# 列級約束
+	last_name VARCHAR(15),
+	email VARCHAR(25) UNIQUE, # 列級約束
+	salary DECIMAL(10,2),
+# 表級約束
+CONSTRAINT uk_test2_email UNIQUE(email)
+);
+DESC test2;
+# 查看約束
+SELECT * FROM information_schema.table_constraints
+WHERE table_name = 'test2'; 
+# 在創建唯一約束時 如果不給唯一約束命名 預設和列名相同
+
+# 可以向聲明為unique的欄位上添加null值
+INSERT INTO test2(id,last_name,email,salary)
+VALUES(2,'Tom1',NULL,4600);
+# 而且 可以多次添加NULL值
+INSERT INTO test2(id,last_name,email,salary)
+VALUES(3,'Tom2',NULL,4600);
+``````
+
+在ALTER TABLE時添加約束
+
+``````mysql
+# alter table 表名稱 add unique key(欄位名稱);
+ALTER TABLE test2
+ADD CONSTRAINT uk_test2_sal UNIQUE(salary);
+
+# alter table 表名稱 modify 欄位名 欄位類型 unique; 
+ALTER TABLE test2
+MODIFY last_name VARCHAR(15) UNIQUE;
+``````
+
+複合的唯一性約束
+
+``````mysql
+CREATE TABLE USER(
+	id INT,
+    'name' VARCHAR(15),
+    'password' VARCHAR(25),
+# 表級約束
+    CONSTRAINT uk_user_name_pwd UNIQUE('name','password')
+);
+``````
+
+
+
+#### 刪除唯一性約束
+
+- 添加唯一性約束的列上也會自動創建唯一索引
+- 刪除唯一性約束只能通過刪除唯一索引的方式刪除
+- 刪除時需要指定唯一索引名 唯一索引名就和唯一約束名一樣
+- 如果創建唯一約束時未指定名稱 
+  - 如果是單列 就預設和列名相同
+  - 如果是多列 就預設和()中排在第一個的列名相同 也可以自定義唯一性的約束名
+
+
+
+如何刪除唯一性約束
+
+``````mysql
+ALTER TABLE test2
+DROP INDEX last_name;
+
+ALTER TABLE test2
+DROP INDEX uk_test2_sal;
+``````
+
+
+
+## PRIMARY KEY約束
+
+作用 : 用來唯一標示表中的一行記錄
+
+關鍵字 : PRIMARY KEY
+
+
+
+#### 特點
+
+- 主鍵約束相當於 **唯一約束 + 非空約束** 的組合 主鍵約束列不允許重複 也不允許空值
+
+- 一個表最多只有一個主鍵約束 建立主鍵約束可以在列級別創建 也可以在表級別創建
+- 主鍵約束對應著表中的一列或是多列 (複合主鍵)
+- 如果是多列組合的複合主鍵約束 那麼這些列都不允許為空值 並且組合的值不允許重複
+- MySQL的主鍵名總是PRIMARY 就算自己命名了主鍵約束名也沒用
+- 當創建主鍵約束時 系統預設會在所在的列或列組合上建立對應的主鍵索引 (能夠根據主鍵查詢的 就根據主鍵查詢 效率更高) 如果刪除了主鍵約束 主鍵約束對應的索引就自動刪除
+- 需要注意的是 不要修改主鍵欄位的值 因為主鍵是數據記錄的唯一標示 如果修改了主鍵的值 就有可能會破壞數據的完整性
+
+
+
+#### 添加主鍵約束
+
+在CREATE TABLE時添加約束
+
+``````mysql
+# 主鍵約束特徵 : 非空且唯一 用於唯一的標示表中的一條記錄
+CREATE TABLE test3(
+	id INT PRIMARY KEY, # 列級約束
+	last_name VARCHAR(15),
+	salary DECIMAL(10,2),
+	email VARCHAR(25)
+);
+
+# MySQL的主鍵名總是PRIMARY 就算自己命名了主鍵約束名也沒用
+CREATE TABLE test4(
+	id INT, # 列級約束
+	last_name VARCHAR(15),
+	salary DECIMAL(10,2),
+	email VARCHAR(25),
+# 表級約束
+    CONSTRAINT pk_test5_id PRIMARY KEY(id) # 沒有必要取名字
+);
+SELECT * FROM information_schema.table_constraints
+WHERE table_name = 'test3';
+``````
+
+在ALTER TABLE時添加約束
+
+``````mysql
+CREATE TABLE test5(
+	id INT,
+	last_name VARCHAR(15),
+	salary DECIMAL(10,2),
+	email VARCHAR(25)
+);
+DESC test5;
+ALTER TABLE test5
+ADD PRIMARY KEY (id);
+``````
+
+如何刪除主鍵約束 : 實際開發不會這麼做
+
+``````mysql
+# alter table 表名稱 drop primary key
+ALTER TABLE test5
+DROP PRIMARY KEY;
+``````
+
+
+
+## 自增列 AUTO_INCREMENT
+
+作用 : 某個欄位的值自增
+
+關鍵字 : auto_increment
+
+
+
+#### 特點和要求
+
+- 一個表最多只能有一個自增長列
+- 當需要產生唯一標示符或順序值時 可設置自增長
+- 自增長列約束的列必須是鍵列 (主鍵列 唯一鍵列)
+- 自增約束的列的數據類型必須是整數類型
+- 如果自增列指定了0和null 會在當前最大值的基礎上自增
+- 如果自增列手動指定了具體值 直接賦值為具體值
+
+錯誤演示
+
+``````mysql
+create table employee(
+	eid int auto_increment, # 自增列沒有主鍵 唯一性約束
+	ename varchar(20)
+);
+``````
+
+``````mysql
+create table employee(
+	eid int primary key,
+	ename varchar(20) unique key auto_increment # 自增列必須是整數類型
+);
+``````
+
+
+
+#### 添加自增長列
+
+在CREATE TABLE時添加
+
+``````mysql
+CREATE TABLE test(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    last_name VARCHAR(15)
+);
+
+# 開發中 一旦主鍵作用的欄位上聲明AUTO_INCREMENT 在添加數據時 就不用給主鍵對應的欄位賦值
+
+# 當我們向主鍵 (包含AUTO_INCREMENT)的欄位上添加0或null時
+# 實際上會自動往上添加指定的欄位的數值
+INSERT INTO test(id,last_name)
+VALUES(NULL,'Tom');
+``````
+
+在ALTER TABLE時添加
+
+``````mysql
+CREATE TABLE test(
+	id INT PRIMARY KEY,
+	last_name VARCHAR(15)
+);
+DESC test;
+
+ALTER TABLE test
+MODIFY id INT AUTO_INCREMENT;
+``````
+
+在ALTER TABLE時刪除
+
+``````mysql
+ALTER TABLE test
+MODIFY id INT;
+``````
+
+
+
+#### 新特性-自增變量的持久化
+
+MySQL5.7將自增主鍵的值存放在記憶體中 每次重啟會重新計算位置
+
+
+
+MySQL8.0將自增主鍵的計數器持久化到 重做日誌 中 
+
+每次計數器發生改變 都會將其寫入重做日誌中 
+
+如果數據庫重啟 innoDB會根據重做日誌中的訊息來初始化計數器的記憶體值
+
+
+
+## FOREIGN KEY約束
+
+作用 : 限定某個表的某個欄位的引用完整性
+
+例如 : 員工表的員工所在部門的選擇 必須在部門表能找到對應的部分
+
+關鍵字 : FOREIGN KEY
+
+
+
+#### 主表和從表 / 父表和子表
+
+主表 : 被引用的表 被參考的表
+
+從表 : 引用別人的表 參考別人的表
+
+例如 : 員工表的員工所在部門 這個欄位的值要參考部門表 --> 部門表為主表 員工表為從表
+
+例如 : 學生表 課程表 選課表 --> 選課表的學生和課程要分別參考學生表和課程表  學生表和課程表是主表 選課表是從表
+
+
+
+#### 特點
+
+- 從表的外鍵列 必須引用/參考主表的主鍵或唯一約束的列 (primary key , unique)
+  - 因為被依賴/被參考的值必須是唯一的
+- 在創建外鍵約束時 如果不給外鍵約束命名 預設名不是列名 而是自動產生一個外鍵名 也可以指定外鍵約束名
+- 創建(CREATE)表時就指定外鍵約束的話 先創建主表 再創建從表
+- 刪除表時 先刪除從表 (或先刪除外鍵約束) 再刪除主表
+- 當主表的記錄被從表參照時 主表的記錄將不允許刪除 如果要刪除數據 需要先刪除從表中依賴該記錄的數據 然後才可以刪除主表的數據
+- 在從表中指定外鍵約束 並且一個表可以建立多個外鍵約束
+- 從表的外鍵列嶼主表被參照的列名字可以不相同 但是數據類型必須一樣 邏輯意義一致 如果類型不一樣 創建子表時 就會出現錯誤
+- **當創建外鍵約束時 系統預設會在所在的列上建立對應的普通索引** 但是索引名是列名 不是外鍵約束名 (根據外鍵查詢效率很高)
+- 刪除外鍵約束時 必須手動刪除對應的索引
+
+
+
+#### 添加外鍵約束
+
+在CREATE TABLE時添加
+
+``````mysql
+# 主表和從表
+## 先創建主表
+CREATE TABLE dept1(
+	dept_id INT,
+    dept_name VARCHAR(15)
+);
+
+## 再創建從表
+CREATE TABLE emp1(
+	emp_id INT PRIMARY KEY AUTO_INCREMENT,
+    emp_name VARCHAR(15),
+    department_id INT,
+# 表級約束
+    CONSTRAINT fk_emp1_dept_id FOREIGN KEY (department_id) REFERENCES dept1(dept_id)
+);
+
+# 上述操作 因為主表中的dept_id沒有主鍵約束或唯一性約束
+# 添加
+ALTER TABLE dept1
+ADD PRIMARY KEY (dept_id);
+DESC emp1;
+``````
+
+演示外鍵效果
+
+``````mysql
+# 添加失敗
+INSET INTO emp1
+VALUES(1001,'Tom',10); # 因為主表中沒有對應部門10號
+#
+INSET INTO dept1
+VALUES(10,'IT');
+# 在主表dept1中添加了10號部門後 我們就可以在從表中添加10號部門的員工
+INSERT INTO emp1
+VALUES(1001,'Tom',10);
+
+# 刪除失敗
+DELETE FROM dept1
+WHERE dept_id = 10; # 因為此時有從表的數據對應 無法刪除
+# 更新失敗
+UPDATE dept1
+SET dept_id = 20
+WHERE dept_id = 10; # 因為此時有從表的數據對應 無法更新
+``````
+
+在ALTER TABLE時添加外鍵約束
+
+``````mysql
+CREATE TABLE dept2(
+	dept_id INT PRIMARY KEY,
+    dept_name VARCHAR(15)
+);
+CREATE TABLE emp2(
+	emp_id INT PRIMARY KEY AUTO_INCREMENT,
+    emp_name VARCHAR(15),
+    department_id INT
+);
+
+ALTER TABLE emp2
+ADD CONSTRAINT fk_emp2_dept_id FOREIGN KEY(department_id) REFERENCES dept2(dept_id);
+``````
+
+ 
+
+#### 約束等級
+
+- **Cascade** : 在父表上update/delete記錄時 同步update/delete掉子表的匹配記錄
+- **Set null** : 在父表上update/delete記錄時 將子表上匹配記錄的列設為null 但是要注意子表的外鍵列不能為not null
+- No action : 如果子表中有匹配的記錄 則不允許對父表對應候選鍵進行update/delete操作
+- Restrict : 同no action 都是立即檢查外鍵約束
+- Set default : (在可視化工具SQLyog中可能顯示空白) : 父表有變更時 子表將外鍵列設置成一個預設的值 但Innodb不能識別
+
+如果沒有指定等級 相當於 Restrict 方式 
+
+對於外鍵約束 最好採用 : ON UPDATE CASCADE ON DELETE RESTRICT 方式
+
+- update cascade : 更新的話 從表一併更新
+- delete restrict : 刪除的話 由於從表不允許刪除
+
+
+
+#### 刪除外鍵約束
+
+- 一個表中可以聲明多個外鍵約束
+
+``````mysql
+SELECT * FROM information_schema.table_constraints
+WHERE table_name = 'emp1'; 
+
+# 刪除外鍵約束
+ALTER TABLE emp1
+DROP FOREIGN KEY fk_emp1_dept_id;
+
+# 檢查目前的索引
+SHOW INDEX FROM emp1;
+
+# 再手動的刪除外鍵約束對應的普通索引
+ALTER TABLE emp1
+DROP INDEX fk_emp1_dept_id; # 索引名fk_emp1_dept_id
+
+``````
+
+
+
+#### 開發場景
+
+- 如果兩個表之間有關係 (一對一 一對多) 
+- 例如員工表和部門表 (一對多) 他們之間是否一定要建立外鍵約束
+  - 不一定
+
+- 建立和不建立外鍵約束有什麼區別
+  - 建立外鍵約束  你的操作(創建表 刪除表 添加 修改 刪除) 會受到限制 從語法層面受到限制
+    - 例如 : 在員工表不可能添加一個員工訊息 他的部門的值在部門表中找不到
+  - 不建立外鍵約束 你的操作 (創建表 刪除表 添加 修改 刪除) 不受限制 要保證數據的引用完整性 只能依照自覺 或是Java程式中進行限定
+    - 例如 : 在員工表中 可以添加一個員工的訊息 他的部門指定為一個完全不存在的部門
+- 那麼建立和不建立外鍵約束和查詢有沒有關係
+  - 沒有
+
+
+
+在MySQL中 外鍵約束是有成本的 需要消耗系統資源 對於大並發的SQL操作 有可能會不適合
+
+例如大型網站的中央數據庫 可能會因為外鍵約束的系統開銷而變得非常慢
+
+所以 MySQL允許你不使用系統自帶的外鍵約束 
+
+在應用層面完成檢查數據一致性的邏輯 也就是說 即使不用外鍵約束 也要想辦法通過應用層面的附加邏輯 來實現外鍵約束的功能 確保數據的一致性
+
+
+
+#### 建議規範
+
+- (強制) 不得使用外鍵與級聯 一切外鍵概念必須在應用層解決
+- 說明
+  - 學生表中的student_id是主鍵 那麼成績表中的strudent_id則為外鍵 如果更新學生表中的student_id 同時觸發成績表中的strudent_id更新 即為級聯更新
+  - 外鍵與級聯更新適用於 單機低並發 不適合 分布式 高並發集群 
+  - 級聯更新是強阻塞 存在數據庫更新風暴的風險 外鍵影響數據庫的插入速度
+
+
+
+## CHECK 約束
+
+作用 : 檢查某個欄位的值是否符合xx要求 一般指的是值的範圍
+
+關鍵字 : CHECK
+
+
+
+``````mysql
+# MySQL5.7不支持CHECK  MySQL8.0才支持CHECK
+CREATE TABLE test(
+	id INT,
+	last_name VARCHAR(15),
+	salary DECIMAL(10,2) CHECK(salary > 2000) # 此時不允許填入salary小於等於2000的值
+);
+``````
+
+
+
+## DEFALUT約束
+
+作用 : 給某個欄位 / 某個列指定預設值 一旦設置預設值 在插入數據時 如果此欄位沒有顯式賦值 則賦值為預設值
+
+關鍵字 : DEFAULT
+
+
+
+#### 如何為欄位設置預設值
+
+在CREATE TABLE添加約束
+
+``````mysql
+CREATE TABLE test(
+	id INT,
+	last_name VARCHAR(15),
+	salary DECIMAL(10,2) DEFAULT 2000 # 預設值為2000
+);
+
+INSERT INTO test(id,last_name)
+VALUES(1,'aa');
+``````
+
+在ALTER TABLE添加約束
+
+``````mysql
+CREATE TABLE test2(
+	id INT,
+    last_name VARCHAR(15),
+    salary DECIMAL(10,2)
+);
+DESC test2;
+
+ALTER TABLE test2
+MODIFY salary DECIMAL(8,2) DEFAULT 2500;
+``````
+
+在ALTER TABLE 刪除約束
+
+``````mysql
+ALTER TABLE test2
+MODIFY salary DECIMAL(8,2);
+``````
+
+
+
+## 面試題
+
+- 為什麼建表時 要加入not null default 或 default 0 
+  - 因為不想讓表中出現null值
+- 為什麼不想要 null值
+  - 不好比較 null是一種特殊值 比較時只能用專門的is null和is not null來比較 碰到運算符 通常返回null
+  - 效率不高 影響提高索引效果 因此 我們往往在建表時加上 not null default 或 default 0
+- 帶auto_increment約束的欄位值是從1開始的嗎
+  - 在MySQL中 預設auto_increment的初始值是1 每新增一條記錄 欄位值自動加1 
+  - 設置自增屬性(auto_increment)的時候 還可以指定第一條插入記錄的自增欄位的值 這樣新插入的記錄的自增欄位值從初始值開始遞增 
+  - 如在表中插入第一條記錄 同時指定id值為5 則以後插入的記錄的id值就會從6開始往上增加 添加主鍵約束時 往往需要設置欄位自動增加屬性
+- 並不是每個表都可以任意選擇儲存引擎 
+  - 外鍵約束(FOREIGN KEY) 不能跨引擎使用
+  - MySQL支持多種儲存引擎 每一個表都可以指定一個不同的儲存引擎 
+  - 需要注意的是 外鍵約束是用來保證數據的參照完整性的 如果表之間需要關聯外鍵 卻指定了不同的儲存引擎 那麼這些表之間是不能創建外鍵約束的 
+  - 所以 儲存引擎的選擇也不完全是隨意的
+
+
+
+## 約束練習
+
+練習1
+
+``````mysql
+CREATE TABLE emp2(
+	id INT,
+    emp_name VARCHAR(15)
+);
+
+CREATE TABLE dept2(
+	id INT,
+    dept_name VARCHAR(15)
+);
+``````
+
+``````mysql
+# 向表emp2的id列中添加PRIMARY KEY約束
+ALTER TABLE emp2
+ADD PRIMARY KEY(id);
+
+# 向表dept2的id列中添加PRIMARY KEY約束
+ALTER TABLE dept2
+ADD PRIMARY KEY(id);
+
+# 向表emp2中添加列dept_id 並在其他定義FOREIGH KEY約束 與之相關聯的列是dept2表中的id列
+ALTER TABLE emp2
+ADD dept_id INT;
+
+ALTER TABLE emp2
+ADD CONSTRAINT fk_emp2_deptid FOREIGN KEY (dept_id) REFERENCES dept2(id);
+``````
+
+
+
+練習2
+
+``````mysql
+USE test01_library;
+DESC books;
+
+# 根據題目要求 books表中添加約束
+## 方式一
+ALTER TABLE books  
+ADD PRIMARY KEY(id); # 加上主鍵約束
+
+ALTER TABLE books
+MODIFY id INT AUTO_INCREMENT; # 加上自增約束
+## 方式二
+ALTER TABLE books
+MODIFY id INT PRIMARY KEY AUTO_INCREMENT; # 同時加上主鍵 自增 約束
+
+# 針對於非id欄位的操作  更改為NOT NULL
+ALTER TABLE books
+MODITY NAME VARCHAR(50) NOT NULL;
+
+ALTER TABLE books
+MODITY AUTHORS VARCHAR(100) NOT NULL;
+
+ALTER TABLE books
+MODITY price FLOAT NOT NULL;
+
+ALTER TABLE books
+MODITY pubdate YEAR NOT NULL;
+
+ALTER TABLE books
+MODITY num INT NOT NULL;
+``````
+
+練習3
+
+``````mysql
+# 創建數據庫 test04_company
+CREATE DATEBASE IF NOT EXISTS test04_company CHARACTER SET 'utf8';
+use test04_company;
+
+# 創建表offices employees
+CREATE TABLE IF NOT EXIST offices(
+	officeCode INT(10) PRIMARY KEY,
+    city VARCHAR(50) NOT NULL,
+    address VARCHAR(50),
+    country VARCHAR(50) NOT NULL,
+    postalCode VARCHAR(15), 
+    CONSTRAINT uk_off_posCode UNIQUE(postalCode)
+);
+DESC offices;
+
+CREATE TABLE IF NOT EXISTS employees(
+	employeeNumber INT PRIMARY KEY AUTO_INCREMENT,
+    lastName VARCHAR(50) NOT NULL,
+    firstName VARCHAR(50) NOT NULL,
+    mobile VARCHAR(25) UNIQUE,
+    officeCode INT(10) NOT NULL,
+    jobTitle VARCHAR(50) NOT NULL,
+    birth DATETIME NOT NULL,
+    note VARCHAR(255),
+    sex VARCHAR(5),
+    
+    CONSTRAINT fk_emp_offcode FOREIGN KEY (officeCode) REFERENCES offices(officeCode)
+);
+
+# 將表employees的mobile欄位修改到officeCode欄位後面
+ALTER TABLE employees
+MODIFY mobile VARCHAR(25) AFTER officeCode;
+
+# 將表employees的birth欄位改名為employee_birth
+ALTER TABLe employees
+CHANGE birth employee_birth DATETIME;
+
+# 修改sex欄位 數據類型為CHAR(1) 非空約束
+ALTER TABLE employees
+MODIFY sex CHAR(1) NOT NULL;
+
+# 刪除欄位note
+ALTER TABLE employees
+DROP COLUMN note;
+
+# 增加欄位名favoriate_activity 數據類型為VARCHAR(100)
+ALTER TABLE employees
+ADD favoriate_activity VARCHAR(100);
+
+# 將表employees名稱修改為employees_info
+RENAME TABLE employees
+TO employees_info;
+``````
+
+
+
+# 視圖
+
+
+
+## 視圖的理解
+
+- 視圖 可以看做一個虛擬表 本身不儲存數據 
+- 視圖的本質 可以看做是儲存起來的SELECT語句
+- 視圖中的SELECT語句中涉及到的表 稱為基表
+- 針對視圖做DML操作 會影響到對應的基表中的數據 反之亦然
+- 視圖本身的刪除 不會導致基表中數據的刪除
+- 視圖的應用場景 : 針對小型專案 不推薦使用視圖  針對大型專案 可以考慮使用視圖
+- 視圖的優點 : 簡化查詢 控制數據的訪問
+
+
+
+## 創建視圖
+
+在CREATE VIEW語句中嵌入子查詢
+
+``````mysql
+CREATE [ON REPLACE]
+[ALGORITHM = {UNDERINED | MERGE | TEMPTABLE}]
+VIEW 視圖名稱 [(欄位列表)]
+AS 查詢語句
+[WITH [CASCADED | LOCAL] CHECK OPTION]
+``````
+
+精簡版
+
+``````mysql
+CREATE VIEW 視圖名稱
+AS 查詢語句
+``````
+
+
+
+#### 創建單表視圖
+
+針對於單表
+
+``````mysql
+# 準備工作
+CREATE DATABASE dbtest;
+use dbtest;
+
+CREATE TABLE emps
+AS
+SELECT * 
+FROM dbtest01.'employees';
+
+CREATE TABLE depts
+AS
+SELECT *
+FROM dbtest01.'departments';
+
+# 針對於單表
+### 情況一 : 視圖中欄位與基表的欄位有對應關係
+CREATE VIEW vu_emp1
+AS
+SELECT employee_id,last_name,salary
+FROM emps;
+
+SELECT * FROM vu_emp1;
+
+### 確定視圖中欄位名的方式一
+CREATE VIEW vu_emp2
+AS
+SELECT employee_id emp_id,last_name lname,salary # 查詢語句中 欄位的別名 作為視圖中欄位的名稱
+FROM emps;
+WHERE salary > 8000;
+
+SELECT * FROM vu_emp2;
+
+### 確定視圖中欄位名的方式二
+CREATE VIEW vu_emp3(emp_id,NAME,monthly_sal)
+AS
+SELECT employee_id,last_name,salary
+FROM emps;
+WHERE salary > 8000;
+
+SELECT * FROM vu_emp3;
+
+### 情況二 : 視圖中的欄位在基表中可能沒有對應的欄位
+CREATE VIEW vu_emp_sal
+AS
+SELECT department_id,AVG(salary) avg_sal
+FROM emps
+WHERE department_id IS NOT NULL
+GROUP BY department_id;
+
+SELECT * FROM vu_emp_sal;
+``````
+
+
+
+#### 創建多表視圖
+
+針對於多表
+
+``````mysql
+CREATE VIEW vu_emp_dept
+AS
+SELECT e.employee_id,e.department_id,d.department_name
+FROM emps e 
+JOIN depts d
+ON e.department_id = d.department_id;
+
+SELECT * FROM vu_emp_dept;
+``````
+
+
+
+#### 利用視圖對數據格式化
+
+`````mysql
+CREATE VIEW vu_emp_dept1
+AS
+SELECT CONCAT(e.last_name,'(',d.department_name,')') emp_info
+FROM emps e 
+JOIN depts d
+ON e.department_id = d.department_id;
+
+SELECT * FROM vu_emp_dept1;
+`````
+
+
+
+#### 基於視圖創建視圖
+
+``````mysql
+CREATE VIEW vu_emp1
+AS
+SELECT employee_id,last_name,salary
+FROM emps;
+
+# 基於視圖創建
+CREATE VIEW vu_emp4
+AS
+SELECT employee_id,last_name
+FROM vu_emp1; # 基於視圖
+
+SELECT * FROM vu_emp4;
+``````
+
+
+
+## 查看視圖
+
+``````mysql
+# 語法一 : 查看數據庫的表對象 視圖對象
+SHOW TABLES;
+
+# 語法二 : 查看視圖的結構 
+# DESC / DESCRIBE 視圖名稱
+DESCRIBE vu_emp1;
+
+# 語法三 : 查看視圖的屬性訊息
+# SHOW TABLE STATUS LIKE '視圖名稱'
+SHOW TABLE STATUS LIKE 'vu_emp1';
+
+# 語法四 : 查看視圖的詳細定義訊息
+SHOW CREATE VIEW vu_emp1;
+``````
+
+
+
+## 更新視圖中的數據
+
+``````mysql
+SELECT * FROM vu_emp1;
+
+# 更新視圖的數據 會導致基表中數據的修改
+UPDATE vu_emp1
+SET salary = 20000
+WHERE employee_id = 101;
+
+# 查看基表
+SELECT employee_id,last_name,salary
+FROM emps;
+
+# 同樣的 更新基表的數據 也會導致視圖中的數據的修改 
+UPDATE emps
+SET salary = 10000
+WHERE employee_id = 101;
+
+# 刪除視圖中的數據 也會導致基表中的數據的刪除
+DELETE FROM vu_emp1
+WHERE employee_id = 101;
+``````
+
+
+
+#### 不能更新的視圖
+
+``````mysql
+CREATE VIEW vu_emp_sal
+AS
+SELECT department_id,AVG(salary) avg_sal # 建立一個不存在emps表的欄位
+FROM emps
+WHERE department_id IS NOT NULL
+GROUP BY department_id;
+
+# 更新失敗
+UPDATE vu_emp_sal
+SET avg_sal = 5000
+WHERE department_id = 30;
+
+# 刪除失敗
+DELETE FROM vu_emp_sal
+WHERE department_id = 30;
+``````
+
+
+
+## 修改視圖
+
+方式一
+
+``````mysql
+CREATE OR REPLACE VIEW vu_emp1
+AS
+SELECT employee_id,last_name,salary,email
+FROM emps
+WHERE salary > 7000;
+``````
+
 方式二
-```
 
-```mysql
--- 創建表格時 沒有外鍵關係
-alter table `student`
-add constraint `FK_gradeid` foreign key(`gradid`) references `grage`(`gradeid`);
--- alter table 表格名
--- add constraint 約束名 foreign key(作為外鍵的列) references 表格(欄位名)
-```
+``````mysql
+ALTER VIEW vu_emp1
+AS
+SELECT employee_id,last_name,salary,email,hire_date
+FROM emps;
+``````
 
-以上操作為物理外鍵 資料庫級別的外鍵 不建議使用  避免資料庫過多造成困擾
 
 
+## 刪除視圖
 
-- 資料庫就是單純的表 只用ˋ來存數據 只有行(數據)和列(欄位)
-- 我們想使用多張表格的數據 想使用外鍵 (程式去實現)
+- 基於視圖a b創建了新的視圖c  如果將視圖a或者視圖b刪除 會導致視圖c的查詢失敗 這樣的視圖c需要手動刪除或修改 否則影響使用
 
+``````mysql
+SHOW TABLES;
 
+DROP VIEW vu_emp4;
 
-#### DML語言 (重要)
+DROP VIEW IF EXISTS vu_emp2,vu_emp3;
+``````
 
-資料庫意義 : 資料儲存 資料管理
 
-DML語言 : 資料操作語言
 
-- Insert
-- updata
-- delete
+## 總結
 
 
 
-#### 添加
+#### 視圖優點
 
-```mysql
-insert
--- 插入語句 (添加)
--- insert into 表明 ([欄位名1,欄位名2,..]) values('值1'),('值2'),('值3'),(...)
-```
+簡化查詢
 
-```mysql
-create table `grade`(
-	`gradeid` int(10) not null auto_increment comment'年級id',
-      `gradename` varchar(50) not null comment '年級名稱',
-	`pwd` varchar(20) not null default '12345' comment'密碼',
-      `gender` varchar(6) not null  default 'male' comment'性別',
-      primary key (`gradeid`)
-)engine = InnoDB default char set=utf8;
+- 將經常使用的查詢操作定義為視圖
 
+減少數據冗余
 
-insert into `grade`(`gradename`) values('大四');
-insert into `grade`(`gradename`) values('大五');
--- 由於主鍵自增 可以省略主鍵 (如果不寫表格的欄位 會自動匹配)
--- 一般寫插入語句 一定要數據與欄位對應
--- 插入多個欄位
-insert into `grade`(`gradename`) values('大二'),('大一');
--- insert into 表格名 ('欄位名','欄位名'..) values (對應欄位的資料類型)
-insert into `grade`(`gradename`,`pwd`,`gender`) values('高三','asdfg','female');
+- 視圖和實際數據表不同 他儲存的是查詢語句 在使用時 我們要通過定義視圖的查詢語句來獲得結果集 而視圖本身不儲存數據 不佔用數據儲存的資源 減少了數據冗余 
 
--- 不寫欄位 需要自行加入primary key
-insert into `grade` values(3,'高二','zxcvb','female');
-```
+數據安全
 
-注意事項 : 
+- MySQL將用戶對數據的訪問限制在某些數據的結果集上 而這些數據的結果集可以使用視圖來實現 用戶不必直接查詢或操作數據表 
+- 可以理解成視圖具有隔離姓 視圖相當於在用戶和實際的數據表之間加了一層虛擬表
+- 同時MySQL可以根據權限將用戶對數據的訪問限制在某些視圖上 用戶不需要查詢數據表 可以直接通過視圖獲取數據表中的訊息 在一定程度上保證了數據表中數據的安全性
 
-- 欄位間使用 , 隔開
-- 欄位是可以省略的 但是資料要一一對應
-- 可以同時插入多條數據 values 後面的值須要使用 , 隔開
+適應靈活多變的需求
 
+- 當業務系統的需求發生改變後 如果需要改動數據表的結構 則工作量相對較大 可以使用視圖來減少改動的工作量 這種方式在實際工作中使用得比較多
 
+能夠分解複雜的查詢邏輯
 
-#### 修改
+- 數據庫中如果存在複雜的查詢邏輯 則可以將問題進行分解 創建多個視圖或取數據 再將創建的多個視圖結合起來 完成複雜的查詢邏輯
 
-```mysql
-update 修改對象 (條件)  set原來的值 = 新的值
--- 語法 updata 表格名 set column_name = value , column_name = value where (條件)
-```
 
-```mysql
--- 修改 
--- 指定當gradeid = 1的時候
-update `grade` set `gradename`='大五' where gradeid = 1;
 
--- 修改多個屬性 使用 , 間隔
-update `grade` set `gradename`='大六' , `pwd`='aaaaa' where gradeid = 1;  
-```
+#### 視圖不足
 
-條件 : where 子句
+如果我們在實際數據表的基礎上創建了視圖
 
-- id 等於某個數值 大於某個數值  在某個區間內修改
+如果實際數據表的結構變更了 我們就需要及時對相關的視圖進行相應的維護
 
-| 操作符              | 含義     | 範圍          | 結果  |
-| ------------------- | -------- | ------------- | ----- |
-| =                   | 等於     | 5 = 6         | false |
-| <> 或 !=            | 不等於   | 5 <> 6        | true  |
-| >                   |          |               |       |
-| <                   |          |               |       |
-| <=                  |          |               |       |
-| >=                  |          |               |       |
-| between ... and ... | 某個範圍 | [2,5]         |       |
-| AND                 | 和 &&    | 5>1 and 1 > 2 | false |
-| OR                  | 或 \|\|  | 5>1 or 1 > 2  | true  |
+特別是嵌套的視圖 (視圖的基礎上創建視圖) 維護會變得比較複雜 可讀性不佳
 
-```mysql
--- 通過多個條件訂為數據
-updata `grade` set gradename = 'sss' where `gradename`='AA' AND gender='male'
-```
+容易變成系統的潛在問題 因為創建視圖的SQL查詢可能會對欄位重命名 也可能包含複雜的邏輯 都會增加維護的成本
 
-語法 : updata 表格名 set column_name = value,[column_name = value...] where[條件]
+實際開發中 如果視圖過多 會導致數據庫維護成本的問題
 
-注意:
+所以在創建視圖時 要結合實際的需求 綜合考慮視圖的優點和不足 才能正確使用視圖
 
-- column_name 是數據庫的列 盡量要使用
-- 條件 篩選的條件 , 如果沒有指定 則會修改所有的列
-- value 是一個具體的值 也可以是變數
-- 多個設置的屬性間 使用 , 隔開
 
 
+## 視圖練習
 
-#### 刪除
+練習一
 
-```mysql
-delete
-語法: delete from 表格名 [where 條件]
-```
+``````mysql
+# 使用表emps創建視圖employee_vu
+CREATE OR REPLACE VIEW employee_vu(lname,emp_id,dept_id)
+AS
+SELECT last_name,employee_id,department_id
+FROM emps;
 
-```mysql
--- 刪除資料 (避免這樣寫 有些系統會限制不能這麼做 會全部刪除)
-DELETE FROM `data`
--- 刪除指定數據
-DELETE FROM `data` where id = 1;
-```
+# 顯示視圖的結構
+DESC employee_vu;
 
+# 查詢視圖中的全部內容
+SELECT * FROM employee_vu;
 
+# 將視圖中的數據顯示在部門號是80的範圍內
+SELECT OR REPLACE VIEW employee_vu(lname,emp_id,dept_id)
+AS
+SELECT last_name,employee_id,department_id
+FROM emps
+WHERE department_id = 80;
+``````
 
-```mysql
-TRUNCATE命令
-```
+練習二
 
-作用 : 完全清鏗一個資料庫表格 表格的結構和索引約束不變
+``````mysql
+# 創建視圖emp_v1 要求查詢電話號碼以 '011'開頭的員工姓名和工資 郵箱
+CREATE OR REPLACE VIEW emp_v1
+AS
+SELECT last_name,salary,email
+FROM emps
+WHERE phone_number LIKE '011%';
 
-```mysql
--- 清空 grate表格
-truncate `grate`;
-```
+# 要求將視圖emp_v1修改為查詢電話號碼以'011'開頭且郵箱中包含'e'
+CREATE OR REPLACE VIEW emp_v1
+AS
+SELECT last_name,email,phone_number,salary
+FROM emps
+WHERE phone_number LIKE '011%'
+AND email LIKE '%e%';
 
+# 修改emp_v1中員工的工資 每人salary + 1000
+UPDATE emp_v1
+SET salary = salary + 1000;
 
+# 刪除emp_v1中姓名為Olsen的員工
+DELETE FROM emp_v1
+WHERE last_name = 'Olsen';
 
-```
-delete和truncate區別
-```
+# 創建視圖emp_v2 要求查詢部門的最高工資高於12000的部門id和其最高工資
+CREATE OR REPLACE VIEW emp_v2 (dept_id,max_sal)
+AS
+SELECT department_id,MAX(salary)
+FROM employees
+GROUP BY department_id
+HAVING MAX(salary) > 12000;
 
-- 相同處 : 都能刪除數據 都不會刪除表格的結構
-- 不同處 :
-  - truncate 重新設置 自增列 計數器會歸0
-  - truncate 不會影響事務
+# 刪除emp_v1 emp_v2
+DROP VIEW IF EXISTS emp_v1,emp_v2;
+SHOW TABLES;
+``````
 
-```mysql
--- 刪除表格 此種作法不會影響自動增量 下次輸入會從下一個增量值開始
-delete from `test` where id < 10;
 
--- 使用truncate 自動增量也會一起歸0
-truncate table `test`;
-```
 
-delete刪除的問題 : 刪除完畢 重起資料庫 現象
+# 儲存過程與函數
 
-- InnoDB : 自增列表會從1開始 (儲存在記憶體中,計數斷電即消失)
-- MyISAM : 繼續從上一個自增量開始 (存在文件中 不會消失)
 
 
+## 儲存過程概述
 
-## DQL 查詢資料 (重點)
+含義 : 儲存過程 經過一組預先編譯的SQL語句的封裝
 
-#### DQL
+執行過程 : 儲存過程預先儲存在MySQL服務器上 需要執行時 客戶端只需要向服務氣端發出調用儲存過程的命令 服務器端就可以把預先儲存好的這一系列SQL語句全部執行
 
-(Data Query LANGUAGE : 資料查詢語言)
 
-- 所有的查詢操作都使用他 select
-- 簡單的查詢 複雜的查詢都可以使用
-- 資料庫中最核心的語言 最重要的部分
-- 使用頻率最高的語句
 
+優點
 
+- 簡化操作 提高sql語句的重用姓 減少開發的壓力
+- 減少操作過程中的失誤 提高效率
+- 減少網路傳輸量 (客戶端不需要把所有的SQL語句通過網路發送給服務器)
+- 減少了SQL語句暴露在網路上的風險 也提高了數據查詢的安全性
 
-#### select語法
 
-```mysql
-select[ALL | distinct]
-{* | table.* | [table.field1[as alias1][.table.field2[as alias2]][...]]}
-from table_name[as table_alias]
-	[left | right | inner join table_name2] -- 聯合查詢
-	[where ...] -- 指定結果須滿足的條件
-	[group by ...] -- 指定結果按照哪幾個欄位分組
-	[having] -- 過濾分組的記錄必須滿足的次要條件
-	[order by ...] -- 指定查詢記錄按一個或多個條件排序
-	-- 指定查詢的記錄從哪條至哪條
-	[limit {[offset.]row_count | row_countOFFSET offset}];
-```
 
+#### 和視圖 函數的對比
 
+視圖
 
-#### 指定查詢欄位
+- 和視圖有著同樣的優點 清晰 安全 還可以減少網路傳輸量 
+- 但不同的是 視圖是虛擬表 通常不對底層數據表直接操作 
+- 而儲存過程是程序化的SQL 可以直接操作底層數據表 相比於面向集合的操作方式 能夠實現一些更複雜的數據處理
 
-```mysql
--- 列出表格 所有欄位 所有資料
-select * from `grade`;
--- 查詢指定欄位  select 欄位名,欄位名 from 表格名
-select `gradeid`,`gradename` from grade;
--- 別名 給結果另外定義一個名字  也可以給表格名定義新名字
--- as 可省略 但是要加上 space
-select `gradeid` as `學號`,`gradename` as `年級` from grade;
--- 函數 Concat(a,b)
-select concat('學號: ',gradeid) as 新學號 from grade;
-```
+函數
 
-語法 : select 欄位 .... from 表格名
+- 一旦儲存過程被創建出來 使用它就像使用函數一樣簡單 
+- 我們直接通過調用儲存過程名即可 相較於函數 儲存過程是沒有返回值的
 
-```
-有的時候 欄位的名字不是這麼直覺 可以用as用一個新名字表示
-```
 
 
+#### 分類
 
-#### 去重複 distinct
+儲存過程的參數類型可以是IN OUT INOUT  分類如下
 
-- 作用 : 去除select查詢出來的結果中重複的數據 只顯示一條
+- 沒有參數 (無參數無返回)
+- 僅僅帶IN類型 (有參數無返回)
+- 僅僅帶OUT類型 (無參數有返回)
+- 既帶IN又帶OUT (有參數有返回)
+- 帶INOUT (有參數有返回)
 
-```mysql
--- 查詢 grade表格中 所有的欄位
-select * from grade;
--- 查詢grade表格中 score欄位
-select `score` from grade;
--- 發現重複數據 去重複
-select distinct `score` from grade;
-```
+IN OUT INOUT 都可以在一個儲存過程中帶多個
 
 
 
-```
-資料庫的列 (表達式)
-```
+## 創建儲存過程
 
-```mysql
--- 查詢系統版本 (函數)
-select version();
--- 計算 (表達式)
-select 100*3-2 as result;
--- 查詢自增的步長 (變量)
-select @@auto_increment_increment;
--- 所有成績+1分
-select `score`+1 as `成績` from grade;
-```
+語法
 
+``````mysql
+CREATE PROCEDURE 儲存過程名 (IN|OUT|INOUT 參數名 參數類型,...)
+[characteristics...]
+BEGIN
+	儲存過程體
+END	
+``````
 
 
-資料庫中的表達式 : 文本值 , 列 , Null , 函數 , 計算表達式 , 系統變量
 
-select 表達式 from 表格名
+準備工作
 
+``````mysql
+CREATE DATABASE dbtest;
+use dbtest;
 
+CREATE TABLE employees
+AS
+SELECT * 
+FROM database01.employees;
 
-#### where 條件子句
+CREATE TABLE departments
+AS
+SELECT * FROM database01.departments;
 
-作用 : 對數據中符合條件的值進行動作
+SELECT * FROM employees;
 
-條件由一個或多個表達式組成 結果 布林值
+SELECT * FROM departments;
+``````
 
-```
-邏輯運算符
-```
 
-| 運算符   | 語法            | 描述   |
-| -------- | --------------- | ------ |
-| and  &&  | a and b  a && b | 邏輯及 |
-| or  \|\| | a or b   a\|\|b | 邏輯或 |
-| Not      | not a      ! a  | 邏輯非 |
 
-配合mysql的語法  盡量使用英文字母
+#### 無參數 無返回值
 
-```mysql
---  where --
-select score from grade;
--- 查詢分數 在 xx ~ yy 之間
-select score from grade  where score >= 60 and score <= 80;
--- 模糊查詢 (區間)
-select score from grade  where score between 60 and 80;
--- 除了 學號不等於 xx 之外的成績
-select gradeid,score from grade  where gradeid != 3; 
--- != not 
-select gradeid,score from grade  where not gradeid = 3; 
-```
+舉例1
 
+``````mysql
+# 創建儲存過程select_all_data() 查看emps表的所有數據
+DELIMITER $
 
+CREATE PROCEDURE select_all_data()
+BEGIN
+		SELECT * FROM employees;
+END $
+DELIMITER ; 
 
-#### 模糊查詢
+# 儲存過程的調用
+CALL select_all_data();
+``````
 
-- 比較運算符
+舉例2
 
-| 運算符      | 語法              | 描述                                         |
-| ----------- | ----------------- | -------------------------------------------- |
-| is null     | a is null         | 如果操作符為null 結果為true                  |
-| is not null | a is not null     | 如果操作符為not null 結果為true              |
-| between     | a between b and c | 若a在b和c之間 結果為true                     |
-| Like        | a like b          | SQL匹配 如果a匹配b 結果為true                |
-| In          | a in(a1,a2,a3)    | 假設a在a1 或者a2 其中的某一個值中 結果為true |
+``````mysql
+#　創建儲存過程avg_employee_salary() 返回所有員工的平均工資
+DELIMITER //
 
-```mysql
--- 模糊查詢 --
+CREATE PROCEDURE avg_employee_salary()
+BEGIN
+		SELECT AVG(salary) FROM employees;
+END //
+DELIMITER ;
 
--- like結合 %(代表0到任一個字元)  _(代表一個字元)
--- 查詢學號 學號中 2開頭的學號
-select `gradeid`,`score` from grade where gradeid like '2%';
--- 查詢學號 學號中 2後面有一個位數的學號
-select `gradeid`,`score` from grade where gradeid like '2_';
--- 查詢學號 學號中 2後面有兩個位數的學號
-select `gradeid`,`score` from grade where gradeid like '2__';
--- 查詢學號 學號中 包含至少一個2的學號
-select `gradeid`,`score` from grade where gradeid like '%2%';
+# 調用
+CALL avg_employee_salary();
+``````
 
---  in 具體的一個或是多個值 --
--- 查詢 指定欄位中 一個區間的元素
-select `gradeid`,`score` from grade where gradeid in (2,3);  -- 2 ~ 3 包含
+舉例3
 
--- null  not null --
--- 查詢欄位為null  查詢score is null的元素
-select `gradeid`,`score` from grade where score is null ;
--- 查詢欄位為null  查詢score is not null的元素
-select `gradeid`,`score` from grade where score is not null ;
-```
+``````mysql
+# 創建儲存過程show_max_salary() 用來查看emps表的最高薪資值
+DELIMITER //
+CREATE PROCEDURE show_max_salary()
+BEGIN
+		SELECT MAX(salary)
+		FROM employees;
+END // 		
+DELIMITER ;
 
+# 調用 
+CALL show_max_salary();
+``````
 
 
-#### 聯表查詢 (交集問題)
 
-![Visual_SQL_JOINS_V2](https://i.imgur.com/2zX58hv.png)
+#### 帶OUT
 
+``````mysql
+# 創建儲存過程show_min_salry() 查看emps表的最低薪資值 並將最低薪資通過OUT參數ms輸出
+DELIMITER //
+CREATE PROCEDURE show_min_salary(OUT ms DOUBLE)
+BEGIN 
+		SELECT MIN(salary) INTO ms
+		FROM employees
+END //		
+DELIMITER ;
 
+# 調用
+CALL show_min_salary(@ms);
 
-```mysql
--- join on 連接查詢
--- where   等值查詢
+# 查看變數值
+SELECT @ms;
+``````
 
--- student和result產生了 studentNo的交集 
--- 必須選擇其中一方為主的student元素 去進行之後的匹配
-select s.studentNo,studentName,SumjectNo,StudentResult
--- 重命名 student -> s result -> r 
--- from student 加入 inner join result的表格一起搜尋 
-from student as s
-inner join result as r
--- 判斷student 和 result交集的元素 返回
-on s.studentNo = r.studentNo;
 
--- right join
-select s.studentNo,studentName,SumjectNo,StudentResult
-from student s
-right join result t
-on s.studentNo = r.studentNo;
 
+#### 帶IN
 
--- left join
-select s.studentNo,studentName,SumjectNo,StudentResult
-from student s
-left join result t
-on s.studentNo = r.studentNo;
+``````mysql
+# 創建儲存過程show_someone_salary() 查看emps表的某個員工的薪資
+# 並用IN參數empname輸入員工姓名
+DELIMITER //
+CREATE PROCEDURE show_someone_salary(IN empname VARCHAR(20))
+BEGIN
+		SELECT salary FROM employees
+		WHERE last_name = empname;
+END //
+DELIMITER ;
 
+# 調用方式一
+CALL show_someone_salary('Abel');
+# 調用方式二
+SET @empname := 'Abel';
+CALL show_someone_salary(@empname);
 
--- 要查詢哪些數據 select ..
--- 從哪幾個表格中查詢 from 表明 xxx join 連接的表格 on 交集的條件
--- 假設存在一種多張表格的查詢 先查詢兩張後慢慢的連接
-```
+SELECT * FROM employees WHERE last_name = 'Abel';
+``````
 
-| 操作       | 描述                                      |
-| ---------- | ----------------------------------------- |
-| inner join | 如果表格中至少有一個匹配 則返回行         |
-| left join  | 會從左表中返回所有的值 即使右表中沒有匹配 |
-| right join | 會從右表中返回所有的值 即使左表中沒有匹配 |
 
-- inner join 內部連接 
-  - 內部合併查詢指令 可以取回兩個資料表都共同存在合併欄位的資料
-  - 也就是 兩個資料表都有在on關鍵字所指定的欄位的值
 
-```mysql
--- 語法
-select 想搜尋的欄位(資料表A & B都可) 
-from [資料表A] 
-inner Join [資料表B] 
-on [資料表A].[關聯鍵] = [資料表B].[關聯鍵]
-```
+#### 帶IN和OUT
 
-- left join 左外部合併查詢
-  - 合併兩個資料表中 取回左邊資料表的所有記錄 就算在右邊資料表沒有存在合併欄位的值 顯示結果會以左邊資料表為主
+``````mysql
+# 創建儲存過程show_someone_salary2()  查看emps表的某個員工的薪資
+# 並用IN參數empname輸入員工姓名 用OUT參數empsalary輸出員工薪資
+DELIMITER // 
+CREATE PROCEDURE show_someone_salary2(IN empname VARCHAR(20),OUT empsalary DECIMAL(10,2))
+BEGIN
+		SELECT salary INTO empsalary
+		FROM employees
+		WHERE last_name = empname;
+END //
+DELIMITER ;
 
-```mysql
--- 語法
-select 想搜尋的欄位(資料表A & B都可) 
-from [資料表A] 
-left Join [資料表B] 
-on [資料表A].[關聯鍵] = [資料表B].[關聯鍵]
-```
+# 調用
+SET @empname = 'Abel';
+CALL show_someone_salary2(@empname,@empsalary);
 
-- Right join 右外部合併查詢
-  - 合併兩個資料表中 取回右邊資料表的所有記錄 就算左邊資料表沒有存在合併欄位的值 顯示結果以右邊資料表為主
+SELECT @empsalary;
+``````
 
-```mysql
--- 語法
-select 想搜尋的欄位(資料表A & B都可) 
-from [資料表A] right 
-Join [資料表B] 
-on [資料表A].[關聯鍵] = [資料表B].[關聯鍵]
-```
 
 
+#### INOUT
 
-#### on 與 where
+``````mysql
+# 創建儲存過程show_mgr_name() 查詢某個員工領導的姓名 並用INOUT參數 empname 輸入員工姓名 輸出領導的姓名
+DELIMITER $
+CREATE PROCEDURE show_mgr_name(INOUT empname VARCHAR(25))
+BEGIN
+		SELECT last_name INTO empname
+		FROM employees
+		WHERE employee_id = (
+            SELECT manager_id
+			FROM employees
+			WHERE last_name = empname
+        );
+END //
+DELIMITER ;
 
-```mysql
--- 標準查詢關鍵字執行順序
-from -> where -> group by -> having -> order by
-```
 
-- on後面的篩選條件主要針對的是關聯表
-- 對於主表的篩選條件應放在where後面 不應該放在on後面
-- 對於關聯表要區分對待 如果是要條件查詢後才連線 應該把查詢件放置於on後 
-  - 如果是想在連線完畢後才篩顯 就應把條件放置於where後
-- 對於關聯表我們可以先做子查詢在座join
+# 調用
+SET @empname := 'Abel';
+CALL show_mgr_name(@empname);
 
+SELECT @empname;
+``````
 
 
-```
-select  A.ID as AID, B1.ID as BID  
-from A 
-leftjoin  ( select B.ID from B  where B.ID <3 )B1 
-on A.ID = B1.ID  
 
-select  A.ID as AID, B.ID as BID  
-from A 
-left join B 
-on A.ID = B.ID and  B.ID<3
-```
+## 儲存函數的使用
 
 
 
-#### 自連接
+注意 : 出現 you might want to use the less safe log_bin_trust_function_creators variable 
 
-- 自己的表格和自己的表格連接 核心 : 一張表格拆為兩張一樣的表格即可
+解決方式
 
+- 加上必要的函數特性 : [NOT] DETERMINISTIC 和 {CONTAINS SQL | NO SQL | READS SQL DATA | MODIFIES SQL DATA}
 
-```mysql
-create table `category`(
-	`categoryid` int(10) unsigned not null auto_increment comment '主題id',
-      `pid` int(10) not null comment '父id',
-      `categoryName` varchar(50) not null comment '主題名字',
-      primary key (`categoryid`)
-)engine=InnoDB auto_increment=9 default charset=utf8;
+- ``````
+  mysql > SET GLOBAL log_bin_trust_function_creators = 1;
+  ``````
 
-insert into `category` (`categoryid`,`pid`,`categoryName`) 
-value ('2','1','訊息技術'),
-('3','1','軟體開發'),
-('4','3','資料庫'),
-('5','1','美術設計'),
-('6','3','web開發'),
-('7','5','ps技術'),
-('8','2','辦公訊息');
-```
 
 
+``````mysql
+# 創建儲存函數 名稱為email_by_name() 參數定義為空
+# 該函數查詢Abel的email 並返回 數據類型為字串型
+DELIMITER //
+CREATE FUNCTION email_by_name()
+RETURNS VARCHAR(25)
+		DETERMINISTIC
+		CONTAINS SQL
+		READS SQL DATA
+BEGIN
+		return (
+            SELECT email
+			FROM employees
+			WHERE last_name = 'Abel'
+        );	
+END //
 
-父類
+DELIMITER;
 
-| category | categoryName |
-| -------- | ------------ |
-| 2        | 訊息技術     |
-| 3        | 軟體開發     |
-| 5        | 美術設計     |
+# 調用
+SELECT email_by_name();
 
-子類
+SELECT email,last_name FROM employees WHERE last_name = 'Abel';
+``````
 
-| pid  | catgoryid | categoryName |
-| ---- | --------- | ------------ |
-| 3    | 4         | 資料庫       |
-| 2    | 8         | 辦公訊息     |
-| 3    | 6         | web開發      |
-| 5    | 7         | ps技術       |
 
 
+``````mysql
+# 創建函數前 執行此語句 保證函數的創建會成功
+SET GLOBAL log_bin_trust_function_creators = 1;
 
-操作 : 查詢父類對應子類關係
+# 創建儲存函數 名稱為email_by_id() 參數傳入emp_id 該函數查詢emp_id的email
+# 並返回 數據類型為字串類型
+DELIMITER //
+CREATE FUNCTION email_by_id(emp_id INT)
+RETURN VARCHAR(25)
+BEGIN
+		RETURN(
+        	SELECT email 
+            FROM employees 
+            WHERE employee_id = emp_id
+        );
+END //
+DELIMITER ;
 
-| 父類     | 子類     |
-| -------- | -------- |
-| 訊息技術 | 辦公訊息 |
-| 軟體開發 | 資料庫   |
-| 軟體開發 | web開發  |
-| 美術設計 | ps技術   |
+# 調用
+SELECT email_by_id(100);
 
-```mysql
--- 查詢父子訊息  把一張表看為兩個一模一樣的表
+SET @emp_id = 102;
+SELECT email_my_id(@emp_id);
+``````
 
-select a.`categoryName` as `父`, b.`categoryName` as `子`
-from `category` as a , `category` as b
-where a.`categoryid` = b.`pid`;
-```
 
 
+``````mysql
+# 創建儲存函數count_by_id() 參數傳入dept_id 該函數查詢dept_id部門的員工人數
+# 並返回 數據類型為整數
+DELIMITER //
+CREATE FUNCTION count_by_id(dept_id INT)
+RETURN INT
 
-## 分頁和排序
+BEGIN
+		RETURN (
+        SELECT COUNT(*)
+        FROM employees
+        WHERE department_id = dept_id
+        );
+END //
 
-```
-排序
-```
+DELIMITER ;
 
-```mysql
--- 分頁 limit 和 排序 order by --
+# 調用
+SET @dept_id := 30;
+SELECT count_by_id(@dept_id);
+``````
 
--- 排序 : 升序ASC , 降序 DESC
--- order by 通過哪一個欄位排序 怎麼排
--- 根據查詢的結果 成績排序 降序
 
--- 避免模糊查詢 選定一個表格查詢 s.
-select s.`studentNo`,`studentName`,`subjectName`,`studentResult`
-from student s
-inner join `result` r
--- 選擇 s r 中相同學號進行回傳
-on s.studentNo = r.studentNo
--- 選擇科目名稱為 datastructure 的資料進行回傳
-where subjectName = `datastructure`
--- order by 依照studentResult結果進行升序排序
-order by studentResult ASC
-```
 
+## 查看 修改 刪除
 
 
-```
-分頁
-```
 
-```mysql
--- 分頁 每個分頁只顯示五條數據
--- 語法 : limit 起始位置 ~ 當前頁面的大小
--- 網頁應用 : 當前頁面 總共的頁數 頁面大小
--- limit 0,5 1~5條數據
--- limit 1,5 2~6條數據
-select s.`studentNo`,`studentName`,`subjectName`,`studentResult`
-from student s
-inner join `result` r
-on s.studentNo = r.studentNo
-where subjectName = `datastructure`
-order by studentResult ASC
-limit 0,5;
--- 第一頁 0 , 5
--- 第二頁 5 , 5
--- 第三頁 10 , 5
--- 第N頁  (N-1 * pageSize , pagesize
--- pageSize : 頁面大小
--- (n-1)* pageSize:起始值
--- n : 當前頁
--- 數據總數 / 頁面大小 + 無條件進位 = 總頁數
-```
+#### 儲存過程.函數的查看
 
-語法 : limit(查詢起始下標,pageSize)
+使用SHOW CREATE語句查看儲存過程和函數的創建訊息
 
+``````mysql
+SHOW CREATE PROCEDURE show_mgr_name;
 
+SHOW CREATE FUNCTION count_by_id;
+``````
 
-#### 子查詢 (不常被使用)
+使用SHOW STATUS語句查看儲存過程和函數的狀態訊息
 
-- where
-  - 本質 : 在where語句中嵌入一個子查詢語句
+``````mysql
+SHOW PROCEDURE STATUS;
 
-```mysql
--- where --
--- 查詢 datastructure 的所有考試結果 (學號 科目編號 成績) 降序排列
+SHOW PROCEDURE STATUS LIKE 'show_max_salary'; # 查看某一些儲存過程
+``````
 
--- 方法一 連接查詢
--- 產生模糊查詢 需要標記查詢的表
-select `studentNo`,r.`subjectNo`,`studentResult`
-from `result` r
--- 連接subject表
-inner join `subject` sub
-on r.subjectNo = sub.subjectNo
-where subjectName = 'datastructure-1'
--- 降序
-order by studentResult desc;
+從information_schemaRoutines中查看
 
--- 方法二 子查詢 (由內而外尋找)
--- 由內 先處理了 subject表格的subjectName
--- 向外 再處理了 result 中的subjectName比較
-select `studentNo`,`studentNo`,`studentResult`
-from `result`
--- 比較結果 如果 上面找尋的studentNo 與 內部尋找的結果相等
-where subjectNo = (
--- 先從內部尋找 從subject表格中尋找subjectNo 且subjectNo的值須為'datastructure'
-	select subjectNo from `subject`
-      where subjectName = 'datastructure-1'
-)
-order by studentResult desc;
-```
+``````mysql
+SELECT * FROM information_shhema.Routines
+WHERE ROUTINE_NAMEA = 'email_by_id'
+AND ROUTINE_TYPE = 'FUNCTION'; # 區分大小寫
+``````
 
-子查詢應用 : 當目前的表中沒有辦法得到相對應的數據  使用子查詢先找出關聯性
 
-```mysql
--- 尋找同樣結果的inner join查詢
-select s.studentNo,studentName
-from student s
-inner join result r
--- 比對兩者相同的subjectNo
-on s.studentNo = r.studentNo
-inner join `subject` sub 
--- 比對兩者相同的subjectNo
-on s.`subjectNo` = sub.`subjectNo`
--- 先刪除除了 math-2 的資料
-where `subjectName` = 'math-2' and studentResult >= 80;
 
+#### 儲存過程.函數的修改
 
--- 分數不小於80的學生 學號和姓名
-select distinct `studentNo`,`studentName`
-from student s
-inner join result r
-on r.studentNo = s.studentNo
-where `studentResult` >= 80; 
+``````mysql
+ALTER PROCEDURE show_max_salary
+SQL SECURITY INVOKER
+COMMENT '查詢最高工資';
+``````
 
 
--- 在以上的基礎增加科目 尋找math-2的編號 (subjectname = math-2)
-select distinct `studentNo`,`studentName`
-from student s
-inner join result r
--- 尋找 兩個表格中相等的學號
-on r.studentNo = s.studentNo
--- 尋找分數大於80 且 科目名 = math-2的學號
-where `studentResult` >= 80 and `subjectNo`   = (
--- 科目的資訊要從subject尋找 選擇出subjectName = 'math-2'的資料
--- 回傳的資料為 科目名為 math-2 的subjectNo
-	select `subjectNo`
-      from `subject`
-      where `subjectName` = 'math-2'
-)
-
--- 再改造 (由內到外) --
-select studentNo,studentName from student where studentNo in(
--- where尋找 studentNo 而 studentNo需要是高於80分的結果
-	select studentNo from where studentResult>80 and subjectNo = (
--- where尋找 subjectNo 而 subjectNo的名稱要是 math-2
-    	select subjectNo from `subject` where `subjectName` = 'math-2'
-    )
-)
-```
 
+#### 儲存過程.函數的刪除
 
+``````mysql
+DROP FUNCTION IF EXISTS count_by_idd;
 
-## MySQL函數
+DROP PROCEDURE IF EXISTS show_min_salary;
+``````
 
-#### 常用函數
 
-```mysql
--- 常用函數 -- 
--- 數學運算
-select abs(-8); -- 絕對值
-select ceiling(9.4); -- 向上取整
-select floor(9.4); -- 向下取整
-select rand(); -- 返回一個0~1之間的隨機數
-select sign(-10); -- 判斷一個數的符號 正數返回1 負數返回-1
- 
--- 字串函數 --
-select char_length('asdfgh'); -- 字串長度 
-select concat('asdfgh','dfgh','1234'); -- 字串拼接
--- 從第一個位址移除兩個元素後 從第一個位址放入替換的字串 跟程式語言的起始位址有些不同
-select insert('ABCDEF',1,2,'XYZ'); 
-select lower('ABCDefg'); -- 轉小寫
-select upper('ABCDefg'); -- 轉大寫
--- 返回第一次出現字串的索引 == 2 找不到則為0
-select instr('ABCD','BC'); 
-select replace('abcdefAAgg','AA','CC'); -- 替換出現的指定字串
-select substr('ABCDEFGHIJ',4,6); -- 返回指定子字串 從第4個開始往後6個
-select reverse('abcde'); -- 反轉
- 
--- 時間日期函數 --
-select current_data(); -- 獲取目前日期
-select curdate(); -- 獲取目前日期
-select now(); -- 獲取目前時間
-select location(); -- 本地時間
-select sysdate(); -- 系統時間
- 
-select year(now()); 
-select month(now()); 
-select day(now()); 
-select minute(now()); 
-select second(now()); 
- 
--- 系統 --
-select system_user();
-select user();
-select version();
-```
 
+## 關於儲存過程的使用
 
 
-#### 聚合函數(常用)
 
-| 函數名稱 | 描述   |
-| -------- | ------ |
-| count()  | 計數   |
-| sum()    | 求和   |
-| avg()    | 平均值 |
-| max()    | 最大值 |
-| min()    | 最小值 |
+優點
 
-```mysql
--- 聚合函數 -- 
--- 統計表中的數據
-select count(`borndate`) from student; -- count 指定列 忽略所有的null
-select count(*) from result; -- count(*) 不會忽略null值 本質 計算行數
-select count(1) from result; -- count(1) 不會忽略null值 本質 計算行數
+- 儲存過程可以一次編譯多次使用
+  - 儲存過程只在創建時編譯 之後的使用就不需要重新編譯 提升了SQL的執行效率
+- 可以減少開發工作量
+  - 將程式碼封裝成模塊 可以把複雜的問題拆解成不同的模塊 模塊間可以重複使用
+- 儲存過程的安全性強
+  - 我們在設定儲存過程時可以設置對用戶的權限
+- 可以減少網路傳輸量
+  - 因為程式碼封裝到儲存過程中 每次使用只需要調用儲存過程即可 減少了網路傳輸量
+- 良好的封裝性
+  - 進行相對複雜的數據庫操作時 原本需要使用一條一條的SQL語句 可能要連接多次數據庫才能完成的操作 現在變成了一次儲存過程 只需要連接一次即可
 
-select sum(`studentResult`) as 總和 from result;
-select avg(`studentResult`) as 平均分 from result;
-select max(`studentResult`) as 最高分 from result;
-select min(`studentResult`) as 最低分 from result;
-```
+缺點
 
+(強制) : 禁止使用儲存過程 儲存過程難以調試和擴展 更沒有移植性
 
+- 可移植性差
+  - 儲存過程不能跨數據庫移植 例如在MySQL Oracle SQL Server裡編寫的儲存過程 在換成其他數據庫時都需要新編寫
+- 調試困難
+  - 只有少數DBMS支持儲存過程的調試 對於複雜的儲存過程來說 開發和維護都不容易
+- 儲存過程的版本管理困難
+  - 如果數據表索引發生變化了 可能會導致儲存過程失效 我們在開發軟體的時候往需要進行版本管理 但是儲存過程本身沒有版本控制 更新時會很麻煩
+- 他不適合高並發的場景
+  - 高並發的場景需要減少了數據庫的壓力 有時數據庫會採用分庫分表的方式 而且對可擴展性要求很高 在這種情況 儲存過程會變得難以維護 增加數據庫的壓力
 
-```
-分組與過濾
-```
 
-```mysql
--- 查詢不同課程的平均分 最高分 最低分 且平均分大於80
--- 核心 : 根據不同的課程分組
-select subjectName , avg(studentResult) as `AVG` , max(studentResult) , min(studentResult)
-from `result` r
-inner join `subject` sub
--- 當r 和 sub表中的 subjectNo相等時
-on r.`subjectNo` = sub.`subjectNo`
--- 藉由 r的subjectNo進行分組
-group by r.subjectNo 
--- 判斷平均分大於80
-having AVG > 80;
-```
 
+## 儲存過程 儲存函數練習
 
+儲存過程
 
-#### 資料庫的MD5加密
+``````mysql
+# 準備工作
+CREATE DATABASE test;
+USE test;
 
-- md5 : 增強算法複雜度和不可逆性
-- md5不可逆 
-
-```mysql
--- 查詢表格
-select * from(`testmd5`);
-
--- md5加密 測試 --
-create table `testmd5`(
-	`id` int(4) not null,
-      `name` varchar(20) not null,
-      `pwd` varchar(50) not null,
-      primary key(`id`)
-)engine=innodb default charset=utf8;
-
--- 明文密碼
-insert into `testmd5` values(1,'AAA','123456'),(2,'BBB','123456'),(3,'CCC','123456');
-
--- 加密
-update testmd5 set pwd=md5(pwd) where id = 1;
-update testmd5 set pwd=md5(pwd);
-
--- 插入資料時加密
-insert into `testmd5` values(4,'DDD',md5('123456'));
-
--- 如何校驗 將用戶傳遞的密碼 進行md5加密 兩者比較加密後的值
-select * from `testmd5` where `name` = 'AAA' and pwd = md5('123456');
-
-```
-
-
-
-## 事務
-
-- 事務 : 都成功 or 都失敗
-  - SQL 執行 A 轉帳給 B  如果一方成功 一方失敗 會產生問題
-- 將一組SQL放在一個批次中執行
-
-```
-事務原則 : ACID原則 原子性 一致性 隔離性 持久性 
-```
-
-
-
-#### 原子性 Atomicity
-
-- 表示兩個步驟一起成功 或是 一起失敗 不能只發生其中一個動作
-  - 也就是轉帳的人所付出的錢 要是收到的人所收到的錢
-
-#### 一致性 Conststency
-
-- 事務前後的數據完整性要保持一致
-- 無論進行了什麼步驟 最後兩者相加的結果會是一樣的
-  - 轉帳的人及被轉帳的人 兩者相加起來的金額會是一樣的
-
-#### 持久性 Durability
-
-- 針對多個用戶間同時操作 主要是排除其他事務對此次事務的影響
-
-#### 隔離性 Isolation
-
-- 事務結束後的數據不會隨著外界原因導致數據丟失
-- 如果事務沒有提交 恢復到原狀
-- 如果事務已經提交 持久化到數據庫
-- 事務一旦提交就不可逆
-
-
-
-#### 隔離級別
-
-##### 髒讀
-
-- 指一個事務讀取了另外一個事務尚未提交的數據
-
-##### 不可重複讀
-
-- 在一個事務內讀取表的某一行數據 多次讀取結果不同 (不一定是錯誤 只是某些場合不對)
-- t1讀取了一個數據後 t2更新了該數據並提交了 之後t1又讀取該數據 發現前後讀取的數據不一樣
-
-##### 幻讀
-
-- 指一個事務內讀取到了別的事務插入的數據 導致前後讀取不一致 
-- 一般是行影響 多了一行
-
-
-
-#### 執行事務
-
-```mysql
--- mysql 預設開啟事務是自動提交的
-set autocommit = 0; -- 關閉
-set autocommit = 1; -- 開啟 (預設)
--- 手動處理事務
-set autocommit = 0; -- 關閉自動提交
-
--- 事務開啟
-start transaction; -- 標記一個事務的開始 從這個之後的sql都在同一個事務內
--- 提交 : 持久化(成功)
-commit;
--- 回滾 : 回到原來的樣子 (失敗)
-rollback;
--- 事務結束 
-set autocommit = 1; -- 開啟自動提交
-
--- 了解
-savepoint test; -- 保存點名  設置事務的保存點
-rollback to savepoint; -- 回滾到保存點
-release savepoint test; -- 刪除保存點
-```
-
-
-
-模擬
-
-```mysql
--- 轉帳
-create database shop character set utf8 collate utf8_general_ci;
-use shop;
--- 查看表格
-select * from `account`;
-create table `account`(
-	`id` int(3) not null auto_increment,
-      `name` varchar(30) not null,
-      `money` decimal(9,2) not null,
-      primary key(`id`)
-)engine=innodb default charset=utf8;
-
-insert into account(`name`,`money`) values ('AA',2000.00),('BB',1000.00);
-
--- 模擬轉帳 事務
-set autocommit = 0; -- 關閉自動提交
-start transaction; -- 開啟一個事務
-update account set money=money-500 where `id` = '1';
-update account set money=money+500 where `id` = '2';
-commit;-- 提交事務
-rollback; -- 回滾
-set autocommit = 1; -- 恢復預設值
-```
-
-
-
-## 索引
-
-
-
-#### 索引的分類
-
-- 主鍵索引 (PRIMARY KEY)
-  - 唯一的標誌 主鍵不可以重複 只能有一個裂作用主鍵
-- 唯一索引 (UNIQUE KEY)
-  - 標誌的是列名唯一 不同的列名都可以加入標誌 避免同一列中的資料重複
-  - 避免重複的列出現 唯一索引可以重複 多個列都可以標誌為唯一索引
-- 常規索引 (KEY / INDEX)
-  - 預設 index key關鍵字來設置
-- 全文索引 (FullText)
-  - 在特定的資料庫引擎下才有 MyISAM
-  - 快速定位資料
-
-
-
-#### 基礎語法
-
-```mysql
--- 索引的使用
--- 創建表的時候給欄位增加索引
--- 創建完畢後 增加索引
-
--- 顯示所有的索引訊息
-show index from grade;
--- 增加一個全文索引列名
-alter table grade.student add fulltext index `studentName`(`studentName`);
--- explain 分析sql執行的狀況
-explain select * from student; -- 非全文索引
-explain select * from student Where match(studentName) against('A');
-```
-
-
-
-#### 索引原則
-
-- 索引不是越多越好
-- 不要對經常變動的數據加索引
-- 小數據量的表不需要加索引
-- 索引一般加在常用來查詢的欄位
-
-
-
-```
-索引的數據結構
-```
-
-Hash類型的索引
-
-Btree : InnoDB的預設數據
-
-
-
-## 權限管理與備份
-
-
-
-#### MySQL備份
-
-為什麼要備份 : 
-
-- 保證資料不會丟失
-- 資料轉移
-
-MySQL資料庫備份的方式
-
-- 直接複製物理文件
-- 在可視化工具中手動導出
-- 使用命令行導出 mysqldump 命令行使用
-
-```
-# mysqldump -hlocalhost -u用戶名 -p密碼 資料庫名 表格名 > 導出位置
-mysqldump -hlocalhost -uroot -p123456 SQL_FIRST grade > C:\Users\Desktop
-```
-
-
-
-## 規範資料庫設計
-
-當資料庫比較複雜的時候 需要設計
-
-- 糟糕的資料庫設計 : 
-  - 數據冗余 浪費空間
-  - 數據庫插入和刪除麻煩 異常
-  - 性能差
-- 良好的資料庫設計 : 
-  - 節省記憶體空間
-  - 保證資料庫的完整性
-  - 方便開發系統
-
-
-
-#### 軟體開發中 關於資料庫的設計
-
-- 分析需求 : 分析業務和需要處理的資料庫需求
-- 概要設計 : 設計關係圖 E-R圖
-
-
-
-#### 設計資料庫的步驟
-
-- 蒐集資訊 分析需求
-- 個人部落格
-  - 用戶表 (用戶登入登出 用戶個人訊息 創建分類)
-  - 分類表 (文章分類 創建人)
-  - 文章表 (文章訊息)
-  - 鏈結表
-  - 自定義表 (系統訊息 關鍵字 主字段) key : value
-
-
-
-#### 三大范式
-
-數據規範化的理由
-
-- 訊息重複
-- 更新異常
-- 插入異常
-  - 無法正常顯示訊息
-- 刪除異常
-  - 丟失有效的訊息
-
-
-
-```
-三大范式
-```
-
-#### 第一范式 (1NF)
-
-- 原子性 : 保證每一列不可再分
-  - 無重複的列
-
-#### 第二范式 (2NF)
-
-- 滿足第一范式的前提
-- 完全依賴 (非部分依賴)
-- 屬性完全依賴於主鍵 (消除部分子函數依賴)
-- 每張表只描述一件事情
-
-#### 第三范式 (3NF)
-
-- 滿足第二范式的前提
-- 直接依賴 (非間接依賴)
-- 屬性不依賴於其他非主屬性 (消除傳遞依賴)
-  - 傳遞依賴 : a到b b到c 而a能到c 必須消除這種關係
-- 假設建立一個訂單表 需要建立一個客戶編號作為外鍵與訂單表建立相應的關係
-  - 不能直接在訂單表中添加客戶的其他訊息
-
-
-
-#### 規範性 和 性能的問題
-
-關聯查詢的表不能超過三張
-
-- 考慮商業化的需求和目標 (成本 用戶體驗) 資料庫的性能更加重要
-- 再規範性能的問題時 需要適當的考慮一下規範性
-- 故意給某些表增加一些冗余的欄位 (從多表查詢變為單表查詢)
-  - 訂單 + 商品id  -->  訂單 + 商品訊息  減少查詢id的時間
-- 故意增加一些計算列 (從大數據量降低為小數據量的查詢 : 索引)
-
-
-
-## JDBC
-
-#### 資料庫驅動程式
-
-- 程式會通過資料庫驅動程式與資料庫進行連接
-  - 應用程式 --> MySQL驅動 -- > 資料庫
-
-#### JDBC
-
-- 為了簡化對資料庫統一的操作 提供了一個java操作資料庫的規範
-  - 應用程式 -- > JDBC --> MySQL驅動 --> 資料庫
-
-
-
-#### JDBC程式
-
-```
-創建測試資料庫
-```
-
-```mysql
--- JDBC --
-create database jdbcstudy character set utf8 collate utf8_general_ci;
-
-use jdbcstudy;
-select * from `users`;
-
-create table users(
-	id int primary key,
-      name varchar(40),
-      password varchar(40),
-      email varchar(60),
-      birthday date
+# 創建儲存過程insert_user() 實現傳入用戶名和密碼 插入到admin表中
+CREATE TABLE admin(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    user_name VARCHAR(15) NOT NULL,
+    pwd VARCHAR(25) NOT NULL 
 );
-insert into users(id,name,password,email,birthday)
-values(1,'AAA','123456','AAAA.com','2000-1-1'),
-(2,'BBB','123456','BBBB.com','2000-1-2'),
-(3,'CCC','123456','CCCC.com','2000-1-3');
-```
 
-
-
-#### 導入資料庫驅動
-
-下載mysql-connector-java 導入裡面的jar包至lib中
-
-
-
-#### 測試程式
-
-```java
-package com;
-
-import java.sql.*;
-
-public class JDBC01 {
-    public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        
-        // 1. 載入驅動
-        // 拋出異常 ClassNotFoundException
-        Class.forName("com.mysql.cj.jdbc.Driver"); // 固定寫法 載入驅動
-        
-        // 2. 用戶訊息和url
-        // useUnicode=true 支持中文 & characterEncoding=utf8 設定字元為utf8 &
-        // useSSL=true 使用安全連接  serverTimezone=UTC 時區 (8.0以後可能需要)
-        String url = "jdbc:mysql://localhost:3306/jdbcstudy?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&useSSL=true";
-        String username = "root";
-        String password = "123456";
-        
-        // 3. 連接成功 返回資料庫對象
-        // 拋出異常 SQLException
-        // Connection 代表資料庫 不為空代表已經取得資料庫
-        Connection connection = DriverManager.getConnection(url, username, password);
-
-        // 4. 執行SQL的對象
-        // Statement 執行SQL的對象
-        Statement statement = connection.createStatement();
-        
-        // 5. 執行SQL的對象去執行SQL 可能存在結果 查看返回結果
-        String sql = "select * from `users`";
-        // Query查詢 update更新刪除插入
-        // 返回的結果 結果集中封裝了我們全部查詢出來的結果
-        ResultSet resultSet = statement.executeQuery(sql);
-        while(resultSet.next()){
-            System.out.println("id = " + resultSet.getObject("id"));
-            System.out.println("name = " + resultSet.getObject("name"));
-            System.out.println("password = " + resultSet.getObject("password"));
-            System.out.println("email = " + resultSet.getObject("email"));
-            System.out.println("birthday = " + resultSet.getObject("birthday"));
-        }
-        
-        // 6. 釋放連接
-        resultSet.close();
-        statement.close();
-        connection.close();
-    }
-}
-
-```
-
-
-
-#### 步驟總結
-
-- 載入驅動
-- 連接資料庫 DriverManager
-- 獲取執行SQL的對象 Statement
-- 獲得返回的結果集 
-- 釋放連接
-
-
-
-```
-DriverManager
-```
-
-```java
-// 1. 載入驅動
-        // 拋出異常 ClassNotFoundException
-        Class.forName("com.mysql.cj.jdbc.Driver"); // 固定寫法 載入驅動
-        // 不建議使用此種載入方式 因為new物件的時候 類別裡會再進行一次載入 等於載入兩次
-        DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
-
-// connection 代表資料庫
-// 資料庫設置自動提交
-// 事務提交
-// 事務回滾
-connection.rollback();
-connection.commit();
-connection.setAutoCommit();
-```
-
-
-
-```
-URL
-```
-
-```java
-String url = "jdbc:mysql://localhost:3306/jdbcstudy?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&useSSL=true";
-// mysql -- 3306        
-// 協議 ://主機地址:連接埠/資料庫名?參數1&參數2&參數3
-
-// oralce -- 1521
-// jdbc:oracle:think@localhost:1521:sid
-```
-
-
-
-```
-Statement 執行SQL的對象  PrepareStatement執行SQL的對象
-```
-
-```java
-String sql = "select * from `users`"; // 編寫SQL
-
-statement.executeQuery(); // 查詢操作返回 ResultSet
-statement.execute(); // 執行任何SQL
-statement.executeUpdate(); // 更新 插入 刪除 都是用這個語句 返回一個受影響的行數
-```
-
-
-
-```
-ResultSet 查詢的結果集 : 封裝了所有的查詢結果
-```
-
-獲取指定的資料類型
-
-```java
-// 不知道列類型的情況下使用
-resultSet.getObject(); 
-// 知道列的指定類型使用
-resultSet.getString();
-resultSet.getInt();
-resultSet.getFloat();
-resultSet.getDate();
-```
-
-
-
-```
-遍歷 
-```
-
-```java
-resultSet.beforeFirst(); // 移動到最前面
-resultSet.afterLast(); // 移動到最後面
-resultSet.next(); // 移動到下一個數據
-resultSet.previous(); // 移動到前一行
-resultSet.absolute(); // 移動到指定行
-```
-
-
-
-```
-釋放資源 耗資源 用完關閉
-```
-
-```
-// 6. 釋放連接
-resultSet.close();
-statement.close();
-connection.close();
-```
-
-
-
-#### Statement對象
-
-- JDBC中的statement對象用於向資料庫發送SQL語句 想完成對資料庫的增刪改查 只需要通過這個對象向資料庫發送增刪改查語句即可
-- executeUpdate方法 用於向資料庫發送增,刪,改的SQL語句
-- executeUpdate執行完後 將會返回一個整數 (即增刪改查語句導致了資料庫幾行數據發生了變化)
-- statement.executeQuery方法用於向資料庫發送查詢語句 executeQuery方法返回代表查詢結果的ResultSet對象
-
-
-
-```
-CRUD操作 - create
-```
-
-使用executeUpdate(String sql)方法完成資料添加操作
-
-```java
-Statement st = conn.createStatement();
-String sq1 = "insert into user(...)values(...)";
-int num = st.executeUpdate(sq1);
-if(num>0){
-	System.out.println("插入成功!");
-}
-```
-
-
-
-```
-CRUD操作 - delete
-```
-
-```java
-Statement st = conn.createStatement();
-String sq1 = "delete from user where id=1";
-int num = st.executeUpdate(sq1);
-if(num>0){
-	System.out.println("刪除成功!");
-}
-```
-
-
-
-```
-CRUD操作 - update
-```
-
-```java
-Statement st = conn.createStatement();
-String sq1 = "update user set name ='' where name=''";
-int num = st.executeUpdate(sq1);
-if(num>0){
-	System.out.println("修改成功!");
-}
-```
-
-
-
-```
-CRUD操作 - read
-```
-
-```java
-Statement st = conn.createStatement();
-String sq1 = "select * from user where id=1";
-ResultSet rs = st.executeQuery(sql);
-while(rs.next()){
-    // 根據獲取列的數據類型 分別調用rs的相應方法映射到java對象中
-}
-```
-
-
-
-```
-程式實現
-```
-
-
-
-定義用戶訊息及URL
-
-db.properties
-
-```java
-driver=com.mysql.cj.jdbc.Driver
-url=jdbc:mysql://localhost:3306/jdbcstudy?useUnicode=true&characterEncoding=utf8&useSSL=true
-username=root
-password=123456
-```
-
-
-
-提取工具類
-
-```java
-package com;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.*;
-import java.util.Properties;
-
-public class JDBC02 {
-    private static String driver = null;
-    private static String url = null;
-    private static String username = null;
-    private static String password = null;
-    static {
-        try{
-            InputStream in = JDBC02.class.getClassLoader().getResourceAsStream("db.properties");
-            Properties properties = new Properties();
-            properties.load(in);
-            // 固定寫法 獲取某一個資源
-            driver = properties.getProperty("driver");
-            url = properties.getProperty("url");
-            username = properties.getProperty("username");
-            password = properties.getProperty("password");
-
-            // 驅動只要載入一次
-            Class.forName(driver);
-
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-        // 獲取連接
-        public static Connection getConnection() throws SQLException {
-                return DriverManager.getConnection(url, username, password);
-        }
-        // 釋放連接資源
-        public static void release(Connection con, Statement st, ResultSet rs){
-                if(rs != null){
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
-                if(st != null){
-                    try {
-                        st.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if(con != null){
-                    try {
-                        con.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-}
-```
-
-
-
-編寫增刪改 executeUpdate 套用之前的方法化 簡化做法
-
-##### insert
-
-```java
-package com;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-public class TestInsert {
-    public static void main(String[] args) {
-        Connection conn = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-            // 簡化 直接使用getConnection 固定用法
-            conn = JDBC02.getConnection(); // 獲取資料庫連接
-            st = conn.createStatement(); // 獲得SQL的執行對象
-            // SQL語句
-            String sql = "insert into users(id,name,password,email,birthday)" +
-                    "values(4,'DDD','123456','DDDD.com','2000-1-4');";
-            // 更新 更新完回傳結果
-            int i = st.executeUpdate(sql);
-            if(i > 0){
-                System.out.println("更新成功!");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            // 釋放資源
-            JDBC02.release(conn,st,rs);
-        }
-    }
-}
-```
-
-##### Delete
-
-```
-package com;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-public class TestDelete {
-    public static void main(String[] args) {
-        Connection conn = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-            // 簡化 直接使用getConnection 固定用法
-            conn = JDBC02.getConnection(); // 獲取資料庫連接
-            st = conn.createStatement(); // 獲得SQL的執行對象
-            // SQL語句
-            String sql = "delete from users where id = 4;";
-            // 更新 更新完回傳結果
-            int i = st.executeUpdate(sql);
-            if(i > 0){
-                System.out.println("刪除成功!");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            // 釋放資源
-            JDBC02.release(conn,st,rs);
-        }
-    }
-}
-```
-
-##### Update
-
-```java
-package com;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-public class TestUpdate {
-    public static void main(String[] args) {
-        Connection conn = null;
-        Statement st = null;
-        ResultSet rs = null;
-
-        try {
-            // 簡化 直接使用getConnection 固定用法
-            conn = JDBC02.getConnection(); // 獲取資料庫連接
-            st = conn.createStatement(); // 獲得SQL的執行對象
-            // SQL語句
-            String sql = "update users set `name` = 'ABC' ,`email` = 'ABC.com'where id = 1";
-            // 更新 更新完回傳結果
-            int i = st.executeUpdate(sql);
-            if(i > 0){
-                System.out.println("更新成功!");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            // 釋放資源
-            JDBC02.release(conn,st,rs);
-        }
-    }
-}
-```
-
-
-
-##### select
-
-```java
-package com;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-public class TestSelect {
-    public static void main(String[] args) {
-        Connection conn = null;
-        Statement st = null;
-        ResultSet rs = null;
-        try {
-            conn = JDBC02.getConnection();
-
-            st = conn.createStatement();
-            // SQL
-            String sql = "select * from users where id = 1";
-            rs = st.executeQuery(sql); // 查詢完畢返回一個結果集
-            while(rs.next()){
-                System.out.println(rs.getString("name"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            JDBC02.release(conn,st,rs);
-        }
-    }
-}
-```
-
-
-
-#### SQL注入問題
-
-sql存在漏洞 會被攻擊導致資料洩漏 ==SQL會被拼接 or == 
-
-
-
-正常情況 正確輸入時返回username password
-
-```java
-package com;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-public class SQLinjection {
-    public static void main(String[] args) {
-        login("ABC","123456");
-    }
-    //登入
-    public static void login(String username,String password){
-        Connection conn = null;
-        Statement st = null;
-        ResultSet rs = null;
-        try {
-            conn = JDBC02.getConnection();
-
-            st = conn.createStatement();
-            // select * from users where `name` = 'ABC' and `password` = '123456';
-            String sql = "select * from users where `name` ='" + username + "' AND `password` ='" + password + "'";
-            rs = st.executeQuery(sql); // 查詢完畢返回一個結果集
-            while(rs.next()){
-                System.out.println(rs.getString("name"));
-                System.out.println(rs.getString("password"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            JDBC02.release(conn,st,rs);
-        }
-    }
-}
-```
-
-
-
-從登入的輸入條件進行攻擊
-
-```java
-login(" 'or' 1=1 ","123456");
-login(" 'or' 1=1 "," 'or' 1=1 ");
-從
-String sql = "select * from users where `name` ='" + username + "' AND `password` ='" + password + "'";
-變成了
-String sql = "select * from users ";
-```
-
-
-
-#### PreparedStatement對象
-
-防止SQL注入問題 效率更好
-
-
-
-##### 新增
-
-```java
-package com.PreparedStatement;
-import java.sql.*;
-import  java.util.Date;
-
-public class TestInsert {
-    public static void main(String[] args) {
-        Connection conn = null;
-        PreparedStatement pst = null;
-        try {
-            conn = JdbcUtils.getConnection();
-            // 區別
-            // 使用 ? 代替參數
-            String sql = "insert into users(id,name,password,email,birthday) values(?,?,?,?,?)";
-            pst = conn.prepareStatement(sql); // 需要先寫入SQL參數 先不執行
-
-            // 手動給參數賦值 1 ~ 5 代表剛定義的第n個參數
-            pst.setInt(1,4); // id
-            pst.setString(2,"'DDD'"); // name
-            pst.setString(3,"123456"); // password
-            pst.setString(4,"DDDD.com"); // email
-            // sql.Date   資料庫  java.sql.Date()
-            // Util.Date  java   new Date().getTime() 獲得時間戳
-            pst.setDate(5,new java.sql.Date(new Date().getTime())); // birthday
-
-            // 執行
-            int i = pst.executeUpdate();
-            if(i > 0){
-                System.out.println("插入成功");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-}
-```
-
-
-
-##### 刪除
-
-```java
-package com.PreparedStatement;
-import java.sql.*;
-
-public class TestDelete {
-    public static void main(String[] args) {
-        Connection conn = null;
-        PreparedStatement pst = null;
-
-        try {
-            conn = JdbcUtils.getConnection();
-            // 區別
-            // 使用 ? 代替參數
-            String sql = "delete from users where id = ?";
-            pst = conn.prepareStatement(sql); // 需要先寫入SQL參數 先不執行
-            // 手動給參數賦值
-            pst.setInt(1,4); // id = 4
-            // 執行
-            int i = pst.executeUpdate();
-            if(i > 0){
-                System.out.println("刪除成功");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-}
-```
-
-
-
-##### 更新
-
-```java
-package com.PreparedStatement;
-
-import java.sql.*;
-
-public class TestUpdate {
-    public static void main(String[] args) {
-        Connection conn = null;
-        PreparedStatement pst = null;
-
-        try {
-            conn = JdbcUtils.getConnection();
-            // 區別
-            // 使用 ? 代替參數
-            String sql = "Update users set `name` = ? where id = ?";
-            pst = conn.prepareStatement(sql); // 需要先寫入SQL參數 先不執行
-
-            // 手動給參數賦值
-            pst.setString(1,"AAA"); // name 更改為
-            pst.setInt(2,1); // id = 1
-
-            // 執行
-            int i = pst.executeUpdate();
-            if(i > 0){
-                System.out.println("更新成功");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-}
-```
-
-
-
-##### 查詢
-
-與增刪改稍有不同
-
-```java
-package com.PreparedStatement;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-public class TestSelect {
-    public static void main(String[] args) {
-        Connection conn = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        // 獲取連接
-        try {
-            conn = JdbcUtils.getConnection();
-            String sql = "select * from users where id = ?";
-            conn.prepareStatement(sql);
-
-            pst.setInt(1,1); // 第一個參數id 設置為1
-            // 執行
-            rs = pst.executeQuery();
-            while(rs.next()){
-                System.out.println(rs.getString("name"));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            JdbcUtils.release(conn,pst,rs);
-        }
-
-    }
-}
-```
-
-
-
-##### 防止SQL注入
-
-使用PreparedStatement對象防止
-
-```java
-package com.PreparedStatement;
-
-import java.sql.*;
-import com.PreparedStatement.JdbcUtils;
-
-public class SQLinjection {
-    public static void main(String[] args) {
-        login("AAA","123456");
-        //login(" 'or' 1=1 ","123456");
-    }
-    //登入
-    public static void login(String username,String password){
-        Connection conn = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-        try {
-            conn = JdbcUtils.getConnection();
-            // PreparedStatement 防止SQL注入的本質 把傳遞進來的參數當作字元
-            // 假設其中存在轉譯字元 直接忽略  ex  ' 直接轉譯
-            String sql = "select * from users where `name` = ? and `password` = ?"; // mybatis
-            pst = conn.prepareStatement(sql);
-            pst.setString(1,username);
-            pst.setString(2,password);
-            // 查詢完畢返回一個結果集
-            rs = pst.executeQuery();
-
-            while(rs.next()){
-                System.out.println(rs.getString("name"));
-                System.out.println(rs.getString("password"));
-                System.out.println("--------------");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            JdbcUtils.release(conn,pst,rs);
-        }
-    }
-}
-```
-
-
-
-#### IDEA連接資料庫
-
-- 開啟IEAD右邊欄位Database
-
-- IDEA測試連接
-
-DBMS: MySQL (ver. 8.0.27)
-Case sensitivity: plain=lower, delimited=lower
-Driver: MySQL Connector/J (ver. mysql-connector-java-8.0.25 (Revision: 08be9e9b4cba6aa115f9b27b215887af40b159e0), JDBC4.2)
-Ping: 44 ms
-SSL: yes
-
-- 連接成功後 選擇資料庫 --> jdbcstudy
-
-![擷取_2021_12_16_21_13_12_845](https://i.imgur.com/F25nPdH.png)
-
-
-
-#### 事務
-
-都成功或是都失敗
-
-```
-ACID原則
-```
-
-原子性 : 全都完成或是全都失敗
-
-一致性 : 總數不變
-
-**隔離性 : 多個進程互不干擾**
-
-持久性 : 一旦提交不可逆 持久化到資料庫
-
-
-
-隔離性問題 : 
-
-髒讀 :  一個事務讀取了另一個沒有提交的事物
-
-不可重複讀 : 在同一個事務內 重複讀取表中的數據 表中的數據發生了變化
-
-虛讀(幻讀) : 在一個事務內 讀取到了別人插入的數據 導致前後讀出的結果不一致 
-
-
-
-```
-程式實現
-```
-
-1. 開啟事務 **conn.setAutoCommit(false);**
-2. 一組業務執行完畢 提交事務 **pst.executeUpdate();**
-3. 可以在catch語句中 顯示定義的rollback語句 執行失敗時則回復
-
-```java
-package transaction;
-
-import com.PreparedStatement.JdbcUtils;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-public class Testtransaction01 {
-    public static void main(String[] args) {
-        Connection conn = null;
-        PreparedStatement pst = null;
-        ResultSet rs = null;
-
-        try {
-            conn = JdbcUtils.getConnection();
-            // 關閉資料庫的自動提交 自動開啟事務
-            conn.setAutoCommit(false); // 開啟事務
-            // sql語句
-            String sql1 = "update account set money = money - 100 where name = 'A'";
-            pst = conn.prepareStatement(sql1);
-            pst.executeUpdate();
-            String sql2 = "update account set money = money + 100 where name = 'B'";
-            pst = conn.prepareStatement(sql2);
-            pst.executeUpdate();
-            // 業務完畢 提交事務
-            conn.commit();
-            System.out.println("成功");
-        } catch (SQLException e) {
-            try {
-                conn.rollback(); // 失敗的話回滾回執行前的狀態
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            e.printStackTrace();
-        }finally {
-            JdbcUtils.release(conn,pst,rs);
-        }
-    }
-}
-```
-
-
-
-#### 資料庫連接池
-
-資料庫連接 -- 執行完畢  -- 釋放   
-
-連接 -- 釋放 十分浪費系統資源
-
-- 池化技術 : 準備一些預先的資源 過來就連接預先準備好的資源
-  - 最小連接數 10
-  - 最大連接數 15 業務最大乘載上限
-  - 等待超時 : 100ms
-
-編寫連接池 --> 實作一個介面 DataSource
-
-
-
-```
-DBCP
-```
-
-導入
-
-commons-pool2-2.11.1.jar
-
-commons-dbcp2-2.9.0.jar
-
-出現 Could not initialize class 錯誤
-
-須多導入一個 commons-logging-1.2.jar
-
-
-
-DBCP 配置文件格式
-
-```
-#  連接設置  裡面的名字是DBCP數據源定義完成的
-driverClassName=com.mysql.cj.jdbc.Driver
-url=jdbc:mysql://localhost:3306/jdbcstudy?userUnicode=true&characterEncoding=utf8&uesSSL=true
-username=root
-password=123456
-
-#<!-- 初始化連接 -->
-initialSize=10
-
-#最大連接數量
-maxActive=50
-
-#<!-- 最大空閒連接 -->
-maxIdle=20
-
-#<!-- 最小空閒連接 -->
-minIdle=5
-
-#<!-- 超時等待時間以毫秒為單位 6000毫秒/1000等於60秒 -->
-maxWait=60000#JDBC驅動建立連接時附帶的連接屬性 屬性的格式必須為這樣 :【屬姓名=property;】 
-#注意："user" 與 "password" 兩個屬性會被明確地傳遞，因此這裡不需要包含他們
-connectionProperties=useUnicode=true;characterEncoding=utf8
-
-#指定由連接池所創建的連接的自動提交（auto-commit）狀態
-defaultAutoCommit=true
-
-#driver default 指定由連接池所創建的連接的唯獨（read-only）狀態。
-#如果沒有設置該值 則“setReadOnly”方法將不被調用 （某些驅動並不支持唯獨模式，如：Informix）
-defaultReadOnly=
-
-#driver default 指定由連接池所創建的連接的事務級別(TransactionIsolation）。
-#可用值為下列之一：（可見javadoc。）NONE,READ_UNCOMMITTED, READ_COMMITTED, REPEATABLE_READ, SERIALIZABLE
-defaultTransactionIsolation=READ_COMMITTED
-```
-
-
-
-DBCP 啟動及關閉文件
-
-```java
-package DBCP;
-
-import org.apache.commons.dbcp2.BasicDataSourceFactory;
-
-import javax.sql.DataSource;
-import java.io.InputStream;
-import java.sql.*;
-import java.util.Properties;
-
-public class JdbcUtils_DBCP {
-    private static DataSource dataSource = null;
-
-    static {
-        try{
-            // 載入文件
-            InputStream in = JdbcUtils_DBCP.class.getClassLoader().getResourceAsStream("dbcpconfig.properties");
-            Properties properties = new Properties();
-            // 將文件載入流
-            properties.load(in);
-            // 創建數據源 工廠模式 --> 創建對象
-            dataSource = BasicDataSourceFactory.createDataSource(properties);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    // 獲取連接
-    public static Connection getConnection() throws SQLException {
-        return dataSource.getConnection(); // 從數據源中獲取連接
-    }
-    // 釋放連接資源
-    public static void release(Connection con, Statement st, ResultSet rs){
-        if(rs != null){
-            try {
-                rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            if(st != null){
-                try {
-                    st.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(con != null){
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-}
-```
-
-
-
-DBCP 測試程式
-
-```java
-package DBCP;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-public class TestDBCP {
-    public static void main(String[] args) {
-        Connection conn = null;
-        PreparedStatement pst = null;
-        try {
-            conn = JdbcUtils_DBCP.getConnection();
-            // 區別
-            // 使用 ? 代替參數
-            String sql = "insert into users(id,name,password,email,birthday) values(?,?,?,?,?)";
-            pst = conn.prepareStatement(sql); // 需要先寫入SQL參數 先不執行
-            // 手動給參數賦值 1 ~ 5 代表剛定義的第n個參數
-            pst.setInt(1,4); // id
-            pst.setString(2,"DDD"); // name
-            pst.setString(3,"123456"); // password
-            pst.setString(4,"DDDD.com"); // email
-            // sql.Date   資料庫  java.sql.Date()
-            // Util.Date  java   new Date().getTime() 獲得時間戳
-            pst.setDate(5,new java.sql.Date(new Date().getTime())); // birthday
-            // 執行
-            int i = pst.executeUpdate();
-            if(i > 0){
-                System.out.println("插入成功");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            JdbcUtils_DBCP.release(conn,pst,null);
-        }
-    }
-}
-```
-
-
-
-```
-C3P0
-```
-
-導入
-
-mchange-commons-java-0.2.20.jar
-
-c3p0-0.9.5.5.jar
-
-
-
-
-
-
-
-C3P0 配置文件格式
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<c3p0-config>
-    <!--
-c3p0的預設配置
-如果在程式中"ComboPooledDataSource ds=new ComboPooledDataSource();"表示使用C3P0的預設數據-->
-    <default-config>
-        <property name="driverClass">com.mysql.cj.jdbc.Driver</property>
-        <property name="jdbcUrl">jdbc:mysql://localhost:3306/jdbcstudy?userUnicode=true＆characterEncoding=utf8＆uesSSL=true＆serverTimezone=UTC</property>
-        <property name="user">root</property>
-        <property name="password">123456</property>
-
-        <property name="acquireIncrement">5</property>
-        <property name="initialPoolSize">10</property>
-        <property name="minPoolSize">5</property>
-        <property name="maxPoolSize">20</property>
-    </default-config>
-<!--  C3P0的命名配置  ComboPooledDateSource ds = new ComboPooledDataSource("MySQL"); 寫入MySQL表示使用MySQL數據 為空則使用預設 -->
-    <named-config name="MySQL">
-        <property name="driverClass">com.mysql.cj.jdbc.Driver</property>
-        <property name="jdbcUrl">jdbc:mysql://localhost:3306/jdbcstudy?userUnicode=true＆characterEncoding=utf8＆uesSSL=true＆serverTimezone=UTC</property>
-        <property name="user">root</property>
-        <property name="password">123456</property>
-
-        <property name="acquireIncrement">5</property>
-        <property name="initialPoolSize">10</property>
-        <property name="minPoolSize">5</property>
-        <property name="maxPoolSize">20</property>
-    </named-config>
-</c3p0-config>
-```
-
-
-
-C3P0 啟動及關閉文件
-
-```java
-package C3P0;
-
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-public class JdbcUtils_C3P0 {
-    private static ComboPooledDataSource dataSource = null;
-
-    static {
-        try{
-            // xml只要放在source文件的src下就會自動導入 不需額外導入
-
-            // 程式配置
-//            dataSource = new ComboPooledDataSource();
-//            dataSource.setDriverClass();
-//            dataSource.setUser();
-//            dataSource.setPassword();
-//            dataSource.setJdbcUrl();
-//
-//            dataSource.setMaxPoolSize();
-//            dataSource.setMinPoolSize();
-
-            // 創建數據源 配置文件寫法
-            dataSource = new ComboPooledDataSource("MySQL");
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    // 獲取連接
-    public static Connection getConnection() throws SQLException {
-        return dataSource.getConnection(); // 從數據源中獲取連接
-    }
-    // 釋放連接資源
-    public static void release(Connection con, Statement st, ResultSet rs){
-        if(rs != null){
-            try {
-                rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            if(st != null){
-                try {
-                    st.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(con != null){
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-}
-```
-
-
-
-C3P0 測試程式
-
-```java
-package C3P0;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-
-public class TestC3P0 {
-    public static void main(String[] args) {
-        Connection conn = null;
-        PreparedStatement pst = null;
-
-        try {
-            conn = JdbcUtils_C3P0.getConnection(); // 原來是自己實現的 現在用別人實現的
-            // 區別
-            // 使用 ? 代替參數
-            String sql = "insert into users(id,name,password,email,birthday) values(?,?,?,?,?)";
-            pst = conn.prepareStatement(sql); // 需要先寫入SQL參數 先不執行
-
-            // 手動給參數賦值 1 ~ 5 代表剛定義的第n個參數
-            pst.setInt(1,5); // id
-            pst.setString(2,"DDD"); // name
-            pst.setString(3,"123456"); // password
-            pst.setString(4,"DDDD.com"); // email
-            // sql.Date   資料庫  java.sql.Date()
-            // Util.Date  java   new Date().getTime() 獲得時間戳
-            pst.setDate(5,new java.sql.Date(new Date().getTime())); // birthday
-
-            // 執行
-            int i = pst.executeUpdate();
-            if(i > 0){
-                System.out.println("插入成功");
-            }
-
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            JdbcUtils_C3P0.release(conn,pst,null);
-        }
-    }
-}
-```
-
-
-
-```
-結論
-```
-
-無論使用什麼數據源 本質還是一樣 DataSource介面不變 方法就不會變
-
-
-
-## MySQL workbench
-
-- 字串集合 : utf8mb4
-- 排序規則 : utf8mb4_bin
-- PRIMARY KEY : 主要key
-  - 資料庫表格中唯一且用來抓取資料的屬性 不會其他資料的key相同
-
-```mysql
--- 建立資料庫
-create database `SQL_FIRST`;
--- 顯示所有資料庫
-SHOW DATABASES;	
--- 指定指令使用的資料庫
-USE `SQL_FIRST`; 
--- 建立表格
-CREATE TABLE `student`(         
-	`student_id` INT PRIMARY KEY,  -- 直接指定主要屬性
-    `name` VARCHAR(10),
-    `major` VARCHAR(20),
-    -- 指定主要元素
---  primary key(`student_id`);  
+DELIMITER $
+CREATE PROCEDURE insert_user(IN user_name VARCHAR(15),IN pwd VARCHAR(25)) # 傳入兩個參數
+BEGIN 
+		INSERT INTO admin(user_name,pwd)
+		VALUES (user_name,pwd);
+END $
+DELIMITER ;
+
+# 調用
+CALL insert_user('Tom','123456'); # 為表添加數據
+SELECT * FROM admin;
+
+# 創建儲存過程get_phone() 傳入編號 返回姓名和電話
+CREATE TABLE table01(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    NAME VARCHAR(15) NOT NULL,
+    phone VARCHAR(15) UNIQUE,
+    birth DATE
 );
- -- 檢查表格
- DESCRIBE `student`; 
- -- 刪除表格
- DROP TABLE `student`; 
- -- 新增表格屬性
- ALTER TABLE `student` ADD `gpa` DECIMAL(3,2);
- -- 刪除表格屬性
- ALTER TABLE `student` DROP column gpa; 
- 
 
- 
- -- 列出表格的所有資料
- select * from `student`;
-```
+DELIMITER //
+CREATE PROCEDURE get_phone(IN id INT,OUT NAME VARCHAR(15),OUT phone VARCHAR(15))
+BEGIN
+		SELECT NAME,phone INTO NAME,phone
+		FROM table01 t
+		WHERE t.id = id;
+END //
+
+DELIMITER ;
+
+# 調用
+CALL get_phone(1,@name,@phone);
+SELECT @name,@phone;
+
+# 創建儲存過程date_diff() 實現傳入兩個生日 返回日期間隔大小
+DELIMITER //
+
+CREATE PROCEDURE date_diff(IN birth1 DATE,IN birth2 DATE,OUT sum_date INT)
+BEGIN
+		SELECT DATEDIFF(birth1,birth2) INTO sum_date;
+END //
+DELIMITER ;
+# 調用
+SET @birth1 = '1992-01-01';
+SET @birth2 = '1992-06-06';
+CALL date_diff(@birth1,@birth2,@sum_date);
+
+SELECT @sum_date;
+
+# 創建儲存過程format_date() 實現傳入一個日期 格式化成xx年xx月xx日並返回
+DELIMITER //
+CREATE PROCEDURE format_date(IN my_date DATE,OUT str_date VARCHAR(25))
+BEGIN
+		SELECT DATE_FORMAT[my_date,'%y年%m月%d日') INTO str_date; 
+END //
+DELIMITER ;
+
+# 調用
+CALL format_date(CURDATE(),@str);
+SELECT @str;
+
+# 創建儲存過程table_limit() 根據傳入的起始索引和條目數 查詢記錄
+DELIMITER // 
+CREATE PROCEDURE table_limit(IN start_index INT,IN size INt)
+BEGIN 
+SELECT * FROM table LIMIT
+END //
+DELIMITER ;
+                           
+# 調用
+CALL table_limit(1,3);                                                  
+``````
+
+儲存函數
+
+``````mysql
+# 創建函數get_count() 返回公司的員工個數
+DELIMITER $ 
+CREATE FUNCTION get_count(]
+RETURNS INT
+BEGIN  
+                 RETURN(SELECT COUNT(*) FROM employees);        
+END $       
+DELIMITER ;
+                          
+# 調用
+SELECT get_count();
+                          
+# 創建函數ename_salary() 根據員工姓名 返回他們工資   
+DELIMITER $ 
+CREATE FUNCTION ename+salary(emp_name VARCHAR(15))
+RETURNS DOUBLE
+BEGIN  
+              RETURN(
+              	  SELECT salary
+                  FROM employees
+                  WHERE last_name = emp_name
+              );              
+END $       
+DELIMITER ;   
+                          
+# 調用
+SELECT ename_salary('Abel');
+                          
+# 創建函數dept_sal() 根據部門名 返回該部門的平均工資
+DELIMITER $ 
+CREATE FUNCTION dept_sal(dept_name VARCHAR(15))
+RETURNS DOUBLE
+BEGIN  
+              RETURN(
+              	  SELECT AVG(salary)
+                  FROM employees e 
+                  JOIN department d
+                  ON e.department_id = d.department_id
+                  WHERE d.department_name = dept_name
+              );              
+END $       
+DELIMITER ;   
+
+# 調用
+SELECT dept_sal('Marketing');     
+                          
+
+# 創建函數add_float() 實現傳入兩個float 返回兩者之和                         
+DELIMITER $ 
+CREATE FUNCTION add_float(value1 FLOAT,value2 FLOAT)
+RETURNS FLOAT
+BEGIN  
+              RETURN(
+                  SELECT value1 + value2            	  
+              );              
+END $       
+DELIMITER ; 
+                          
+# 調用        
+SET @v1 := 12.2;
+SET @v2 = 2.2;
+SELECT add_float(@v1,@v2);
+``````
 
 
 
-#### 插入表格
-
-```mysql
- -- 插入 student 表格  依照參數的順序依序填入  PRIMARY KEY 為唯一的
- insert into `student` values(1,"ABC","english") ;
- insert into `student` values(2,"DFE","math") ;
- insert into `student` values(3,"GHI",NULL) ;
- 
- -- 插入 student 表格 改變參數順序
- insert into `student`(`name`,`major`,`student_id`)  values("JKL","Math",4);
-```
+# 變數 流程控制 游標
 
 
 
-#### 限制 約束
+## 變數-系統變數
 
-```mysql
-caeate table `student`(
-	`student_id` int auto_increment,
-	`name` varchar(20) not null default `未命名`,
-	`major` varchar(20) unique,
-	primary key(`student_id`)
-);
--- not null 此項元素不可為null
--- unique 此項元素不可重複 每一個都是獨特的
--- default 當增加資料時不選擇此元素 則預設為命名的數值
--- auto_increment 每次添加資料後自動增加1
-```
+變數 系統變數  : (全域系統變數 會話系統變數)  vs 用戶自定義變數
 
 
 
-#### 修改 刪除資料
+#### 查看系統變數
 
-```mysql
-update `student`
-set `major` = 'english' 
-where `major` = '英語';
-```
+``````mysql
+# 全域系統變數
+SHOW GLOBAL VARIABLES; 
+# 會話系統變數
+SHOW SESSION VARIABLES; 
+# 預設查詢的是會話系統變數
+SHOW VARIABLES; 
+
+# 查詢部分系統變數
+SHOW GLOBAL VARIABLES LIKE 'admin_%';
+
+SHOW VARIABLES LIKE 'character_%';
+``````
+
+
+
+#### 查看指定系統變數
+
+MySQL中有些系統變數只能是全域的 例如max_connections用於限制伺服器的最大連接數
+
+有些既是全域又可以是會話 例如 character_set_client 用於設置客戶端的字元集
+
+有些的作用域只能是當前會話 例如pseudo_thread_id 用於標記當前會話的MySQL連接ID
+
+``````mysql
+SELECT @@global.max_connections;
+SELECT @@global.character_set_client
+
+# 錯誤 因為此變數是會話的
+SELECT @@global.pseudo_thread_id;
+# 錯誤 因為此變數是全域的
+SELECT @@seesion.max_connections;
+
+SELECT @@session.character_set_client
+
+SELECT @@session.pseudo_thread_id;
+
+# 先查詢會話系統變數 在查詢全域系統變數
+SELECT @@character_set_client;
+``````
+
+
+
+#### 修改系統變數的值
+
+``````mysql
+# 方式一
+SET @@global.max_connections = 161;
+# 方式二
+SET GLOBAL max_connections = 170;
+
+
+# 全域系統變數 : 針對於當前的數據庫實例是有效的 一旦重啟mysql服務 就失效了
+
+# 會話系統變數
+# 方式一
+SET @@session.character_set_client = 'gbk';
+# 方式二
+SET SESSION character_set_client = 'gbk';
+# 針對於當前會話是有效的 一旦結束會話 重新建立起新的會話 就失效了
+``````
 
 
 
 
 
-#### 資料類型
+## 變數-用戶變數
 
-```mysql
- INT 				-- 整數
- DECIMAL(m,n) 		-- 有小數點的數  (3,2) 有三個數字 小數點佔了兩位2.33
- VARCHAR(n) 		-- 字串 (10) 長度為10
- BLOB 				-- (Binary Large Object) 圖片 影片 檔案
- DATA 				-- 'YYYY-MM-DD' 日期
- TIMESTAMP 			-- 'YYYY-MM-DD HH:MM:SS' 記錄時間
-```
+變數 用戶變數  : 會話用戶變數 vs 局部變數
 
+會話用戶變數 : 使用@開頭 作用域為當前會話
+
+局部變數 : 只能使用在儲存過程和儲存函數中
+
+
+
+#### 會話用戶變數
+
+變數的聲明和賦值
+
+``````
+# 方式一  = 或 :=
+SET @用戶變數 = 值;
+SET @用戶變數 := 值;
+
+# 方式二  := 或 INTO關鍵字
+SELECT @用戶變數 := 表達式 [FROM 等子句];
+SELECT 表達式 INTO @用戶變數 [FROM 等子句];
+
+使用 SELECT @變數名
+``````
+
+賦值
+
+``````mysql
+# 準備工作
+USE dbtest;
+
+CREATE TABLE employees
+AS
+SELECT * FROM database01.employees;
+
+CREATE TABLE departments
+AS
+SELECT * FROM database01.departments;
+
+# 測試
+## 方式一
+SET @m1 = 1;
+SET @m2 := 2;
+SET @sum := @m1 + @m2;
+
+SELECT @sum;
+
+## 方式二
+SELECT @count := COUNT(*) FROM employees;
+
+SELECT @count;
+
+SELECT AVG(salary) INTO @avg_sal FROM employees;
+
+SELECT @avg_sal;
+``````
+
+
+
+#### 局部變數
+
+必須使用DECLARE聲明
+
+聲明並使用在 BEGIN ... END 中 (使用在儲存過程 儲存函數中)
+
+DECLARE的方式聲明的局部變數 必須聲明在BEGIN中的首行的位置
+
+
+
+聲明格式
+
+``````mysql
+DECLARE 變數名 類型 (default 值);  # 如果沒有DEFAULT子句 初始值為NULL
+``````
+
+賦值
+
+``````mysql
+# 方式一
+SET 變數名 = 值;
+SET 變數名 := 值;
+
+# 方式二
+SELECT 欄位名或表達式 INTO 變數名 FROM 表;
+
+# 使用
+SELECT 局部變數名;
+
+# 舉例
+DELIMITER //
+CREATE PROCUDURE test_var()
+BEGIN
+		# 聲明局部變數
+		DECLARE a INT DEFAULT 0;
+		DECLARE b INT;
+		# DECLARE a,b INT DEFAULT 0;
+		DECLARE emp_name VARCHAR(25);
+		# 賦值
+		SET a = 1;
+		SET b := 2;
+		
+		SELECT last_name INTO emp_name FROM employees WHERE employee_id = 101;
+		# 使用
+		SELECT a,b,emp_name;
+END //
+DELIMITER ;
+
+# 調用儲存過程
+CALL test_var();
+
+
+# 聲明局部變數 並分別賦值為employees表中employee_id為102的last_name和salary
+DELIMITER //
+BEGIN
+		# 聲明
+		DECLARE emp_name VARCHAR(25);
+		DECLARE sal DOUBLE(10,2) DEFAULT 0.0;
+		# 賦值
+		SELECT last_name,salary INTO emp_name,sal
+		FROM employees
+		WHERE employee_id = 102;
+		# 使用
+		SELECT emp_name,sal;
+END //
+DELIMITER ;
+
+# 調用儲存過程
+CALL test_pro();
+SELECT last_name,salay FROM employees
+WHERE employee_id = 102;
+
+# 聲明兩個變數 求和並印出 (分別使用會話用戶變數 局部變數的方式實現)
+## 方式一 : 使用會話用戶變數
+SET @v1 = 10;
+SET @v2 := 20;
+SET @result := @v1 + @v2;
+
+# 查看
+SELECT @result;
+
+## 方式二 : 使用局部變數
+DELIMITER //
+CREATE PROCEDURE add_value()
+BEGIN
+		# 聲明
+		DECLARE value1,value2 INT,sum_val INT;
+		# 賦值
+		SET value1 = 10;
+		SET value2 := 100;
+		SET sum_val = value1 + value2;
+		# 使用
+		SELECT sum_val;
+END
+DELIMITER ;
+
+# 調用儲存過程
+CALL add_value();
+
+# 創建儲存過程 different_salary 查詢某員工和他的領導的薪資差距 
+# 並用IN參數emp_id接收員工id  用OUT參數dif_salary 輸出薪資差距的結果
+DELIMITER //
+CREATE PROCEDURE different_salary(IN emp_id INT,OUT dif_salary DOUBLE)
+BEGIN
+		# 分析 : 查詢出emp_id員工的工資  查詢出emp_id員工的管理者id 
+		# 查詢管理者id的工資 計算兩個工資的差距
+		
+		# 聲明變數
+		DECLARE emp_sal DOUBLE DEFAULT 0.0; # 記錄員工的工資
+		DECLARE mgr_sal DOUBLe DEFAULT 0.0; # 記錄管理者的工資
+		DECLARE mgr_id INT DEFAULT 0; # 記錄管理者的id
+		# 賦值
+		SELECT salary INTO emp_sal # 賦值
+		FROM employees
+		WHERE employee_id = emp_id;
+		
+		SELECT manager_id INTO mgr_id # 賦值
+		FROM employees
+		WHERE employee_id = emp_id;
+		
+		SELECT salary INTO mgr_sal  # 賦值
+		FROM employees
+		WHERE employee_id = mgr_id;
+		
+		SET dif_salary = mgr_sal - emp_sal;
+END //
+DELIMITER ;
+
+# 調用儲存過程
+SET @emp_id := 102;
+SET @dif_sal := 0;
+CALL different_salary(@emp_id,@dif_sal);
+
+SELECt @dif_sal;
+
+
+``````
+
+
+
+## 定義條件與處理程序-85
+
+
+
+#### 定義處理程序
+
+``````mysql
+DECLARE 處理方式 HANDLER FOR 錯誤類型 處理語句
+``````
+
+- 處理方式 : 處理方式有三個取值 : CONTINUE EXIT UNDO
+  - CONTINUE : 表示遇到錯誤不處理 繼續執行 
+  - EXIT : 表示遇到錯誤馬上退出
+  - UNDO : 表示遇到錯誤後撤回之前的操作 MySQL中暫時不支持這樣的操作
+- 錯誤類型 : 即條件 可以有如下取值
+  - SQLSTATE '字串錯誤碼' : 表示長度為5的sqlstate_value類型的錯誤程式碼
+  - MySQL_error_code : 匹配數據類型錯誤程式碼
+  - 錯誤名稱 :表示DECLARE ... CONDITION定義的錯誤條件名稱
+  - SQLWARNING : 匹配所有以01開頭的SQLSTATE錯誤程式碼
+  - NOT FOUND : 匹配所有以02開頭的SQLSTATE錯誤程式碼
+  - SQLEXCEPTION : 匹配所有沒有被SQLWARNING或NOT FOUND捕獲的SQLSTATE錯誤程式碼
+- 處理語句 : 如果出現上述條件之一 則採用對應的處理方式 並執行指定的處理語句 語句可以是像 "SET 變數 = 值" 這樣的簡單語句 也可以是使用BEGIN ... END編寫的複合語句
+
+
+
+定義處理程序的幾種方式
+
+``````mysql
+# 捕獲sqlstate_value
+DECLARE CONTINUE HANDLER FOR SQLSTATE '42S05' SET @info = 'NO_SUCH_TABLE';
+
+# 捕獲mysql_error_value
+DECLARE CONTINUE HANDLER FOR 1146 SET @info = 'NO_SUCH_TABLE';
+
+# 先定義條件 再調用
+DECLARE no_such_table CONDITION FOR 1146;
+DECLARE CONTINUE HANDLER FOR NO_SUCH_TABLE SET @info ='NO_SUCH_TABLE';
+
+# 使用SQLWARNING
+DECLARE CONTINUE HANDLER FOR SQLWARNING SET @info ='ERROR';
+
+# 使用NOT FOUND
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET @info ='NO_SUCH_TABLE';
+
+# 使用SQLEXCEPTION
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET @info ='ERROR';
+``````
