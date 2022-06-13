@@ -1,137 +1,71 @@
-# Mybatis
+# MyBatis
 
 
 
-## 簡介
+#### MyBaits特性
+
+- MyBatis支持訂製化SQL 儲存過程以及高級映射優秀的持久層框架
+- MyBatis避免了幾乎所有的JDBC程式碼焊手動設置參數以及獲取結果集
+- MyBatis可以使用簡單的XML或註解用於配置和原始映射 將接口和Java的POJO (Plain Old Java Object , 普通的Java對象) 映射成資料庫中的記錄
+- MyBatis是一個半自動的ORM (Object Relation Mapping) 框架
 
 
 
-#### 什麼是Mybatis
+#### 持久層技術比較
 
-- 是一款**持久層框架** 
-- 支持訂製化SQL 儲存過程 高級映射
-- MyBatis避免幾乎所有JDBC的程式碼 手動設置參數 獲取結果集
-- 可以使用簡單的XML或註解配置和映射原生類型 界面和java的POJO (Plain Old Java Objects) 為資料庫中記錄 
-
-
-
-#### 持久化 (動作)
-
-數據持久化
-
-- 持久化就是將程式的數據在持久狀態和瞬時狀態轉化的過程
-- 記憶體特性 : 斷電即失
-- 資料庫(jdbc), io文件持久化
-
-為什麼需要持久化 
-
-- 有一些對象不能丟失
-- 記憶體成本高
+- JDBC
+  - SQL夾雜在java程式碼中耦合度高 導致編碼不易
+  - 維護不易且實際開發需求中SQL有變化 頻繁修改的情況常見
+  - 程式碼複雜 開發效率低
+- Hibernate 和 JPA
+  - 操作簡便 開發效率高
+  - 程式中的複雜的SQL繞過框架
+  - 內部自動生產的SQL 不容易做特殊優化
+  - 基於全映射的全自動框架 大量欄位的POJO進行部分映射時比較困難
+  - 反射操作太多 導致資料庫性能下降
+- MyBatis
+  - 輕量 性能出色
+  - SQL和java編碼分開 功能邊界清晰 java程式碼專注業務處理 SQL語句專注數據處理
+  - 開發效率稍微低於Hibernate
 
 
 
-#### 持久層 (概念)
-
-Dao層 Service層 Controller層
-
-- 完成持久化工作的程式區塊
-- 層界限十分明顯
+## 搭建MyBatis
 
 
 
-#### 為什麼需要Mybatis
+#### 創建Maven工程
 
-- 幫助將資料存入資料庫中
-- 傳統的JBDC程式碼過於複雜 為了簡化 框架 自動化
+- 打包方式 : jar
+- 引入依賴
 
-優點 : 
-
-- 靈活
-- SQL和程式碼的分離 提高可維護性
-- 提供映射標籤 支持對象與資料庫的orm字串關係映射
-- 提供對象關係映射標籤 支持對象關係組建維護
-- 提供xml標籤 支持編寫動態SQL
-
-
-
-## 第一個Mybatis程式
-
-```
-------- 環境準備 -------
-導入數據庫 --> 
-導入數據庫依賴jar包 --> 
-建構配置文件(xml)連接資料庫 --> 
-獲取SqlSessionFactory (連接配置文件) 
---> 將配置文件打包至輸入流 呼叫方法.build(輸入流) 建立 獲取SqlSessionFactory
---> SqlSessionFactoryBuilder 返回 sqlSessionFactory
-由 sqlSessionFactory.openSession() 獲得SqlSession實例操作資料庫
-------- 編寫實體類 -------
-建構實體類 (配合資料庫表格中對應的數據)
-建立介面
-使用Mapper.xml代替實現類實作介面  綁定介面 綁定方法 返回類型(泛型)
-------- test -------
-```
-
-
-
-
-
-搭建環境 --> 導入Mybatis  --> 編寫程式 --> 測試
-
-#### 搭建環境 
-
-搭建資料庫
-
-```mysql
-create database `mybatis`;
-create table `user`(
-	`id` int(20) not null primary key,
-	`name` varchar(30) default null,
-      `pwd` varchar(30) default null	
-)engine=innodb default charset=utf8;
-
-insert into `user` (`id`,`name`,`pwd`) values
-(1,'AAA','123456'),(2,'BBB','123456'),(3,'CCC','123456');
-```
-
-新建項目
-
-- 建立一個普通的maven項目
-- 刪除src目錄
-- 導入maven依賴
-
-```xml
-<!--  導入依賴  -->
-    <dependencies>
-<!--   mysql驅動 -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.27</version>
-        </dependency>
-<!--   mybatis -->
+``````xml
+<!-- https://mvnrepository.com/artifact/org.mybatis/mybatis -->
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
-            <version>3.5.8</version>
+            <version>3.5.7</version>
         </dependency>
-<!--    junit   -->
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>
-```
+        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.27</version>
+        </dependency>
+``````
 
 
 
-#### 創建一個模塊
+#### 創建MyBatis核心配置文件
 
-- 編寫mybatis的核心配置文件 (mybatis-config.xml)
-  - 引入資料庫連接數據
-
+- mybatis-config.xml
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -139,1828 +73,1462 @@ insert into `user` (`id`,`name`,`pwd`) values
         PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
+<!-- 配置連接資料庫的環境   -->
     <environments default="development">
         <environment id="development">
             <transactionManager type="JDBC"/>
             <dataSource type="POOLED">
-                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
-                <property name="url" value="jdbc:mysql://localhost:3306/mybatis?useSSL=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=GMT"/>
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
                 <property name="username" value="root"/>
                 <property name="password" value="123456"/>
             </dataSource>
         </environment>
     </environments>
-<-- 每一個Mapper.xml都需要在Mybatis核心配置文件中註冊-->    
+<!-- 引入映射文件   -->
     <mappers>
         <mapper resource="org/mybatis/example/BlogMapper.xml"/>
     </mappers>
 </configuration>
 ```
 
-- 編寫mybatis工具類
-  - 連接 mybatis的核心配置文件 (mybatis-config.xml)  的數據
-  - 獲取SessionFactory對象
 
+
+#### 創建mapper接口
+
+
+
+#### 創建MyBatis映射文件
+
+相關概念 : ORM (Object Relationship Mapping) 對象關係映射
+
+- 對象 : Java的實體類對象
+- 關係 : 關係型資料庫
+- 映射 : 二者之間的對應關係
+
+| Java概念 | 資料庫概念 |
+| -------- | ---------- |
+| 類       | 表         |
+| 屬性     | 欄位/列    |
+| 對象     | 資料/行    |
+
+
+
+- SqlSession : 代表Java程式和資料庫之間的會話 (HttpSession是Java程式和瀏覽器之間的會話)
+- SqlSessionFactory : 是生產 SqlSession 的工廠
+- 工廠模式 : 如果創建某一個對象 使用的過程基本固定 那麼我們就可以把創建這個對象的相關程式封裝到一個工廠類中 以後都使用這個工廠類來生產我們需要的對象
+
+
+
+#### 通過Junit測試功能
 
 ```java
-//sqlSessionFactory  --> sqlSession
-public class MybatisUtils {
-    // 提升作用域
-    private static SqlSessionFactory sqlSessionFactory;
-    static{
-        try {
-            // Mybatis第一步 獲取sqlSessionFactory對象
-            String resource = "mybatis-config.xml";
-            InputStream inputStream = Resources.getResourceAsStream(resource);
-            //  SqlSessionFactoryBuilder 使用一次
-            sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    // 有了sqlSessionFactory 我們就可以從中獲得 SqlSession 的實例
-    // SqlSession 完全包含了面向資料庫執行 SQL命令所需的所有方法
-    public static SqlSession getsqlSession(){
-        return sqlSessionFactory.openSession();
+public class MyBatisTest {
+
+    /*
+        sqlSession預設部自動提交事務 若需要自動提交事務
+        可以使用sqlSessionFactory openSession(true)
+     */
+    @Test
+    public void testMyBatis() throws IOException {
+        // 載入核心配置文件
+        InputStream is = Resources.getResourceAsStream("mybatis-config.xml");
+        // 獲取SqlSessionFactoryBuilder
+        SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+        // 獲取sqlSessionFactory
+        SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(is);
+        // 獲取SqlSession
+        SqlSession sqlSession = sqlSessionFactory.openSession(true); // 自動提交
+        // 獲取Mapper接口對象
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class); // 代理模式
+        // 測試功能
+        int result = mapper.insertUser();
+        // 提交事務
+//        sqlSession.commit(); // 手動開啟
+        System.out.println("result: " + result);
     }
 }
 ```
 
 
 
-#### 編寫程式碼
-
-- 實體類
-  - 與資料庫的表格中的數據一致
+#### CRUD功能
 
 
-```java
-public class User {
-    private int id;
-    private String name;
-    private String pwd;
-    public User() {
-    }
-    public User(int id, String name, String pwd) {
-        this.id = id;
-        this.name = name;
-        this.pwd = pwd;
-    }
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-    public String getPwd() {
-        return pwd;
-    }
-    public void setPwd(String pwd) {
-        this.pwd = pwd;
-    }
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", pwd='" + pwd + '\'' +
-                '}';
-    }
-}
-```
 
-- Dao介面
+映射文件
 
 ```java
-public interface UserDao {
-    List<User> getUserList();
-}
-```
+<mapper namespace="com.mapper.UserMapper">
+<!-- int insertUser();   -->
+    <insert id="insertUser">
+        insert into user values(null,'admin2','123456',20,'男','aaa@com')
+    </insert>
 
-- 介面實現類 由原來的UserDaolmpl轉變為一個Mapper配置文件
+<!-- void updateUser();   -->
+    <update id="updateUser">
+        update user set username = 'ABC' where id = 4;
+    </update>
+<!-- void deleteUser();   -->
+    <delete id="deleteUser">
+        delete from user where id = 5;
+    </delete>
 
-```xml
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<!-- namespace=綁定一個對應的Dao/Mapper介面 -->
-<mapper namespace="com.dao.UserMapper">
-<!--  select 查詢語句  -->
-<!--  id : 方法名   resultType : 返回類型 -->
-    <select id="getUserList" resultType="com.pojo.User">
-        select * from mybatis.user
+<!-- User getUserById();   -->
+    <!--
+        查詢功能的標籤必須設置resultType或resultMap
+        resultType : 設置預設的映射關係
+        resultMap : 設置自定義的映射關係
+    -->
+    <select id="getUserById" resultType="com.pojo.User">
+        select * from user where id = 1;
+    </select>
+    
+<!-- List<User> getAllUser();   -->
+    <select id="getAllUser" resultType="com.pojo.User">
+        select * from user;
     </select>
 </mapper>
 ```
 
 
 
-#### 測試
-
-org.apache.ibatis.binding.BindingException:Type interface com.dao.UserDao is not known to the MapperRegistry
-
-MapperRegistry : 核心配置文件中註冊 mappers
-
-- junit測試
-
-```java
-@Test
-    public void test(){
-        // 1. 獲得SqlSession對象
-        SqlSession sqlSession = MybatisUtils.getsqlSession();
-        // 方式一 : getMapper
-        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-        List<User> userList = mapper.getUserList();
-        // 方式二 : 通過sqlSession直接呼叫返回一個具體的List 不推薦使用
-//List<User> userLis = sqlSession.selectList("com.dao.UserDao.getUserList");
-        for (User user : userList) {
-            System.out.println(user);
-        }
-        // 關閉 SqlSession
-        sqlSession.close();
-    }
-```
-
-
-
-可能遇到的問題
-
-- 配置文件沒有註冊
-  - or 配置文件名 路徑 錯誤
-- 綁定介面錯誤
-- 方法名不對
-- 返回類型不對
-- Maven導出資源問題
-
-
-
-## CRUD
-
-#### namespace
-
-namespace中的名字要與 Dao/mapper 介面中的名字一致
-
-```xml
-<!-- namespace=綁定一個對應的Dao/Mapper介面 -->
-<mapper namespace="com.dao.UserMapper">
-```
-
-#### Select
-
-選擇 查詢語句
-
-```
-id : 就是對應的namespace中的方法名
-resultType : sql語句執行的返回值
-parameterType : 參數類型
-```
-
-1.編寫介面
-
-```java
-public interface UserMapper {
-// 根據ID查詢用戶
-    User getUserByID(int id);
-}
-```
-
-2.編寫對應的Mapper中的sql語句
-
-```xml
-<select id="getUserByID" parameterType="int" resultType="com.pojo.User">
-    select * from mybatis.user where id = #{id};
-</select>
-```
-
-3.測試
-
-```java
-@Test
-public void getUserById(){
-    // 1. 獲得SqlSession對象
-    SqlSession sqlSession = MybatisUtils.getsqlSession();
-    // 方式一 : getMapper
-    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-    User user = mapper.getUserByID(1);
-    System.out.println(user);
-    // 關閉 SqlSession
-    sqlSession.close();
-}
-```
-
-
-
-
-
-```
-增刪改需要提交事務 sqlSession.commit();
-```
-
-#### Insert
-
-```java
-public interface UserMapper {
-// insert一個用戶
-    int addUser(User user);
-}
-```
-
-```xml
-<!--  對象中的屬性 可以直接取出  -->
-    <insert id="addUser" parameterType="com.pojo.User">
-        insert into mybatis.user (id,name,pwd) values (#{id},#{name},#{pwd});
-    </insert>
-```
-
-```java
-// 增刪改需要提交事務
-@Test
-public void addUser(){
-    SqlSession sqlSession = MybatisUtils.getsqlSession();
-    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-    int res = mapper.addUser(new User(4, "DDD", "1234567"));
-    if(res > 0){
-        System.out.println("插入成功");
-    }
-    // 提交事務
-    sqlSession.commit();
-    sqlSession.close();
-}
-```
-
-
-
-#### Update
-
-```java
-public interface UserMapper {
-// 修改用戶
-    int updateUser(User user);
-}
-```
-
-```xml
-<update id="updateUser" parameterType="com.pojo.User">
-    update mybatis.user
-    set  name = #{name} , pwd = #{pwd}
-    where id = #{id};
-</update>
-```
-
-```java
-@Test
-public void updateUser(){
-    SqlSession sqlSession = MybatisUtils.getsqlSession();
-    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-    int res = mapper.updateUser(new User(4,"EEE","123456"));
-    if(res > 0){
-        System.out.println("更新成功");
-    }
-    sqlSession.commit();
-    sqlSession.close();
-}
-```
-
-
-
-#### Delete
-
-```java
-public interface UserMapper {
-// 刪除一個用戶
-    int deleteUser(int id);
-}
-```
-
-```xml
-<delete id="deleteUser" parameterType="int">
-    delete from mybatis.user where id = #{id};
-</delete>
-```
-
-```java
-@Test
-public void deleteUser(){
-    SqlSession sqlSession = MybatisUtils.getsqlSession();
-    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-    int res = mapper.deleteUser(4);
-    if(res > 0){
-        System.out.println("刪除成功");
-    }
-    sqlSession.commit();
-    sqlSession.close();
-}
-```
-
-
-
-#### 錯誤分析
-
-- 標籤與執行的操作需要匹配 
-- resource綁定Mapper需要使用路徑 .com.UserMapper
-- 配置文件必須符合規範 /dao/UserMapper.xml
-- NullPointerException 空指針異常
-- 資料導出失敗
-  - 加入依賴
-
-```xml
-<!-- 在bulid中配置resources 防止我們資源導出失敗的問題 -->
-<build>
-	<resources>
-    	<resource>
-        	<directory>src/main/resources</directory>
-            <includes>
-            	<include>**/*.properties</include>
-                <include>**/*.xml</include>
-            </includes>
-            <filtering>false</filtering>
-        </resource>
-        <resource>
-        	<directory>src/main/java</directory>
-            <includes>
-            	<include>**/*.properties</include>
-                <include>**/*.xml</include>
-            </includes>
-            <filtering>false</filtering>
-        </resource>
-    </resources>
-</build>
-```
-
-
-
-#### 萬能Map
-
-假設實體類 或者 資料庫中的表格 字串參數過多 應該考慮使用Map
-
-可以選擇要插入的數據 不一定要全部寫入
-
-
-
-- Map插入資料
-
-```java
-介面
-// 萬能Map
-int addUser2(Map<String,Object> map);
-```
-
-```xml
-對應Mapper文件
-<!--  Map
-      傳遞Map的Key
--->
-    <insert id="addUser2" parameterType="map">
-        insert into mybatis.user (id,name,pwd) values (#{userid},#{username},#{password});
-    </insert>
-```
-
-```java
 測試
+
+```java
 @Test
-    public void addUser2(){
-        SqlSession sqlSession = MybatisUtils.getsqlSession();
+    public void testCRUD() throws IOException {
+        InputStream is = Resources.getResourceAsStream("mybatis-config.xml");
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(is);
+        SqlSession sqlSession = sqlSessionFactory.openSession(true);
         UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("userid",4);
-        map.put("username","FFF");
-        map.put("password","12345678");
-
-        mapper.addUser2(map);
-        sqlSession.commit();
-        sqlSession.close();
-
+//        mapper.updateUser();
+//        mapper.deleteUser();
+//        User user = mapper.getUserById();
+        List<User> list = mapper.getAllUser();
+        list.forEach(user -> System.out.println(user));
     }
 ```
 
 
 
-- Map查詢資料
-
-```java
- // map query data
-    User getUserByID2(Map<String,Object> map);
-```
+## 核心配置文件解析
 
 ```xml
-<!--  map query  -->
-    <select id="getUserByID2" parameterType="map" resultType="com.pojo.User">
-        select * from mybatis.user where id = #{userid} and name = #{name};
+<configuration>
+    <!-- 配置連接資料庫的環境
+       environments : 配置多個連接資料庫的環境
+       屬性 :
+            default : 設置預設使用的環境的id
+    -->
+    <environments default="development">
+        <!--
+        environment : 配置某個具體的環境
+        屬性 :
+            id : 表示連接資料庫的環境的唯一標示 不能重複
+        -->
+        <environment id="development">
+            <!--
+                transactionManager : 設置事務管理方式
+                屬性 :
+                    type = "JDBC|MANAGED"
+                    JDBC : 表示當前環境中 執行SQL時 使用的是JDBC中原生的事務管理方式
+                           事務的提交或回滾需要手動處理
+                    MANAGED : 被管理 例如Spring
+            -->
+            <transactionManager type="JDBC"/>
+            <!--
+                dataSource : 配置數據源
+                屬性 :
+                    type : 設置數據源的類型
+                    type : "POOLED|UNPOOLED|JNDI"
+                    POOLED : 表示使用資料庫連接池暫存資料庫連接
+                    UNPOOLED : 表示不使用資料庫連接池
+                    JNDI : 表示使用上下文中的數據源
+            -->
+            <dataSource type="POOLED">
+                <!-- 設置連接資料庫的驅動   -->
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <!-- 設置連接資料庫的連接地址   -->
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+                <!-- 設置連接資料庫的用戶名   -->
+                <property name="username" value="root"/>
+                <!-- 設置連接資料庫的密碼   -->
+                <property name="password" value="123456"/>
+            </dataSource>
+        </environment>
+    </environments>
+<!-- 引入映射文件   -->
+    <mappers>
+        <mapper resource="mappers/UserMapper.xml"/>
+    </mappers>
+</configuration>
+```
+
+
+
+#### 核心配置文件properties
+
+properties
+
+```properties
+jdbc.driver=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/mybatis
+jdbc.username=root
+jdbc.password=123456
+```
+
+
+
+配置文件
+
+```xml
+<configuration>
+
+<!-- 引入properties文件   -->
+    <properties resource="jdbc.properties"></properties>
+    
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            
+            <dataSource type="POOLED">
+                <!-- 設置連接資料庫的驅動  獲取配置文件 $  -->
+                <property name="driver" value="${jdbc.driver}"/>
+                <!-- 設置連接資料庫的連接地址   -->
+                <property name="url" value="${jdbc.url}"/>
+                <!-- 設置連接資料庫的用戶名   -->
+                <property name="username" value="${jdbc.username}"/>
+                <!-- 設置連接資料庫的密碼   -->
+                <property name="password" value="${jdbc.password}"/>
+            
+            </dataSource>
+        </environment>
+    </environments>
+	<!-- 引入映射文件   -->
+    <mappers>
+        <mapper resource="mappers/UserMapper.xml"/>
+    </mappers>
+</configuration>
+```
+
+
+
+#### 核心配置文件typeAliases
+
+類型別名
+
+```xml
+<configuration>
+<!--  設置類型別名  -->
+    <typeAliases>
+        <!--
+        typeAlias : 設置某個類型的別名
+        屬性:
+            type : 設置需要設置別名的類型
+            alias : 設置某個類型的別名  不區分大小寫
+                    若不設置則預設為不區分大小寫的類別名User user
+        -->
+        <typeAlias type="com.pojo.User" alias="User"></typeAlias>
+        <!--  以包為單位 將包下所有的類型設置預設的類型別名 (即類名不區分大小寫)    -->
+        <package name="com.pojo"/>
+    </typeAliases>
+
+</configuration>
+```
+
+
+
+#### 核心配置文件mappers
+
+
+
+在resources創建包 使用 / 分隔
+
+resources中的配置文件需要與java中包的路徑一致 才可以使用package
+
+```xml
+ <!-- 引入映射文件   -->
+    <mappers>
+<!--        <mapper resource="mappers/UserMapper.xml"/>-->
+        <!--
+            以包為單位引入映射文件
+            要求 :
+            1. mapper接口所在的包要和映射文件所在的包一致
+            2. mapper接口要和映射文件的名字一致
+        -->
+        <package name="com.mapper"/>
+    </mappers>
+```
+
+
+
+
+
+## MyBatis獲取參數的兩種方式
+
+
+
+- ${} 本質字串拼接 
+  - 需要手動加上單引號
+  - 會有SQL注入問題
+
+- #{} 本質佔位符賦值
+
+
+
+#### 單個字面量
+
+```xml
+<mapper namespace="com.mybatis.mapper.ParameterMapper">
+
+<!-- User getUserByUsername(String username);  -->
+    <select id="getUserByUsername" resultType="User">
+<!--      select * from user where username = #{username} -->
+        select * from user where username = '${username}'
+    </select>
+
+</mapper>
+```
+
+
+
+```java
+/*+
+    MyBatis獲取參數的兩種方式 : ${} #{}
+    ${} 本質字串拼接
+    #{} 本質佔位符賦值
+    MyBatis獲取參數值的各種情況:
+    1. mapper接口方法的參數為單個的字面量類型
+       可以通過${}和#{}以任意的名稱獲取參數值
+       但是需要注意${}的單引號問題 (字串拼接)
+ */
+@Test
+public void testGetUserByUsername(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    ParameterMapper mapper = sqlSession.getMapper(ParameterMapper.class);
+    User user = mapper.getUserByUsername("admin2");
+    System.out.println(user);
+}
+```
+
+
+
+#### 多個字面量-自動設置Map
+
+多個參數 mybatis會將參數放到Map中 [arg1, arg0, param1, param2]
+
+
+
+```xml
+<mapper namespace="com.mybatis.mapper.ParameterMapper">
+
+<!-- User checkLogin(String username,String password);   -->
+    <select id="checkLogin" resultType="User">
+<!--         select * from user where username = #{arg0} and password = #{arg1} -->
+        select * from user where username = '${param1}' and password = '${param2}'
+    </select>
+
+</mapper>
+```
+
+
+
+```java
+/*
+2. mapper接口方法的參數為多個時
+    此時MyBatis會將這些參數放在一個Map集合中 以兩種方式進行儲存
+    a > 以arg0,arg1...為鍵 以參數為值
+    b > 以param1,param2..為鍵 以參數為值
+    因此只需要通過#{}和${}以鍵的方式訪問值即可 但是要注意${}的單引號問題
+*/
+    
+@Test
+    public void testCheckLogin(){
+        SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+        ParameterMapper mapper = sqlSession.getMapper(ParameterMapper.class);
+        User user = mapper.checkLogin("admin2","123456");
+        System.out.println(user);
+    }    
+```
+
+
+
+#### 多個字面量-手動設置Map
+
+
+
+```xml
+<mapper namespace="com.mybatis.mapper.ParameterMapper">
+
+<!-- User checkLoginByMap(Map<String,Object> map);   -->
+    <select id="checkLoginByMap" resultType="User">
+        select * from user where username = #{username} and password = #{password}
+    </select>
+
+</mapper>
+```
+
+
+
+```java
+/*
+	3. 若mapper接口方法的參數有多個時 可以手動將這些參數放在一個map中儲存
+   	   只需要通過#{}和${}以鍵的方式訪問值即可 但是要注意${}的單引號問題
+*/
+@Test
+    public void testCheckLoginByMap(){
+        SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+        ParameterMapper mapper = sqlSession.getMapper(ParameterMapper.class);
+        Map<String,Object> map = new HashMap<>();
+//      自定義 key-value
+        map.put("username","admin2");
+        map.put("password","123456");
+        User user = mapper.checkLoginByMap(map);
+        System.out.println(user);
+    }
+```
+
+
+
+#### 實體類類型參數
+
+以屬性的方式訪問 (get set方法)
+
+
+
+```xml
+<!-- int insertUser(User user);   -->
+    <insert id="insertUser">
+        insert into user values (null,#{username},#{password},#{age},#{gender},#{email})
+    </insert>
+```
+
+
+
+```java
+/*
+	4. mapper接口方法的參數是實體類類型的參數
+       只需要通過#{}和${}以屬性的方式訪問屬性值即可 但是需要注意${}的單引號問題
+*/
+@Test
+    public void testInsertUser(){
+        SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+        ParameterMapper mapper = sqlSession.getMapper(ParameterMapper.class);
+        int result = mapper.insertUser(new User(null, "AAA", "12345", 21, "男", "AAA@com"));
+        System.out.println(result);
+    }
+```
+
+
+
+#### 使用@Param命名(key)
+
+
+
+```xml
+<!-- User checkLoginByParam(@Param("username") String username,@Param("password") String password);   -->
+    <select id="checkLoginByParam" resultType="User">
+        select * from user where username = #{username} and password = #{password}
     </select>
 ```
 
+
+
+```java
+/*
+   5. 使用@Param註解命名參數(key)
+      此時MyBatis會將這些參數放在一個Map集合中 以兩種方式進行儲存
+      a > 以@Param註解的值為鍵 以參數為值
+      b > 以param1,param2為鍵 以參數為值
+      因此只需要通過#{}和${}以鍵的方式訪問值即可 但是需要注意${}的單引號問題
+*/
+
+@Test
+    public void testCheckLoginByParam(){
+        SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+        ParameterMapper mapper = sqlSession.getMapper(ParameterMapper.class);
+        User user = mapper.checkLoginByParam("admin2", "123456");
+        System.out.println(user);
+    }
+```
+
+
+
+
+
+## MyBatis的查詢功能
+
+
+
+```j
+MyBatis的各種查詢功能
+1. 若查詢出的數據只有一條
+   a> 可以通過實體類對象接收
+   b> 可以通過List集合接收
+   c> 可以通過map集合接收
+      結果 : {password=12345, gender=男, id=3, age=21, email=AAA@com, username=AAA}
+2. 若查詢出的數據有多條
+   a> 可以通過List集合接收
+   b> 可以通過map類型的List集合接收
+   c> 可以在mapper接口的方法上添加@MapKey註解 此時就可以將每條數據轉換的map集合作為值
+      以某個欄位的值作為key 放在同一個map集合中
+   一定不能通過實體類對象接收 此時會拋異常TooManyResultsException
+
+MyBatis中設置了預設的類型別名
+java.lang.Integer --> int,integer
+int --> _int,_integer
+Map --> map
+String --> string
+```
+
+
+
+#### 查詢一個實體類對象
+
+```xml
+<!-- User getUserById(@Param("id") Integer id); -->
+    <select id="getUserById" resultType="User">
+        select * from user where id = #{id}
+    </select>
+```
+
+
+
 ```java
 @Test
-public void getUserByID2(){
-    SqlSession sqlSession = MybatisUtils.getsqlSession();
-    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-    HashMap<String, Object> map = new HashMap<>();
-    map.put("userid",1);
-    map.put("name","AAA");
-
-    User userByID2 = mapper.getUserByID2(map);
-    System.out.println(userByID2);
-    sqlSession.close();
+public void testGetUserById(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    SelectMapper mapper = sqlSession.getMapper(SelectMapper.class);
+    System.out.println(mapper.getUserById(2));
 }
 ```
 
 
 
-Map傳遞參數 直接在sql中取出key即可 :  parameterType="map"
+#### 查詢一個list集合
 
-對象傳遞參數 直接在sql中取對象的屬性即可 : parameterType="Object"
+```xml
+<!-- List<User> getAllUser();   -->
+    <select id="getAllUser" resultType="User">
+        select * from user
+    </select>
+```
 
-只有一個基本類型參數的情況下 可以直接在sql中取得 
 
-多個參數用Map 或者 註解
+
+```java
+@Test
+public void testAllUser(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    SelectMapper mapper = sqlSession.getMapper(SelectMapper.class);
+    System.out.println(mapper.getAllUser());
+}
+```
+
+
+
+#### 查詢單個數據
+
+```xml
+<!-- Integer getCount();   -->
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(*) from user
+    </select>
+```
+
+
+
+```java
+@Test
+public void testGetCount(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    SelectMapper mapper = sqlSession.getMapper(SelectMapper.class);
+    System.out.println(mapper.getCount());
+}
+```
+
+
+
+#### 查詢一條數據為map集合
+
+```xml
+<!-- Map<String,Object> getUserByIdToMap(@Param("id") Integer id);   -->
+    <select id="getUserByIdToMap" resultType="map">
+        select * from user where id = #{id}
+    </select>
+```
+
+
+
+```java
+@Test
+public void testGetUserByIdToMap(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    SelectMapper mapper = sqlSession.getMapper(SelectMapper.class);
+    System.out.println(mapper.getUserByIdToMap(3));
+}
+```
+
+
+
+#### 查詢多條數據為map集合
+
+
+
+兩種方式
+
+```java
+// 查詢所有用戶訊息為map集合
+//    List<Map<String,Object>> getAllUserToMap();
+    @MapKey("id")
+    Map<String,Object> getAllUserToMap();
+```
+
+
+
+```xml
+<!-- List<Map<String,Object>> getAllUserToMap();   -->
+    <select id="getAllUserToMap" resultType="map">
+        select * from user
+    </select>
+```
+
+
+
+```java
+@Test
+public void testGetAllUserToMap(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    SelectMapper mapper = sqlSession.getMapper(SelectMapper.class);
+    System.out.println(mapper.getAllUserToMap());
+}
+```
+
+
+
+## 特殊SQL的執行
 
 
 
 #### 模糊查詢
 
-#{} 不存在sql注入問題,取值以後再去編譯SQL語句
-
-```java
-// 模糊查詢
-List<User> getUserLike(String value);
-```
-
-1.java程式執行時 使用傳遞通配符 % 
-
-2.sql拼接中使用通配符 %
+- select * from user where username like '%${username}%'  -->  字串拼接
+  -  '%#{username}%'   --> '%?%'   使用#  會將?變成字串 導致無法讀取參數
+- select * from user where username like concat('%',#{username},'%')
+  - 使用concat拼接  則可以使用#
+- select * from user where username like "%"#{username}"%"  --> 較常使用
 
 ```xml
-<select id="getUserLike" resultType="com.pojo.User">
-    select * from mybatis.user where name like ('%${value}%');
-</select>
+<!-- List<User> getUserByLike(@Param("username") String username);   -->
+    <select id="getUserByLike" resultType="User">
+<!--         select * from user where username like '%${username}%' -->
+<!--         select * from user where username like concat('%',#{username},'%') -->
+        select * from user where username like "%"#{username}"%"
+    </select>
 ```
 
+
+
+#### 批量刪除
+
+- 通過in進行批量刪除
+  - 使用 #{} 會在傳入的參數中 加上 ' '  不符合in的格式
+  - 必須使用${}的方式傳入參數才符合格式
+
+```xml
+<!--     int deleteMore(@Param("ids")String ids);   -->
+    <delete id="deleteMore">
+        delete from user where id in (${ids});
+    </delete>
+```
+
+
+
 ```java
-// 模糊查詢
 @Test
-public void getUserLike(){
-    SqlSession sqlSession = MybatisUtils.getsqlSession();
-    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-    List<User> user = mapper.getUserLike("%A%");
-    for (User user1 : user) {
-        System.out.println(user);
-    }
-    sqlSession.close();
+public void testDeleteMore(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    SQLMapper mapper = sqlSession.getMapper(SQLMapper.class);
+    mapper.deleteMore("3,4,5");
 }
 ```
 
 
 
-## 配置解析
+#### 動態設置表名
 
-#### 核心配置文件
-
-- mybatis-config.xml
-- MyBatis的配置文建會深深影響MyBatis行為的設置和屬性訊息
-
-```
-configuration（配置）
-properties（屬性）
-settings（設置）
-typeAliases（類型別名）
-typeHandlers（類型處理器）
-objectFactory（對象工廠）
-plugins（插件）
-environments（環境配置）
-environment（環境變數）
-transactionManager（事務管理器）
-dataSource（數據源）
-databaseIdProvider（數據庫廠商標示）
-mappers（映射器）
-```
-
-
-
-#### 環境配置 （environments）
-
-Mybatis可以配置多種環境
-
-不過每個SqlSessionFactory實例只能選擇一種環境
-
-Mybatis預設的事務管理器是JDBC  連接池為 POOLED
-
-- 事務管理器
-  - JDBC : 使用了JDBC的提交和回滾設置
-  - MANAGED : 較少使用
-- 數據源
-  - UNPOOLED : 沒有連接池
-  - POLLED :  連接池
-  - JNDI : 正常連接
-
-
-
-#### 屬性 (properties)
-
-我們可以通過properties屬性來實現引用配置文件
-
-這些屬性都是可外部配置且可動態替換的 可以在典型的java屬性文件中配置 也可以通過properties元素的子元素來傳遞 (dp.properties)
-
-```properties
-driver=com.mysql.cj.jdbc.Driver
-url=jdbc:mysql://localhost:3306/mybatis?useSSL=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT
-username=root
-password=123456
-```
-
-在核心配置文件中引入
+- 表名不能使用 #{} 因為會自動加入 ' ' 
 
 ```xml
-<properties resource="dp.properties">
-        <property name="username" value="root"/>
-        <property name="password" value="123456"/>
-    </properties>
+<!-- List<User> getUserByTableName(@Param("tableName") String tableName);   -->
+    <select id="getUserByTableName" resultType="User">
+        select * from ${tableName}
+    </select>
 ```
 
-- 可以直接引入外部文件
-- 可以在其中增加一些屬性配置
-- 如果兩個文件有同樣的屬性 先引用內部的屬性後再引入外部的屬性 如果有相同的屬性會被外部的屬性覆蓋
 
-
-
-#### 類型別名 (typeAliases)
-
-- 類別別名是為java類型設置一個短的名字
-- 存在的意義僅在於用來減少類完全限定名的冗余
-
-```xml
-<typeAliases>
-    <typeAlias type="com.pojo.User" alias="User"></typeAlias>
-</typeAliases>
-```
-
-也可以指定一個包名 Mybatic會在包名下面搜尋需要的Java Bean
-
-例如掃描實體類的包 預設別名為這個類的纇名 首字母小寫
-
-```xml
-<typeAliases>
-    <package name="com.pojo"></typeAlias>
-</typeAliases>
-```
-
-實體類較少 --> 第一種作法
-
-實體類較多 --> 第二種作法
-
-第一種做法可以自定義別名 第二種則已固定 如果要更改 需要在實體纇上增加註解
 
 ```java
-@Alias("user")
-public class User{}
+@Test
+public void testGetUserByTableName(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    SQLMapper mapper = sqlSession.getMapper(SQLMapper.class);
+    List<User> list = mapper.getUserByTableName("user");
+    System.out.println(list);
+}
 ```
 
 
 
-#### 設置 (settings)
+#### 添加功能獲取自增的主鍵
 
-MyBatis中極為重要的調整設置 他們會改變MyBatis的運行時行為
+class(classId,ClassName)
 
-```
-loglmpl  指定MyBatis所用日志的具體實現 未指定時將自動查找
-cacheEnabled	全局性地開啟或關閉所有映射器配置文件中已配置的任何暫存
-lazyLoadingEnabled 開啟後 任一方法的調用都會加載該對象的所有延遲加載屬性 否則 每個延遲加載屬性會按需加載
-```
+student(studentId,studentName,classId)
 
-
-
-#### 映射器 (mappers)
-
-MapperRegistry : 註冊綁定Mapper文件
-
-方式一 : 推薦使用
+- 添加班級訊息
+- 獲取新添加的班級的id
+- 為班級分配學生 即將某個學生的班級id修改為新添加的班級的id
 
 ```xml
-<!--每一個Mapper.xml都需要在Mybatis核心配置文件中註冊-->
-<mappers>
-	<mapper resource="com/dao/UserMapper.xml"/>
-</mappers>
+<!--
+        void insertUser(User user);
+        useGeneratedKeys : 設置當前標籤中的sql使用了自增的id
+        keyProperty : 將自增的主鍵的值賦值給傳輸到映射文件中參數的某個屬性
+-->
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
+        insert into user values(null,#{username},#{password},#{age},#{gender},#{email})
+    </insert>
 ```
 
-方式二 : 使用class文件綁定註冊介面
 
-```xml
-<mappers>
-	<mapper class="com.dao.UserMapper"></mapper>
-</mappers>
+
+```java
+@Test
+public void testInsertUser(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    SQLMapper mapper = sqlSession.getMapper(SQLMapper.class);
+    User user = new User(null,"BBB","12345",20,"女","bbb@com");
+    mapper.insertUser(user);
+    System.out.println(user);
+}
 ```
 
-注意點 : 
 
-- 介面和他對應的Mapper文件名字必須一樣
-- 介面和他的Mapper配置文件必須在同一個包下
 
-方式三 : 使用掃描包進行注入綁定
+## 自定義映射resultMap
 
-```xml
-<mappers>
-	<package name="com.dao"/>
-</mappers>
+
+
+#### 欄位名和屬性名不一致
+
 ```
-
-注意點 : 
-
-- 介面和他對應的Mapper文件名字必須一樣
-- 介面和他的Mapper配置文件必須在同一個包下
-
-
-
-#### 生命週期和作用域
-
-生命週期和作用域是至關重要的 錯誤的使用會導致嚴重的併發問題
-
-![擷取_2021_12_27_12_32_27_244](https://i.imgur.com/tlqtush.png)
-
-
-
-#### SqlSessionFactoryBuilder 
-
-- 用於創建SqlSessionFactory
-- 一旦創建了SqlSessionFactory就不再需要了
-- 區域變數
-
-#### SqlSessionFactory 
-
-- 用於創建SqlSession對象
-- 可以想像為 資料庫連接池
-- 一旦被創建 會在應用的運行期間一直存在 沒有任何理由丟棄他或重新創建另一個實例 直到程式結束
-- 因此SqlSessionFactory的最佳作用域是應用作用域
-- 最簡單的就是使用單例模式或是靜態單例模式
-
-#### SqlSession
-
-- 連接到連接池的一個請求
-- SqlSession的實例不是執行緒安全 因此不能被共享 所以最佳的作用域是請求或方法作用域
-- 用完之後需要關閉 否則資源會被占用
-
-![擷取_2021_12_27_13_04_13_45](https://i.imgur.com/MYq1yc1.png)
-
-這裡面的每一個Mapper代表一個具體的業務
-
-
-
-
-
-
-
-#### 其他配置
-
-- 類型處理器 (typeHandlers)
-- 對象工廠 (objectFactory)
-- plugins插件
-  - mybatis-generator-core
-  - mybatis-plus
-  - 通用mapper
-
-
-
-## 解決屬性名和字串名不一致的問題
-
-
-
-#### 問題
-
-```xml
-// select * from mybatis.user where id = #{id};
-// 類型處理器
-// select id,name,pwd from mybatis.user where id = #{id};
+解決欄位名和屬性名不一致的情況
+a> 為欄位設置別名 保持和屬性名的一致
+b> 設置全域配置 當_自動映射為駝峰
+   <setting name="mapUnderscoreToCamelCase" value="true"/>
+c> 通過resultMap設置自定義的映射關係
 ```
-
-解決方法
 
 - 設置別名
 
 ```xml
-<select id="getUserByID" parameterType="int" resultType="com.pojo.User">
-    select id,name,pwd as password from mybatis.user where id = #{id};
-</select>
+<!-- List<Emp> getAllEmp();   -->
+    <select id="getAllEmp" resultType="Emp">
+        select eid,emp_name empName,age,gender,email from emp
+    </select>
 ```
 
-
-
-#### resultMap
-
-結果集映射
-
-```
-id name pwd 
-id name password 
-```
+- 設置Mybatis的全域配置
 
 ```xml
-<!-- 結果集映射   -->
-<resultMap id="UserMap" type="User">
-<!--   column資料庫中的欄位  property實體類中的屬性     -->
-        <result column="id" property="id"></result>
-        <result column="name" property="name"></result>
-        <result column="pwd" property="password"></result>
-</resultMap>
-
-<select id="getUserByID"  resultMap="UserMap">
-    select id,name,pwd as password from mybatis.user where id = #{id};
-</select>
-```
-
-- resultMap元素是MyBatis中最重要且強大的元素
-- resultMap的設計思想 : 對於簡單的語句不需要配置顯式的結果映射 而對於複雜一點的語句只需要描述他們的關係即可
-- resultMap最優秀的地方在於 雖然已經對他相當了解了 但是根本就不需要顯示地用到他們
-
-
-
-## 日誌
-
-#### 日誌工廠
-
-如果一個資料庫操作出現異常 需要排錯 日誌就是最好的做法
-
-曾經 : sout debug
-
-現在 : 日誌工廠
-
-- SLF4J
-- LOG4J 掌握
-- LOG4J2
-- JDK_LOGGING
-- COMMONS_LOGGING
-- STDOUT_LOGGING 掌握
-- NO_LOGGING
-
-在Mybatis中具體使用哪一個日誌實現 在設置中設定
-
-
-
-STDOUT_LOGGING 標準日誌輸出
-
-- 在Mybatis核心配置文件中 配置我們的日誌
-
-```xml
+<!-- 設置Mybatis的全域配置   -->
 <settings>
-        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    <!--  將_映射為駝峰  emp_name -> empName      -->
+    <setting name="mapUnderscoreToCamelCase" value="true"/>
 </settings>
 ```
 
-
-
-#### Log4j
-
-什麼是Log4j
-
-- 通過Log4j 我們可以控制日誌訊息輸入的目的地是 控制台 文件 GUL組件
-- 我們也可以控制每一條日誌的輸出格式
-- 通過定義每一條日誌訊息的級別 我們能夠更加細緻的控制日誌的生成過程
-- 通過一個配置文件來靈活的進行配置 而不需要修改應用的程式碼
-
-
-
-導入Log4j jar包
+- 通過resultMap設置
 
 ```xml
-<dependency>
-    <groupId>log4j</groupId>
-    <artifactId>log4j</artifactId>
-    <version>1.2.17</version>
-</dependency>
-```
-
-log4j.properties
-
-```properties
-# 將等級為DEBUG的日誌訊息輸出到console和file這兩個目的地
-# console和filte的定義在下面的程式碼
-log4j.rootLogger=DEBUG,console,file
-
-# 控制台輸出的相關設置
-# 控制台的輸出 使用這個實現
-log4j.appender.console = org.apache.log4j.ConsoleAppender
-# 日誌 使用 sout 輸出
-log4j.appender.console.Target = System.out
-# 日誌輸出的級別
-log4j.appender.console.Threshold=DEBUG
-log4j.appender.console.layout = org.apache.log4j.PatternLayout
-# 日誌格式
-log4j.appender.console.layout.ConversionPattern=(%c)-%m%n
-
-# 文件輸出的相關設置
-# 輸出的文件
-log4j.appender.file = org.apache.log4j.RollingFileAppender
-# 生成文件的地址
-log4j.appender.file.File=./log/kuang.log
-# 文件最大大小 超過的話生成新的
-log4j.appender.file.MaxFileSize=10mb
-log4j.appender.file.Threshold=DEBUG
-log4j.appender.file.layout=org.apache.log4j.PatternLayout
-# 文件的格式
-log4j.appender.file.layout.ConversionPattern=(%p)(%d{yy-MM-dd})(%c)%m%n
-
-# 日誌輸出級別
-# DEGUG才會輸出
-log4j.logger.org.mybatis=DEBUG
-log4j.logger.java.sql=DEBUG
-log4j.logger.java.sql.Statement=DEBUG
-log4j.logger.java.sql.ResultSet=DEBUG
-log4j.logger.java.sql.PreparedStatement=DEBUG
-```
-
-配置log4j為日誌的實現
-
-```xml
-<settings>
-    <setting name="logImpl" value="LOG4J"/>
-</settings>
-```
-
-Log4j的使用  測試運行查詢時 出現的訊息
-
-```java
-(org.apache.ibatis.logging.LogFactory)-Logging initialized using 'class org.apache.ibatis.logging.log4j.Log4jImpl' adapter.
-(org.apache.ibatis.logging.LogFactory)-Logging initialized using 'class org.apache.ibatis.logging.log4j.Log4jImpl' adapter.
-(org.apache.ibatis.datasource.pooled.PooledDataSource)-PooledDataSource forcefully closed/removed all connections.
-(org.apache.ibatis.datasource.pooled.PooledDataSource)-PooledDataSource forcefully closed/removed all connections.
-(org.apache.ibatis.datasource.pooled.PooledDataSource)-PooledDataSource forcefully closed/removed all connections.
-(org.apache.ibatis.datasource.pooled.PooledDataSource)-PooledDataSource forcefully closed/removed all connections.
-(org.apache.ibatis.transaction.jdbc.JdbcTransaction)-Opening JDBC Connection
-(org.apache.ibatis.datasource.pooled.PooledDataSource)-Created connection 87674905.
-(org.apache.ibatis.transaction.jdbc.JdbcTransaction)-Setting autocommit to false on JDBC Connection [com.mysql.cj.jdbc.ConnectionImpl@539d019]
-(com.dao.UserMapper.getUserList)-==>  Preparing: select * from mybatis.user; 
-(com.dao.UserMapper.getUserList)-==> Parameters: 
-(com.dao.UserMapper.getUserList)-<==      Total: 4
-User{id=1, name='AAA', pwd='123456'}
-User{id=2, name='BBB', pwd='123456'}
-User{id=3, name='CCC', pwd='123456'}
-User{id=4, name='FFF', pwd='12345678'}
-(org.apache.ibatis.transaction.jdbc.JdbcTransaction)-Resetting autocommit to true on JDBC Connection [com.mysql.cj.jdbc.ConnectionImpl@539d019]
-(org.apache.ibatis.transaction.jdbc.JdbcTransaction)-Closing JDBC Connection [com.mysql.cj.jdbc.ConnectionImpl@539d019]
-(org.apache.ibatis.datasource.pooled.PooledDataSource)-Returned connection 87674905 to pool.
-
-Process finished with exit code 0
-
-```
-
-
-
-簡單使用
-
-- 在要使用Log4j的類中 導入包 import org.apache.log4j.Logger;
-- 日誌對象 參數為當前類的Class
-
-```java
-// 獲得當前class的反射對象
-    static Logger logger = Logger.getLogger(UserMapperTest.class);
-```
-
-- 日誌級別
-
-```java
-logger.info("info:進入了testLog4j");
-logger.debug("debug:進入了testLog4j");
-logger.error("error:進入了testLog4j");
-```
-
-
-
-## 分頁
-
-為什麼需要分頁
-
-- 減少資料的處理量
-
-
-
-#### 使用Limit分頁
-
-```mysql
-select * from user limit startIndex,pageSize
-select * from user limit 2,2; // 由2開始印出2個數值
-select * from user limit 3;   // 由0開始印出3個數值
-```
-
-
-
-使用Mybatis實現分頁 核心SQL
-
-- 介面
-
-```java
-List<User> getUserByLimit(Map<String,Integer> map);
-```
-
-- Mapper.xml
-
-```xml
-<select id="getUserByLimit" parameterType="map" resultType="com.pojo.User">
-    select * from mybatis.user limit #{startIndex},#{pageSize}
-</select>
-```
-
-- 測試
-
-```xml
-@Test
-public void getUserByLimit(){
-    SqlSession sqlSession = MybatisUtils.getSqlSession();
-    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-    HashMap<String, Integer> map = new HashMap<>();
-    map.put("startIndex",2);
-    map.put("pageSize",2);
-    List<User> userLimit = mapper.getUserByLimit(map);
-    for (User user : userLimit) {
-        System.out.println(user);
-    }
-
-    sqlSession.close();
-}
-```
-
-
-
-#### RowBounds分頁
-
-不再使用SQL實現分頁
-
-- 介面
-
-```java
-List<User> getUserByRowBound();
-```
-
-- Mapper.xml
-
-```xml
-<select id="getUserByRowBound" resultType="com.pojo.User">
-    select * from mybatis.user
-</select>
-```
-
-- 測試
-
-```java
-@Test
-public void getUserByRowBound(){
-    SqlSession sqlSession = MybatisUtils.getSqlSession();
-    // RowBounds實現
-    RowBounds rowBounds = new RowBounds(1, 2);
-    // 通過java層面實現分頁
-    List<User> userList = sqlSession.selectList("com.dao.UserMapper.getUserByRowBound", null, rowBounds);
-    for (User user : userList) {
-        System.out.println(user);
-    }
-    sqlSession.close();
-
-}
-```
-
-
-
-#### 分頁插件
-
-MyBatis PageHelper
-
-
-
-## 註解開發
-
-#### 面向介面編程
-
-- 真正的開發中 很多時候會選擇面向介面編程
-- 解耦 , 可拓展 提高復用 
-- 分層開發中 上層不用管具體的實現 大家遵守共同的規範  
-- 介面的理解
-  - 為定義(規範 約束) 與 實現 (名實分離的原則) 的分離
-  - 反映了系統設計人員對系統的抽象理解
-  - 分為兩類
-    - 第一類是對一個個體的抽象 他可對應為一個抽象體(abstract class)
-    - 第二類是對一個個體某一方面的抽象 形成一個抽象面(interface)
-  - 一個體有可能有多個抽象面 抽象體與抽象面是有區邊的
-
-- 三個面向區別
-  - 面向對象是指 考慮問題時 以對象為單位 考慮他的屬性與方法
-  - 面相過程是指 考慮問題時 以一個具體的流程(事務過程)為單位 考慮他的實現
-  - 介面設計與非介面設計是針對復用技術而言 與面向對向(過程) 不是一個問題 更多的體現就是對系統整體的架構
-
-
-
-#### 使用註解開發
-
-- 註解在介面上實現
-
-```java
-@Select("select * from user")
-List<User> getUser();
-```
-
-- 需要在核心配置文件中綁定介面
-
-```xml
-<mappers>
-    <mapper class="com.dao.UserMapper"></mapper>
-</mappers>
-```
-
-- 測試
-
-本質 : 使用反射機制實現
-
-底層 : 動態代理
-
-![擷取_2021_12_30_12_43_24_427](https://i.imgur.com/OpPDXkF.png)
-
-
-
-#### Mybatis的執行流程
-
-![擷取_2021_12_30_13_25_21_874](https://i.imgur.com/GDFSp5x.png)
-
-
-
-- 第一步 Resoureces.getResourceAsStream(resource)
-- SqlSessionFactoryBuilder().build 構造器build
-  - build 調用XMLConfigBuilder  解析 inputStream流 environment環境 properties配置文件
-- 解析後傳給Configuration
-- SqlSessionFactory實例化
-- SqlSessionFactory中包含事務
-  - 有了事務後 創建executor執行器
-    - 執行事務 暫存 Stack 是否關閉
-- 創建SqlSession
-  - 通過executor執行Mapper
-    - 通過反射載入的class的訊息
-    - 將executor套用
-      - 執行從配置文件中讀取的SQL語句
-
-
-
-#### CRUD
-
-我們可以在工具類創建的時候實現自動提交事務
-
-```java
-public static SqlSession getSqlSession(){
-// 設置為true 事務會自動提交
-return sqlSessionFactory.openSession(true);
-}
-```
-
-編寫介面 增加註解
-
-```java
-public interface UserMapper {
-    @Select("select * from user")
-    List<User> getUser();
-
-    // 方法存在多個參數 所有的參數前面必須加上@Param註解
-    // @Param中的參數對應SQL語句的 #{id}
-    @Select("select * from user where id = #{id}")
-    User getUserByID(@Param("id")int id);
-
-    @Insert("insert into user (id,name,pwd) values (#{id},#{name},#{pwd})")
-    int addUser(User user);
-
-    @Update("update user set name=#{name},pwd=#{pwd} where id=#{id}")
-    int updateUser(User user);
-
-    @Delete("delete from user where id = #{id}")
-    int deleteUser(@Param("id") int id);
-
-}
-```
-
-測試類
-
-```java
-public class UserMapperTest {
-
-    @Test
-    public void select(){
-        SqlSession sqlSession = MybatisUtils.getSqlSession();
-        // 底層主要應用反射
-       UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-       List<User> users = mapper.getUser();
-        for (User user : users) {
-            System.out.println(user);
-       }
-        sqlSession.close();
-    }
-
-    @Test
-    public void selectByID(){
-        SqlSession sqlSession = MybatisUtils.getSqlSession();
-        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-        User userByID = mapper.getUserByID(4);
-        System.out.println(userByID);
-        sqlSession.close();
-    }
-
-    @Test
-    public void insert(){
-        SqlSession sqlSession = MybatisUtils.getSqlSession();
-        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-        int i = mapper.addUser(new User(5,"GGG","1234567"));
-        sqlSession.close();
-    }
-
-    @Test
-    public void update(){
-        SqlSession sqlSession = MybatisUtils.getSqlSession();
-        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-        mapper.updateUser(new User(4,"HHH","123456"));
-        sqlSession.close();
-    }
-
-    @Test
-    public void Delete(){
-        SqlSession sqlSession = MybatisUtils.getSqlSession();
-        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-        mapper.deleteUser(5);
-        sqlSession.close();
-    }
-}
-```
-
-注意 : 必須要將介面註冊綁定到我們的核心配置文件中
-
-```xml
-<mappers>
-    <mapper class="com.dao.UserMapper"></mapper>
-</mappers>
-```
-
-
-
-@Param()註解
-
-- 基本類型的參數或是String類型 需要加上
-- 引用類型不需要使用
-- 如果只有一個基本類型的話 可以忽略 但是建議加上
-- 我們在SQL中引用的就是這裡的@Param() 中設定的屬性名
-
-
-
-#{} ${} 區別
-
-- #{} 預編譯
-  - 很大的程度上防止SQL注入
-- ${}
-  - 無法防止SQL注入
-
-
-
-## Lombok
-
-- java library
-- plugs
-- build tools
-- with one annotation your class
-
-
-
-使用步驟 : 
-
-- 在IDEA中安裝Lombok
-- 在項目中導入Lombok的jar包
-
-```xml
-<dependency>
-    <groupId>org.projectlombok</groupId>
-    <artifactId>lombok</artifactId>
-    <version>1.18.20</version>
-</dependency>
-```
-
-- 在實體類上加上註解
-
-```java
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-```
-
-
-
-```java
-@Getter and @Setter
-@FieldNameConstants
-@ToString
-@EqualsAndHashCode
-@AllArgsConstructor, @RequiredArgsConstructor and @NoArgsConstructor
-@Log, @Log4j, @Log4j2, @Slf4j, @XSlf4j, @CommonsLog, @JBossLog, @Flogger, @CustomLog
-@Data  // 最常使用class註解   建構 get set 建構子 toString
-@Builder
-@SuperBuilder
-@Singular
-@Delegate
-@Value
-@Accessors
-@Wither
-@With
-@SneakyThrows
-```
-
-
-
-```java
-@Data : 無參建構子 get set toString hashcode equals
-@AllArgsConstructor : 有參建構子
-@NoArgsConstructor : 無參建構子
-@ToString
-@EqualsAndHashCode
-@ToString
-```
-
-
-
-## 多對一處理
-
-- 多個學生 對應 一個老師
-- 對於學生而言 關聯 多個學生 關聯一個老師 (多對一)
-- 對於老師而言 集合 一個老師 有很多學生 (一對多)
-
-```mysql
-CREATE TABLE `teacher` (
-  `id` INT(10) NOT NULL,
-  `name` VARCHAR(30) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8;
-
-INSERT INTO teacher(`id`, `name`) VALUES (1, '秦老師'); 
-
-CREATE TABLE `student` (
-  `id` INT(10) NOT NULL,
-  `name` VARCHAR(30) DEFAULT NULL,
-  `tid` INT(10) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fktid` (`tid`),
-  CONSTRAINT `fktid` FOREIGN KEY (`tid`) REFERENCES `teacher` (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8;
-INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('1', '小明', '1'); 
-INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('2', '小紅', '1'); 
-INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('3', '小張', '1'); 
-INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('4', '小李', '1'); 
-INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('5', '小王', '1');
-```
-
-
-
-#### 測試環境搭建
-
-- 導入lombok
-- 新建實體類 Teacher Student
-- 建立Mapper介面
-- 建立Mapper.XML文件
-- 在核心配置文件中綁定註冊我們的Mapper介面或是文件 (方式有多種)
-- 查詢是否成功
-
-
-
-#### 按照查詢嵌套處理
-
-- 子查詢
-
-```xml
-<mapper namespace="com.dao.StudentMapper">
 <!--
-    1. 查詢所有的學生訊息
-    2. 根據查詢出來的學生的tid 尋找對應的老師
--->
-    <select id="getStudent" resultMap="StudentTeacher">
-        select * from mybatis.student;
-    </select>
-    
-    <resultMap id="StudentTeacher" type="com.pojo.Student">
-        <result property="id" column="id"></result>
-        <result property="name" column="name"></result>
-<!--    複雜的屬性 需要單獨處理
-        對象 : association
-        集合 : collection
- -->
-<!--  student中對應的屬性teacher 對應SQL中column的 tid
-      給予屬性teacher對應的實體類(javaType)
-      
-	  通過 select="getTeacher" 
-	  getTeacher中的參數對應為SQL表中的tid(外鍵)
- -->
-        <association property="teacher" column="tid" javaType="com.pojo.Teacher" select="getTeacher"></association>
-    </resultMap>
+           resultMap : 設置自定義映射關係
+           id : 唯一標示 不能重複
+           type : 設置映射關係中的實體類類型
+           子標籤 :
+           id : 設置主鍵的元素關係
+           result : 設置普通欄位的映射關係
+           屬性 :
+           property : 設置映射關係中的屬性名 必須是type屬性所設置的實體類類型中的屬性名
+           column : 設置映射關係中的欄位名 必須是sql語句查詢出的欄位名
 
-    <select id="getTeacher" resultType="com.pojo.Teacher">
-        select * from mybatis.teacher where id = #{id};
+        -->
+    <resultMap id="empResultMap" type="Emp">
+        <!--  id設置主鍵       -->
+        <id property="eid" column="eid"></id>
+        <result property="empName" column="emp_name"></result>
+        <result property="age" column="age"></result>
+        <result property="gender" column="gender"></result>
+        <result property="age" column="age"></result>
+        <result property="email" column="email"></result>
+    </resultMap>
+    
+<!-- List<Emp> getAllEmp();   -->
+    <select id="getAllEmp" resultMap="empResultMap">
+        select * from emp
     </select>
-</mapper>
 ```
 
 
 
-#### 按照結果嵌套處理
+#### 多對一的映射關係
 
-- 聯表查詢
+```
+處理多對一的映射關係
+a> 級聯屬性賦值
+b> association
+c> 分步查詢
+```
+
+##### 級聯屬性賦值
 
 ```xml
-<!-- 按照結果嵌套處理 -->
-<select id="getStudent2" resultMap="StudentTeacher2">
-    select s.id sid, s.name sname,t.name tname
-    from mybatis.student s,mybatis.teacher t
-    where s.tid = t.id;
+<!-- List<Emp> getEmpAndDept(@Param("eid") Integer eid);   -->
+<select id="getEmpAndDept" resultMap="empAndDeptResultMapOne">
+    select * from emp
+    left join dept
+    on emp.did = dept.did
+    where emp.did = #{eid}
 </select>
 
-<!--   對應每一項關係
-       id 對應 resultMap  type : 對應實體類Student
-       Student中有三個屬性 id name teacher  -> 對應SQL中的屬性 sid ...
-       多對一 -> 關聯  association  -> 放入teacher 屬性 對應實體類 javaType
--->
-<resultMap id="StudentTeacher2" type="com.pojo.Student">
-    <result property="id" column="sid"></result>
-    <result property="name" column="sname"></result>
-    <association property="teacher" javaType="com.pojo.Teacher">
-        <!--  Teacher擁有屬性 name 對應SQL中表格中的tname (Teacher.name) -->
-        <result property="name" column="tname"></result>
+<!-- 處理多對一映射關係  方式一 : 級聯屬性賦值 -->
+<resultMap id="empAndDeptResultMapOne" type="Emp">
+    <id property="eid" column="eid"></id>
+    <result property="empName" column="emp_name"></result>
+    <result property="age" column="age"></result>
+    <result property="gender" column="gender"></result>
+    <result property="email" column="email"></result>
+    <result property="dept.did" column="did"></result>
+    <result property="dept.deptName" column="dept_name"></result>
+</resultMap>
+```
+
+
+
+```java
+@Test
+public void testGetEmpAndDept(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    EmpMapper mapper = sqlSession.getMapper(EmpMapper.class);
+    List<Emp> empAndDept = mapper.getEmpAndDept(1);
+    for (Emp emp : empAndDept) {
+        System.out.println(emp);
+    }
+}
+```
+
+
+
+##### association-javaType
+
+```xml
+<!-- 處理多對一映射關係  方式二 : association -->
+<resultMap id="empAndDeptResultMapTwo" type="Emp">
+    <id property="eid" column="eid"></id>
+    <result property="empName" column="emp_name"></result>
+    <result property="age" column="age"></result>
+    <result property="gender" column="gender"></result>
+    <result property="email" column="email"></result>
+    <!--
+         association : 處理多對一的映射關係
+         property : 需要處理多對一的映射關係的屬性名 (Emp的dept)
+         javaType : 該屬性的類型 (dept對應的類別 Dept)
+         -->
+    <association property="dept" javaType="Dept">
+        <id property="did" column="did"></id>
+        <result property="deptName" column="dept_name"></result>
     </association>
 </resultMap>
-    
 ```
 
 
 
-回顧MySQL多對一查詢方式
+##### 分步查詢
 
-- 子查詢
-  - select id,name,tid from student where tid = ()
-- 聯表查詢
-
-
-
-## 一對多處理
-
-一個老師擁有多個學生
-
-對於老師而言 就是一對多的關係
-
-
-
-搭建環境
-
-實體類
-
-```java
-@Data
-public class Student {
-    private int id;
-    private String name;
-    private int tid;
-
-}
-```
-
-```java
-@Data
-public class Teacher {
-    private int id;
-    private String name;
-    // 一個老師擁有多個學生
-    private List<Student> students;
-
-}
-```
-
-
-
-#### 按照結果嵌套處理
-
-```java
-// 獲取指定老師下的所有學生 及老師的訊息
-Teacher getTeacher2(@Param("tid")int id);
-```
+EmpMapper
 
 ```xml
-<!-- 按結果嵌套查詢   -->
-    <select id="getTeacher2" resultMap="TeacherStudent">
-        select s.id sid,s.name sname,t.name tname,t.id tid
-        from student s,teacher t
-        where s.tid = t.id and t.id = #{tid}
+<!-- 
+    通過分布查詢 查詢員工以及員工所對應的部門訊息
+    分布查詢第一步 : 查詢員工訊息
+    List<Emp> getEmpAndDeptByStepOne(@Param("eid")Integer eid);   -->
+<select id="getEmpAndDeptByStepOne" resultMap="empAndDeptByStepResultMap">
+    select * from emp where eid = #{eid}
+</select>
+
+<resultMap id="empAndDeptByStepResultMap" type="Emp">
+    <id property="eid" column="eid"></id>
+    <result property="empName" column="emp_name"></result>
+    <result property="age" column="age"></result>
+    <result property="gender" column="gender"></result>
+    <result property="email" column="email"></result>
+    <!--
+        select : 設置分步查詢的sql的唯一標示 (namespace,SQLId或mapper接口的全類名.方法名)
+        column : 設置分步查詢的條件
+    -->
+    <association property="dept"
+                 select="com.mybatis.mapper.DeptMapper.getEmpAndDeptByStepTwo"
+                 column="did"></association>
+</resultMap>
+```
+
+DeptMapper
+
+```xml
+<!-- 通過分布查詢 查詢員工以及員工所對應的部門訊息
+     分布查詢第二步 : 通過did查詢員工所對應的部門
+     Dept getEmpAndDeptByStepTwo(@Param("did") Integer did); -->
+    <select id="getEmpAndDeptByStepTwo" resultType="Dept">
+        select * from dept where did = #{did}
     </select>
-    <resultMap id="TeacherStudent" type="com.pojo.Teacher">
-        <result property="id" column="tid"></result>
-        <result property="name" column="tname"></result>
-<!--   集合
-       javaType = "" 指定屬性的類型
-       集合中的泛型訊息 我們使用ofType獲取
--->
-        <collection property="students" ofType="com.pojo.Student" >
-            <result property="id" column="sid"></result>
-            <result property="name" column="sname"></result>
-            <result property="tid" column="tid"></result>
+```
+
+
+
+```java
+@Test
+public void testGetEmpAndDeptByStep(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    EmpMapper mapper = sqlSession.getMapper(EmpMapper.class);
+    List<Emp> list = mapper.getEmpAndDeptByStepOne(3);
+    for (Emp emp : list) {
+        System.out.println(emp);
+    }
+}
+```
+
+執行過程
+
+``````
+[com.mybatis.mapper.EmpMapper.getEmpAndDeptByStepOne]-==>  Preparing: select * from emp where eid = ?
+[com.mybatis.mapper.EmpMapper.getEmpAndDeptByStepOne]-==> Parameters: 3(Integer)
+[com.mybatis.mapper.DeptMapper.getEmpAndDeptByStepTwo]-====>  Preparing: select * from dept where did = ?
+[com.mybatis.mapper.DeptMapper.getEmpAndDeptByStepTwo]-====> Parameters: 3(Integer)
+``````
+
+
+
+#### 延遲載入
+
+分布查詢的優點 : 可以實現延遲載入 但是必須在核心配置文件中設置全域配置訊息
+
+- lazyLoadingEnabled : 延遲載入的全域開關 當開啟時 所有關聯對象都會延遲載入
+- aggressiveLazyLoading : 當開啟時 任何方法的調用都會載入該對象的所有屬性 否則 每個屬性會按需載入
+- 此時就可以實現按需載入 獲取的數據是什麼 就只會執行相應的sql 此時可以通過association和collection中的fechType屬性設置當前的分步查詢是否使用延遲載入
+  - fetchType = "lazy(延遲載入) | eager(立即載入)"
+
+```xml
+    <settings>
+		<!--    開始延遲載入    -->
+        <setting name="lazyLoadingEnabled" value="true"/>
+    </settings>
+```
+
+
+
+```xml
+<resultMap id="empAndDeptByStepResultMap" type="Emp">
+    <id property="eid" column="eid"></id>
+    <result property="empName" column="emp_name"></result>
+    <result property="age" column="age"></result>
+    <result property="gender" column="gender"></result>
+    <result property="email" column="email"></result>
+    <!--
+        select : 設置分步查詢的sql的唯一標示 (namespace,SQLId或mapper接口的全類名.方法名)
+        column : 設置分步查詢的條件
+        fetchType : 當開啟了全域的延遲載入後 可以通過此屬性手動控制延遲載入的效果
+        fetchType="lazy|eager" : lazy表示延遲載入 eager表示立即載入
+    -->
+    <association property="dept"
+                 select="com.mybatis.mapper.DeptMapper.getEmpAndDeptByStepTwo"
+                 column="did"
+                 fetchType="eager">
+    </association>
+</resultMap>
+```
+
+
+
+
+
+#### 一對多映射關係
+
+```
+處理一對多的映射關係
+a> collection
+b> 分步查詢
+```
+
+##### collection-ofType
+
+```xml
+<!-- Dept getDeptAndEmp(@Param("did") Integer did);   -->
+    <select id="getDeptAndEmp" resultMap="deptAndEmpResultMap">
+        select * from dept
+        left join emp
+        on dept.did = emp.did
+        where dept.did = #{did}
+    </select>
+
+    <resultMap id="deptAndEmpResultMap" type="Dept">
+        <id property="did" column="did"></id>
+        <result property="deptName" column="dept_name"></result>
+        <!--
+            collection : 處理一對多的映射關係
+            ofType : 表示該屬性所對應的集合中儲存數據的類型
+             -->
+        <collection property="emps" ofType="Emp">
+            <id property="eid" column="eid"></id>
+            <result property="empName" column="emp_name"></result>
+            <result property="age" column="age"></result>
+            <result property="gender" column="gender"></result>
+            <result property="email" column="email"></result>
         </collection>
     </resultMap>
 ```
 
 
 
-#### 按照查詢嵌套處理
+##### 分步查詢
 
-```java
-// 按照查詢嵌套處理
-Teacher getTeacher3(@Param("tid")int id);
+```xml
+<!-- 通過分步查詢查詢部門以及部門中所有的員工訊息
+     分步查詢第一步 : 查詢部門訊息
+     Dept getDeptAndEmpByStepOne(@Param("did") Integer did);   -->
+    <select id="getDeptAndEmpByStepOne" resultMap="deptAndEmpByStepResultMap">
+        select * from dept where did = #{did}
+    </select>
+    
+    <resultMap id="deptAndEmpByStepResultMap" type="Dept">
+        <id property="did" column="did"></id>
+        <result property="deptName" column="dept_name"></result>
+        <collection property="emps"
+                    select="com.mybatis.mapper.EmpMapper.getDeptAndEmpByStepTwo"
+                    column="did">
+        </collection>
+    </resultMap>
 ```
 
 
 
 ```xml
-<!--  按照查詢嵌套處理   -->
-<select id="getTeacher3" resultMap="TeacherStudent2">
-    select * from teacher where id = #{tid};
-</select>
-<resultMap id="TeacherStudent2" type="com.pojo.Teacher">
-    <collection property="students" javaType="ArrayList" ofType="com.pojo.Student" select="getStudentByTeacherId" column="id"></collection>
-</resultMap>
-<select id="getStudentByTeacherId" resultType="com.pojo.Student">
-    select * from student where tid = #{tid};
-</select>
+<!-- 通過分步查詢查詢部門以及部門中所有的員工訊息
+     分步查詢第二步 : 根據did查詢員工訊息
+     List<Emp> getDeptAndEmpByStepTwo(@Param("did") Integer did);   -->
+    <select id="getDeptAndEmpByStepTwo" resultType="Emp">
+        select * from emp where did = #{did}
+    </select>
 ```
-
-
-
-#### 小結
-
-- 關聯 association 多對一
-- 集合 collection 一對多
-- javaType &  ofType 
-  - javaType 用來指定實體類中屬性的類型
-  - ofType 用來指定映射到List或者集合中的pojo類型 泛型中的約束類型
-
-注意點 : 
-
-- 保證SQL的可讀性 盡量通俗易懂
-- 注意 一對多和多對一中 屬性和欄位的問題
-- 如果問題不好除錯 可以使用日誌 Log4j
-
-
-
-MySQL :
-
-- MySQL引擎
-- InnoDB底層原理
-- 索引
-- 索引最佳化
 
 
 
 ## 動態SQL
 
-動態SQL :
+Mybatis框架的動態SQL技術是一種根據特定條件動態拼裝SQL語句的功能 他存在的意義是為了解決拼接SQL語句字串時的問題
 
-- 根據不同的條件 生成不同的SQL語句
-- 利用動態SQL可以擺脫過去複雜的處理方式
-- 所謂的動態SQL 本質還是SQL語句 只是我們可以在SQL中 執行邏輯的判斷
-- 動態SQL元素和JSTL基於類似XML的文本處理器 
-  - if
-  - choose (when,otherwise)
-  - trim(where,set)
-  - foreach
 
-#### 搭建環境
 
-```mysql
-create table `blog`(
-	`id` varchar(50) not null comment 'blogid',
-	`title` varchar(100) not null comment 'blog標題',
-	`author` varchar(30) not null comment 'blog作者',
-	`create_time` datetime not null comment '創建時間',
-	`views` int(30) not null comment '瀏覽量'
-)engine=innodb default charset=utf8;
+#### if
+
+```
+動態SQL
+1. if:根據標籤中test屬性所對應的表達式決定標籤中的內容是否需要拼接到SQL中
 ```
 
-
-
-創建基礎工程
-
-- 導包
-- 編寫配置文件
-- 編寫實體類
-
-```java
-@Data
-public class Blog {
-    private int id;
-    private String title;
-    private String author;
-    private Date createTime;
-    private int views;
-}
-```
-
-- 編寫實體類對應Mapper界面和Mapper.xml文件
-
-
-
-#### IF
+- 根據if標籤決定SQL內容的拼接
+  - 使用 where 1 = 1 確保不會出錯
 
 ```xml
-<select id="queryBlogIF" parameterType="map" resultType="com.pojo.Blog">
-    select * from blog where 1=1
-    <if test="title != null">
-        and title = #{title}
-    </if>
-    <if test="author != null">
-        and author = #{author}
-    </if>
-</select>
-```
-
-
-
-#### choose (when,otherwise)
-
-- choose 只會成立一個條件 當三者都不為null則執行第一個title
-
-```xml
-select * from blog
-        <where>
-
-            <choose>
-                <when test="title != null">
-                    title = #{title}
-                </when>
-                <when test="author != null">
-                    author = #{author}
-                </when>
-
-                <otherwise>
-                    views = #{views}
-                </otherwise>
-            </choose>
-        </where>
-```
-
-
-
-#### trim (where,set)
-
-- where會判斷第一個元素中選中的元素有無and 有的話會自行刪去and
-  - 以及所有條件都不成立時 會自行刪去where語句
-
-```xml
-select * from blog
-<where>
-    <if test="title != null">
-        title = #{title}
-    </if>
-    <if test="author != null">
-        and author = #{author}
-    </if>
-</where>
-```
-
-
-
-set
-
-- set元素會動態前置SET關鍵字 同時也會刪掉無關的 , 
-
-```xml
-<update id="updateBlog" parameterType="map">
-    update blog
-    <set>
-        <if test="">
-            title = #{title},
+<!-- List<Emp> getEmpByCondition(Emp emp); -->
+    <select id="getEmpByCondition" resultType="Emp">
+        select * from emp where 1=1
+        <if test="empName != null and empName != ''">
+            emp_name = #{empName}
         </if>
-        <if test="">
-            author = #{author}
+        <if test="age != null and age != ''">
+            and age = #{age}
         </if>
-    </set>
-    where id = #{id}
-</update>
+        <if test="gender != null and gender != ''">
+            and gender = #{gender}
+        </if>
+        <if test="email != null and email != ''">
+            and email = #{email}
+        </if>
+    </select>
 ```
 
 
 
-#### Foreach
+#### where標籤
 
-```xml
--- select * from user where 1=1 and (id=1 or id=2 or id=3)
-
-<foreach item="id" collection="ids"
-    open="(" separator="or" close=")">
-   	#{id}
-</foreach>
+```
+2. where : 當where標籤中有內容時 會自動生成where關鍵字 並且將內容前多餘的and 或 or 去掉
+           當where標籤中沒有內容時 此時where標籤會沒有任何效果 (不生成)
+   注意點 : where標籤不能將其中內容後面多餘的and 或 or 去掉
 ```
 
-
-
 ```xml
-!--
-    select * from blog where 1 = 1 and (id=1 or id=2 or id=3)
-    我們傳遞一個萬能map map中可以存在一個集合
-    open 開頭 close 結尾  separator 元素之間分隔的字串
-    collection 集合 此集合放置的元素是 item id  
-   -->
-    <select id="queryBlogForeach" parameterType="map" resultType="com.pojo.Blog">
-        select * from blog
+<!-- List<Emp> getEmpByCondition(Emp emp); -->
+    <select id="getEmpByCondition" resultType="Emp">
+        select * from emp
         <where>
-            <foreach collection="ids" item="id" open="and (" close=")" separator="or">
-                id = #{id}
-            </foreach>
+            <if test="empName != null and empName != ''">
+                emp_name = #{empName}
+            </if>
+            <if test="age != null and age != ''">
+                and age = #{age}
+            </if>
+            <if test="gender != null and gender != ''">
+                and gender = #{gender}
+            </if>
+            <if test="email != null and email != ''">
+                and email = #{email}
+            </if>
         </where>
     </select>
 ```
 
 
 
-#### SQL片段
+#### trim標籤
 
-- 有時候 我們可能會將公共部分抽取出來 方便重複使用
+```
+3. trim :
+若標籤中有內容時
+prefix|suffix : 將trim標籤中內容前面或後面添加指定內容
+suffixOverrides|prefixOverrides : 將trim標籤中內容前面或後面去掉指定內容
+若標籤中沒有內容時 --> trim標籤也沒有任何效果
+```
 
-- 使用SQL標籤取得公共的部分
+
 
 ```xml
-<sql id="if-title-author">
-    <if test="title != null">
-        title = #{title}
-    </if>
-    <if test="author != null">
-        author = #{author}
-    </if>
-</sql>
+<!-- List<Emp> getEmpByCondition(Emp emp); -->
+    <select id="getEmpByCondition" resultType="Emp">
+        select * from emp
+        <trim prefix="where" suffixOverrides="and|or">
+            <if test="empName != null and empName != ''">
+                emp_name = #{empName} and
+            </if>
+            <if test="age != null and age != ''">
+                 age = #{age} and
+            </if>
+            <if test="gender != null and gender != ''">
+                gender = #{gender} and
+            </if>
+            <if test="email != null and email != ''">
+                email = #{email}
+            </if>
+        </trim>
+    </select>
 ```
 
 
 
-- 在需要使用的地方使用include標籤引用
+#### choose標籤
+
+```
+4. choose,when,otherwise 相當於 if...else if...else
+when至少要有一個 otherwise最多只能有一個
+```
+
+
 
 ```xml
-<select id="queryBlogIF" parameterType="map" resultType="blog">
-    select * from blog
-    <where>
-        <include refid="if-title-author"></include>
-    </where>
-</select>
-```
-
-注意點 :
-
-- 最好基於單表來定義SQL片段
-- 不要存在where標籤
-
-
-
-動態SQL就是拼接SQL語句 只要保證SQL的正確性 按照SQL的格式 去排列組合即可
-
-- 先在MySQL中寫出完整的SQL 在依照此SQL去實現動態SQL的更動
-
-
-
-
-
-## 暫存
-
-#### 簡介
-
-```
-查詢 --> 連接資料庫  --> 耗費資源
-將查詢的結果放入暫存 可以直接取到的地方 --> 記憶體
-當再次進行相同的查詢時 直接尋找暫存 就不會耗費太多資源
+<!-- List<Emp> getEmpByChoose(Emp emp);   -->
+    <select id="getEmpByChoose" resultType="Emp">
+        select * from emp
+        <where>
+            <choose>
+                <when test="empName != null and empName != ''">
+                    emp_name = #{empName}
+                </when>
+                <when test="age != null and age != ''">
+                    age = #{age}
+                </when>
+                <when test="gender != null and gender != ''">
+                    gender = #{gender}
+                </when>
+                <when test="email != null and email != ''">
+                    email = #{email}
+                </when>
+                <otherwise>
+                    did = 1
+                </otherwise>
+            </choose>
+        </where>
+    </select>
 ```
 
 
 
-什麼是暫存
+#### foreach標籤
 
-- 存在記憶體中的臨時數據
-- 將用戶經常查詢的數據放在記憶體中 用戶去查詢數據就不用從硬碟上查詢 從暫存中查詢 進而提高查詢效率 解決高併發系統的性能問題
+```
+5. foreach
+collection : 設置需要循環的陣列或集合
+item : 表示陣列或集合中的每一個數據
+separator : 循環體之間的分隔符
+open : foreach標籤所循環所有內容的開始符
+close : foreach標籤所循環所有內容的結束符
+```
 
-為什麼使用暫存
+##### 批量刪除
 
-- 減少與資料庫的交互次數 減少系統負擔 提高系統效率
+- 方法一
 
-什麼樣的資料能使用暫存
+```xml
+<!-- int deleteMoreByArray(@Param("eids") Integer[] eids);   -->
+    <delete id="deleteMoreByArray">
+        delete from emp where eid in 
+        <foreach collection="eids" item="eid" separator="," open="(" close=")">
+            #{eid}
+        </foreach>
+    </delete>
+```
 
-- 經常查詢且不經常改變的資料 (可以使用暫存)
+- 方法二
 
-
-
-#### Mybatis暫存
-
-- MyBatis的暫存預設定義了兩個暫存 一級暫存 二級暫存
-  - 預設情況下 只有一級暫存開啟 (SqlSession級別的暫存 也稱為本地暫存)
-  - 二級暫存需要手動開啟和配置 是基於namespace級別 (介面Mapper) 的暫存
-  - 為了提高擴展性 Mybatis定義了暫存介面Cache 通過實現Cache介面來自定義二級暫存
-
-
-
-#### 一級暫存
-
-- 也稱為本地暫存 : SqlSession
-  - 與資料庫同一次會話奇觀查詢到的資料會放在本地暫存中
-  - 以後如果需要獲取相同的資料 直接從暫存中拿 沒必要再去查詢資料庫
-
-測試步驟 :
-
-- 開啟日誌
-- 測試在一個SqlSession中查詢兩次相同的記錄
-
-
-
-暫存失效的情況 :
-
-- 查詢不同的東西
-- 增刪改操作 可能會改變原來的數據 所以必定會刷新暫存
-- 查詢不同的Mapper.xml
-- 手動清理暫存
+```xml
+    <delete id="deleteMoreByArray">
+        delete from emp where
+        <foreach collection="eids" item="eid" separator="or">
+            eid = #{eid}
+        </foreach>
+    </delete>
+```
 
 
 
-小結 :
-
-- 一級暫存預設是開啟的　只在一次SqlSession中有效 也就是拿到連接到關閉連接這個區間段
-- 相當於一個Map
-
-
-
-#### 二級暫存
-
-- 又稱全局暫存 一級暫存作用域過低 因此誕生了二級暫存
-
-- 基於namespace級別的暫存 一個名稱空間 對應一個二級暫存
-
-- 工作機制
-
-  - 一個會話查詢一條資料 這個資料就會被放在當前會話的一級暫存中
-  - 如果當前會話關閉了 這個會話對應的一級暫存就會移除 但是我們希望會話關閉後 資料會被保存至二級暫存
-  - 一級暫存關閉後 會產生二級暫存
-  - 新的會話查詢訊息就可以從二級暫存中獲取內容
-  - 不同的Mapper查出的資料會放在對應的暫存(map)中
-
-- 步驟 :
-
-  - 開啟全局暫存
-
-  ```xml
-  <!--顯示的開啟全局暫存-->
-  <setting name="cacheEnabled" value="true"/>
-  ```
-
-  - 在要使用二級暫存的Mapper中開啟
-
-  ```xml
-  <!-- 在當前Mapper.xml中使用二級暫存 -->
-  <cache/>
-  ```
-
-  - 也可以自定義參數
-
-  ```xml
-  <cache  eviction="FIFO"
-  		flushInterval="60000"
-  		size="512"
-  		readOnly="true"/>
-  ```
-
-- 測試
-
-  - 需要將實體類序列化
-  - 實體類是資料庫的映射 還是要在資料庫或是一級暫存中序列化 因為實體在二級暫存中 所以需要序列化的處理才能方便查找
-
-  ```
-  implements Serializable
-  ```
+```java
+@Test
+public void testDeleteMoreByArray(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    DynamicSQLMapper mapper = sqlSession.getMapper(DynamicSQLMapper.class);
+    int result = mapper.deleteMoreByArray(new Integer[]{6, 7, 8});
+    System.out.println(result);
+}
+```
 
 
 
-小結 :
+##### 批量添加
 
-- 只要開啟了二級暫存 在同一個Mapper下都有效
-- 所有的資料都會先放在一級暫存中
-- 只有當會話提交 或是關閉時 才會提交至二級暫存中
+```xml
+<!-- int insertMoreByList(List<Emp> emps);   -->
+    <insert id="insertMoreByList">
+        insert into emp values
+        <foreach collection="emps" item="emp" separator=",">
+            (null,#{emp.empName},#{emp.age},#{emp.gender},#{emp.email},null)
+        </foreach>
+    </insert>
+```
 
 
 
-#### 暫存原理
+```java
+@Test
+public void testInsertMoreByList(){
+    SqlSession sqlSession = SqlSessionUtils.getSqlSession();
+    DynamicSQLMapper mapper = sqlSession.getMapper(DynamicSQLMapper.class);
+    Emp emp1 = new Emp(null,"a",20,"男","aaa@com");
+    Emp emp2 = new Emp(null,"a",20,"男","aaa@com");
+    Emp emp3 = new Emp(null,"a",20,"男","aaa@com");
+    List<Emp> emps = Arrays.asList(emp1, emp2, emp3);
+    System.out.println(mapper.insertMoreByList(emps));
 
-- 資料尋找過程
-  - 由二級暫存中尋找 如未找到往下尋找
-  - 一級暫存中尋找 如果找到往下尋找
-  - 暫存中都沒有所需的資料則 進行SQL語句的資料庫查詢
-
-![擷取_2022_01_01_21_58_49_682](https://i.imgur.com/lHapEE5.png)
+}
+```
 
 
 
 
 
+## MyBatis的暫存
 
 
 
+#### MyBatis一級暫存
+
+一級暫存屬於SqlSession級別 通過同一個SqlSession查詢的數據會被暫存 下次查詢相同的數據 就會從暫存中直接獲取 不會從資料庫重新訪問
+
+使一級暫存失效的四種情況
+
+- 不同的SqlSession對應不同的一級暫存
+- 同一個SqlSession但是查詢條件不同
+- 同一個SqlSession兩次查詢期間執行了任何一次增刪改操作
+- 同一個SqlSession兩次查詢期間手動清空了暫存
+
+``````
+sqlSession.clearCache();
+``````
 
 
 
+#### MyBatis二級暫存
+
+二級暫存是SqlSessionFactory級別 通過同一個sqlSessionFactory創建的SqlSession查詢的結果會被暫存 此後若再次執行相同的查詢語句 結果就會從暫存中獲取
+
+二級暫存開啟的條件
+
+- 在核心配置文件中 設置全局配置屬性cacheEnabled="true" , 預設為true  不需要設置
+- 在映射文件中設置標籤<cache/\>
+- 二級暫存必須在SqlSession關閉後提交後才有效
+- 查詢的數據所轉換的實體類類型必須實現序列化的接口
+
+使二級暫存失效的情況
+
+- 兩次查詢之間執行了任意的增刪改 會使一級和二級暫存同時失效
 
 
 
+```java
+@Test
+public void testTwoCache(){
+    try {
+        InputStream is = Resources.getResourceAsStream("mybatis-config.xml");
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(is);
+        SqlSession sqlSession1 = sqlSessionFactory.openSession(true);
+        SqlSession sqlSession2 = sqlSessionFactory.openSession(true);
+        CacheMapper mapper1 = sqlSession1.getMapper(CacheMapper.class);
+        System.out.println(mapper1.getEmpByEid(1));
+        sqlSession1.close();
+        CacheMapper mapper2 = sqlSession2.getMapper(CacheMapper.class);
+        System.out.println(mapper2.getEmpByEid(1));
+        sqlSession2.close();
+
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+
+
+#### 二級暫存的相關配置
+
+在mapper配置文件中添加的cache標籤可以設置的屬性
+
+- eviction屬性 : 暫存回收策略
+
+  - LRU (Least Recently Used) 最近最少使用的 移除最長時間不被使用的對象
+  - FIFO (First in First out) 先進先出 按對象進入暫存的順序來移除他們
+  - SOFT 軟硬用 : 移除基於垃圾回收器狀態和軟引用規則的對象
+  - WEAK  弱引用 : 更積極的移除基於垃圾回收器狀態和弱引用規則的對象
+
+  預設是LRU
+
+- flushInterval屬性 : 刷新間隔 單位為毫秒
+
+  - 預設情況是不設置 也就是沒有刷新間隔˙暫存僅僅調用語句時刷新 
+
+- size屬性 :  引用數目 正整數
+
+  - 代表暫存最多可以儲存多少個對象 太大容易導致記憶體溢出
+
+- readOnly屬性 : 唯獨 true/false
+
+  - true : 唯獨暫存
+    - 會給所有調用者返回暫存對象的相同實例 因此這些對象不能被修改 這提供了很重要的性能優勢
+  - false : 讀寫暫存
+    - 會返回暫存對象的複製 (通過序列化) 會較花時間 但是安全 因此預設為false
+
+
+
+#### MyBatis暫存查詢的順序
+
+- 先查詢二級暫存 因為二級暫存中可能會有其他程式已經查出來的數據 可以直接拿來使用
+- 如果二級暫存沒有命中 再查詢一級暫存
+- 如果一級暫存也沒有命中 則查詢資料庫
+- SqlSession關閉之後 一級暫存中的數據會寫入二級暫存
+
+
+
+## MyBatis的逆向工程
+
+- 正向工程 : 先創建Java實體類 由框架負責根據實體類生成資料庫表 Hibernate支持正向工程
+- 逆向工程 : 先創建資料庫表 由框架負責根據資料庫表 反向生成如下的資源
+  - Java實體類
+  - Mapper接口
+  - Mapper映射文件
+
+#### 
+
+## MyBatis分頁插件
+
+```
+limit index,pageSize
+index : 當前頁的起始索引
+pageSize : 每頁顯示的條數
+pageNum : 當前頁的頁碼
+index = (pageNum-1) * pageSize
+
+使用MyBatis的分頁插件實現分頁功能
+1. 需要在查詢功能之前開啟分頁
+PageHelper.startPage(int pageNum,int PageSize);
+2. 在查詢功能之後獲取分頁相關訊息
+PageInfo<Emp> page = new PageInfo<>(list, 5);
+list : 分頁數據
+5 : 當前導航分頁的數量
+```
+
+
+
+#### 添加依賴
+
+```xml
+<!-- https://mvnrepository.com/artifact/com.github.pagehelper/pagehelper -->
+<dependency>
+    <groupId>com.github.pagehelper</groupId>
+    <artifactId>pagehelper</artifactId>
+    <version>5.2.0</version>
+</dependency>
+
+```
+
+
+
+#### 設置分頁插件
+
+``````xml
+<plugins>
+	<plugin interceptor="com.github.pagehelper.PageInterceptor"></plugin>
+</plugins>
+``````
+
+
+
+#### 分頁插件應用
+
+PageInfo{pageNum=2, pageSize=4, size=4, startRow=5, endRow=8, total=9, pages=3,  
+
+prePage=1, nextPage=3, isFirstPage=false, isLastPage=false, hasPreviousPage=true, hasNextPage=true, navigatePages=5, navigateFirstPage=1, navigateLastPage=3, navigatepageNums=[1, 2, 3]}
+
+- 常用數據
+
+``````
+pageNum : 當前頁的頁碼
+pageSize : 每頁顯示的條數
+size : 當前頁顯示的真實條數
+total : 總記錄樹
+pages : 總頁數
+prePage : 上一頁的頁碼
+nextPage : 下一頁的頁碼
+isFirstPage/isLastPage : 是否為第一頁/最後一頁
+hasPreviousPage/hasNextPage : 斥否存在上一頁/下一頁
+navigatePages : 導航分頁的頁碼數
+navigatepageNums : 導航分頁的頁碼 [1,2,3,4,5]
+``````
 
